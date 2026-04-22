@@ -1,0 +1,135 @@
+{
+  "source_file": "/Users/manu/Downloads/asset-2.xlsx",
+  "facility_name": "Itelyum Arena",
+  "total_assets": 164,
+  "total_locations": 29,
+  "categories": {
+    "Rivelazione incendi": 94,
+    "Meccanico": 44,
+    "Elettrico": 8,
+    "Antincendio": 13,
+    "TVCC": 5
+  },
+  "frequencies_in_months": {
+    "6": 84,
+    "3": 29,
+    "12": 51
+  },
+  "frequencies_in_days": {
+    "180": 84,
+    "90": 29,
+    "360": 51
+  },
+  "sample_assets": [
+    {
+      "legacy_id": "",
+      "serial_number": "RIV-UF1-001",
+      "name": "Rivelatore fumi AMBIENTE",
+      "category": "Rivelazione incendi",
+      "location_name": "00_UF1",
+      "verification_frequency_code": "SEM",
+      "verification_frequency_days": 180,
+      "last_verification": null,
+      "qr_url": null
+    },
+    {
+      "legacy_id": "",
+      "serial_number": "SPL-UF1-001",
+      "name": "Split",
+      "category": "Meccanico",
+      "location_name": "00_UF1",
+      "verification_frequency_code": "TRI",
+      "verification_frequency_days": 90,
+      "last_verification": null,
+      "qr_url": null
+    },
+    {
+      "legacy_id": "",
+      "serial_number": "SPL-UF2-001",
+      "name": "Split",
+      "category": "Meccanico",
+      "location_name": "00_UF2",
+      "verification_frequency_code": "ANN",
+      "verification_frequency_days": 360,
+      "last_verification": null,
+      "qr_url": null
+    },
+    {
+      "legacy_id": "",
+      "serial_number": "RIV-UF2-001",
+      "name": "Rivelatore fumi AMBIENTE",
+      "category": "Rivelazione incendi",
+      "location_name": "00_UF2",
+      "verification_frequency_code": "TRI",
+      "verification_frequency_days": 90,
+      "last_verification": null,
+      "qr_url": null
+    },
+    {
+      "legacy_id": "",
+      "serial_number": "RIC-UF2-001",
+      "name": "Rivelatore fumi CONTROSOFFITO",
+      "category": "Rivelazione incendi",
+      "location_name": "00_UF2",
+      "verification_frequency_code": "TRI",
+      "verification_frequency_days": 90,
+      "last_verification": null,
+      "qr_url": null
+    },
+    {
+      "legacy_id": "",
+      "serial_number": "RIV-UF2-002",
+      "name": "Rivelatore fumi AMBIENTE",
+      "category": "Rivelazione incendi",
+      "location_name": "00_UF2",
+      "verification_frequency_code": "TRI",
+      "verification_frequency_days": 90,
+      "last_verification": null,
+      "qr_url": null
+    },
+    {
+      "legacy_id": "",
+      "serial_number": "RIV-UF3-001",
+      "name": "Rivelatore fumi AMBIENTE",
+      "category": "Rivelazione incendi",
+      "location_name": "00_UF3",
+      "verification_frequency_code": "TRI",
+      "verification_frequency_days": 90,
+      "last_verification": null,
+      "qr_url": null
+    },
+    {
+      "legacy_id": "",
+      "serial_number": "RIC-UF3-001",
+      "name": "Rivelatore fumi CONTROSOFFITO",
+      "category": "Rivelazione incendi",
+      "location_name": "00_UF3",
+      "verification_frequency_code": "ANN",
+      "verification_frequency_days": 360,
+      "last_verification": null,
+      "qr_url": null
+    },
+    {
+      "legacy_id": "",
+      "serial_number": "SPL-UF3-001",
+      "name": "Split",
+      "category": "Meccanico",
+      "location_name": "00_UF3",
+      "verification_frequency_code": "ANN",
+      "verification_frequency_days": 360,
+      "last_verification": null,
+      "qr_url": null
+    },
+    {
+      "legacy_id": "",
+      "serial_number": "RIV-UF4-001",
+      "name": "Rivelatore fumi AMBIENTE",
+      "category": "Rivelazione incendi",
+      "location_name": "00_UF4",
+      "verification_frequency_code": "ANN",
+      "verification_frequency_days": 360,
+      "last_verification": null,
+      "qr_url": null
+    }
+  ]
+}

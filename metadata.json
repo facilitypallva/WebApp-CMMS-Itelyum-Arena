@@ -1,0 +1,8 @@
+{
+  "name": "CMMS Itelyum Arena",
+  "description": "Sistema professionale per la gestione delle manutenzioni dell'impianto sportivo Itelyum Arena.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": []
+}
