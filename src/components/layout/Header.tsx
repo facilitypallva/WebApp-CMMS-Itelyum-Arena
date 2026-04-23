@@ -233,7 +233,7 @@ export function Header({
   };
 
   return (
-    <header className="h-20 border-b bg-white/50 backdrop-blur-md sticky top-0 z-10 flex items-center justify-between px-8">
+    <header className="h-20 border-b bg-white/80 backdrop-blur-md sticky top-0 z-40 flex items-center justify-between px-8 shadow-sm shadow-slate-200/60">
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" className="md:hidden">
           <Menu size={24} />
