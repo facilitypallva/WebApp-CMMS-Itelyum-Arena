@@ -25,19 +25,26 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] -z-10" />
+    <div className="relative isolate min-h-screen overflow-hidden bg-slate-950 flex items-center justify-center p-6">
+      <img
+        src="/login-arena-bg.webp"
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 -z-30 h-full w-full object-cover opacity-70"
+      />
+      <div className="absolute inset-0 -z-20 bg-gradient-to-br from-black/85 via-slate-950/60 to-red-950/70" />
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_38%,rgba(255,255,255,0.16),transparent_34%),linear-gradient(to_top,rgba(0,0,0,0.74),transparent_45%)]" />
 
       <div className="w-full max-w-md space-y-8">
         <div className="text-center space-y-3">
-          <div className="mx-auto flex h-24 w-24 items-center justify-center p-2">
+          <div className="mx-auto flex h-24 w-24 items-center justify-center p-2 drop-shadow-2xl">
             <img src={vareseLogo} alt="Pallacanestro Varese" className="h-full w-full object-contain" />
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Pallacanestro Varese</h1>
-          <p className="text-slate-500 font-medium">CMMS Arena Operations</p>
+          <h1 className="text-3xl font-extrabold tracking-tight text-white drop-shadow-lg">Pallacanestro Varese</h1>
+          <p className="font-medium text-white/75">CMMS Arena Operations</p>
         </div>
 
-        <div className="bg-white rounded-[2rem] p-8 shadow-xl border border-slate-100 space-y-6">
+        <div className="rounded-[2rem] border border-white/30 bg-white/90 p-8 shadow-2xl shadow-black/35 backdrop-blur-xl space-y-6">
           <div>
             <h2 className="text-xl font-bold text-slate-800">Accedi</h2>
             <p className="text-sm text-slate-500 mt-1">Inserisci le tue credenziali per continuare</p>
