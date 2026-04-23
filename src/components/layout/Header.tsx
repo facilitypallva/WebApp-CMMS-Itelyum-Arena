@@ -258,7 +258,7 @@ export function Header({
             onChange={(event) => onGlobalSearchChange?.(event.target.value)}
           />
           {shouldShowSearchPanel && (
-            <div className="absolute top-[calc(100%+0.75rem)] left-0 w-[30rem] rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl">
+            <div className="absolute top-[calc(100%+0.75rem)] left-0 z-30 flex max-h-[30rem] w-[30rem] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl">
               <div className="flex items-center justify-between px-3 py-2">
                 <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Ricerca Globale</p>
                 <Badge variant="outline" className="rounded-full border-slate-200 text-[10px] font-bold text-slate-500">
@@ -271,7 +271,8 @@ export function Header({
                   Nessun risultato per "{globalSearch}"
                 </div>
               ) : (
-                <ScrollArea className="max-h-[24rem]">
+                <div className="min-h-0 flex-1 overflow-hidden">
+                <ScrollArea className="h-[24rem]">
                   <div className="space-y-3 p-1">
                     {(Object.keys(groupedResults) as Array<keyof typeof groupedResults>).map((groupKey) => {
                       const items = groupedResults[groupKey];
@@ -314,6 +315,7 @@ export function Header({
                     })}
                   </div>
                 </ScrollArea>
+                </div>
               )}
             </div>
           )}
@@ -336,7 +338,7 @@ export function Header({
             </Button>
 
             {isNotificationsOpen && (
-              <div className="absolute right-0 top-[calc(100%+0.75rem)] z-20 w-[24rem] rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl">
+              <div className="absolute right-0 top-[calc(100%+0.75rem)] z-20 flex max-h-[30rem] w-[24rem] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl">
                 <div className="flex items-center justify-between px-3 py-2">
                   <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Notifiche</p>
                   <Badge variant="outline" className="rounded-full border-slate-200 text-[10px] font-bold text-slate-500">
@@ -349,7 +351,8 @@ export function Header({
                     Nessuna notifica disponibile
                   </div>
                 ) : (
-                  <ScrollArea className="max-h-[24rem]">
+                  <div className="min-h-0 flex-1 overflow-hidden">
+                  <ScrollArea className="h-[24rem]">
                     <div className="space-y-1 p-1">
                       {notifications.map((notification) => (
                         <button
@@ -372,6 +375,7 @@ export function Header({
                       ))}
                     </div>
                   </ScrollArea>
+                  </div>
                 )}
               </div>
             )}

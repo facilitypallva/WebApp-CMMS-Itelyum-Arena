@@ -22,7 +22,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { supabase } from '@/lib/supabase';
-import { runResilientRequest } from '@/lib/resilientRequest';
+import { runResilientRequest, withRequestTimeout } from '@/lib/resilientRequest';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 type TicketDraftState = {
@@ -208,7 +208,7 @@ export function WorkOrdersList({
   const filtered = useMemo(() => workOrders.filter((wo) => {
     const normalizedSearch = searchValue.trim().toLowerCase();
     const matchSearch = !normalizedSearch || wo.description.toLowerCase().includes(normalizedSearch) ||
-      (wo as any).asset?.name?.toLowerCase().includes(normalizedSearch);
+      wo.asset?.name?.toLowerCase().includes(normalizedSearch);
     const matchStatus = filterStatus === 'ALL' || wo.status === filterStatus;
     return matchSearch && matchStatus;
   }), [workOrders, searchValue, filterStatus]);
@@ -288,19 +288,41 @@ export function WorkOrdersList({
     if (!file) return;
     e.target.value = '';
 
-    const ext = file.name.split('.').pop() ?? 'bin';
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Il file non può superare 10 MB');
+      return;
+    }
+
     const safeName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
     const path = storagePath(form.asset_id, editing.id, safeName);
 
     setUploading(true);
-    const { error } = await supabase.storage.from(BUCKET).upload(path, file);
-    setUploading(false);
-    if (error) { toast.error('Errore nel caricamento del file'); return; }
+    try {
+      const { error: uploadError } = await withRequestTimeout(
+        () => supabase.storage.from(BUCKET).upload(path, file),
+        30_000,
+        'Timeout nel caricamento del file'
+      );
+      if (uploadError) { toast.error('Errore nel caricamento del file'); return; }
 
-    const nextFiles = [...reportFiles, path];
-    setReportFiles(nextFiles);
-    await supabase.from('work_orders').update({ report_files: nextFiles }).eq('id', editing.id);
-    toast.success('File allegato');
+      const nextFiles = [...reportFiles, path];
+      const { error: dbError } = await runResilientRequest(
+        (signal) => supabase.from('work_orders').update({ report_files: nextFiles }).eq('id', editing.id).abortSignal(signal),
+        { label: 'WO files update', timeoutMessage: 'Timeout nel salvataggio del file' }
+      );
+      if (dbError) {
+        await supabase.storage.from(BUCKET).remove([path]);
+        toast.error('Errore nel salvataggio: il file è stato rimosso, riprovare');
+        return;
+      }
+
+      setReportFiles(nextFiles);
+      toast.success('File allegato');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Errore nel caricamento del file');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleFileDownload = async (path: string) => {
@@ -311,12 +333,29 @@ export function WorkOrdersList({
 
   const handleFileDelete = async (path: string) => {
     if (!editing) return;
-    const { error } = await supabase.storage.from(BUCKET).remove([path]);
-    if (error) { toast.error('Errore nella rimozione del file'); return; }
-    const nextFiles = reportFiles.filter((f) => f !== path);
-    setReportFiles(nextFiles);
-    await supabase.from('work_orders').update({ report_files: nextFiles }).eq('id', editing.id);
-    toast.success('File rimosso');
+    try {
+      const { error: storageError } = await withRequestTimeout(
+        () => supabase.storage.from(BUCKET).remove([path]),
+        15_000,
+        'Timeout nella rimozione del file'
+      );
+      if (storageError) { toast.error('Errore nella rimozione del file'); return; }
+
+      const nextFiles = reportFiles.filter((f) => f !== path);
+      const { error: dbError } = await runResilientRequest(
+        (signal) => supabase.from('work_orders').update({ report_files: nextFiles }).eq('id', editing.id).abortSignal(signal),
+        { label: 'WO files delete', timeoutMessage: 'Timeout nel salvataggio' }
+      );
+      if (dbError) {
+        toast.error('File rimosso dallo storage ma errore nel salvataggio: ricaricare la pagina');
+        return;
+      }
+
+      setReportFiles(nextFiles);
+      toast.success('File rimosso');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Errore nella rimozione del file');
+    }
   };
 
   useEffect(() => {
@@ -413,7 +452,7 @@ export function WorkOrdersList({
       const data = 'data' in result ? result.data : null;
 
       if (error) {
-        toast.error(error.message ?? (error as any).details ?? 'Errore nel salvataggio');
+        toast.error(error.message ?? 'Errore nel salvataggio');
         return;
       }
 
@@ -639,7 +678,7 @@ export function WorkOrdersList({
                       <div className="space-y-1 flex-1 min-w-0">
                         <h3 className="font-bold text-slate-800 flex items-center gap-2">
                           <PriorityIcon priority={wo.priority} />
-                          <span className="truncate">{(wo as any).asset?.name ?? 'Asset'}</span>
+                          <span className="truncate">{wo.asset?.name ?? 'Asset'}</span>
                         </h3>
                         <p className="text-sm text-slate-500 line-clamp-2">{wo.description}</p>
                         <p className="text-xs text-slate-400">Creato il {format(new Date(wo.created_at), 'd MMM yyyy', { locale: it })}</p>
@@ -651,9 +690,9 @@ export function WorkOrdersList({
                       <div className="flex items-center gap-2">
                         <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center"><User size={12} className="text-slate-400" /></div>
                         <span className="text-xs font-bold text-slate-600">
-                          {(wo as any).technician?.name ?? 'Non assegnato'}
-                          {(wo as any).technician?.employment_type === 'EXTERNAL' && (wo as any).technician?.supplier?.name
-                            ? ` • ${(wo as any).technician.supplier.name}`
+                          {wo.technician?.name ?? 'Non assegnato'}
+                          {wo.technician?.employment_type === 'EXTERNAL' && wo.technician.supplier?.name
+                            ? ` • ${wo.technician.supplier.name}`
                             : ''}
                         </span>
                       </div>

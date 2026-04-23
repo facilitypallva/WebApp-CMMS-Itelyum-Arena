@@ -9,44 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
+import { runResilientRequest, withRequestTimeout } from '@/lib/resilientRequest';
 import { useLocations } from '@/hooks/useLocations';
 import { TICKET_PROBLEM_CATEGORIES } from '@/lib/constants';
 import vareseLogo from '@/assets/pallacanestro-varese-logo.png';
-
-const SUPABASE_REQUEST_TIMEOUT_MS = 15_000;
-const TICKET_INSERT_RETRY_DELAY_MS = 800;
-
-function withTimeout<T>(promise: Promise<T>, timeoutMs: number, message: string) {
-  return new Promise<T>((resolve, reject) => {
-    const timeoutId = window.setTimeout(() => reject(new Error(message)), timeoutMs);
-
-    promise
-      .then((value) => {
-        window.clearTimeout(timeoutId);
-        resolve(value);
-      })
-      .catch((error) => {
-        window.clearTimeout(timeoutId);
-        reject(error);
-      });
-  });
-}
-
-function sleep(delayMs: number) {
-  return new Promise((resolve) => {
-    window.setTimeout(resolve, delayMs);
-  });
-}
-
-async function retryTicketInsert<T>(operation: () => Promise<T>) {
-  try {
-    return await operation();
-  } catch (error) {
-    console.warn('Ticket insert first attempt failed, retrying once', error);
-    await sleep(TICKET_INSERT_RETRY_DELAY_MS);
-    return operation();
-  }
-}
 
 async function notifyTicketStakeholders(payload: {
   ticketId: string;
@@ -58,13 +24,16 @@ async function notifyTicketStakeholders(payload: {
   description: string;
   photoUrl: string | null;
 }) {
-  const response = await fetch('/api/ticket-notifications', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
-  });
+  const response = await withRequestTimeout(
+    (signal) => fetch('/api/ticket-notifications', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      signal,
+    }),
+    10_000,
+    'Timeout durante l\'invio delle notifiche'
+  );
 
   if (!response.ok) {
     const errorPayload = await response.json().catch(() => ({}));
@@ -138,9 +107,9 @@ export function PublicTicketForm() {
 
       if (photoFile) {
         const safeName = `public_tickets/${Date.now()}_${photoFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
-        const { error: uploadError } = await withTimeout(
-          supabase.storage.from('tickets').upload(safeName, photoFile, { upsert: false }),
-          SUPABASE_REQUEST_TIMEOUT_MS,
+        const { error: uploadError } = await withRequestTimeout(
+          (_signal) => supabase.storage.from('tickets').upload(safeName, photoFile, { upsert: false }),
+          15_000,
           'Timeout durante il caricamento della foto'
         );
 
@@ -157,11 +126,13 @@ export function PublicTicketForm() {
 
       const selectedLocationName = locations.find((location) => location.id === form.location_id)?.name ?? null;
 
-      const { data, error } = await retryTicketInsert(() => withTimeout(
-        supabase.from('tickets').insert(payload).select('id, code').single(),
-        SUPABASE_REQUEST_TIMEOUT_MS,
-        'Timeout durante l\'invio della segnalazione'
-      ));
+      const { data, error } = await runResilientRequest(
+        (signal) => supabase.from('tickets').insert(payload).select('id, code').abortSignal(signal).single(),
+        {
+          label: 'ticket insert',
+          timeoutMessage: 'Timeout durante l\'invio della segnalazione',
+        }
+      );
 
       if (error) {
         console.error('Ticket insert failed', error);

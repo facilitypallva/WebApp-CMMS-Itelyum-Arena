@@ -5,6 +5,7 @@ import { calculateAssetStatus } from '@/lib/assetUtils';
 import { logAudit } from '@/lib/auditLog';
 import { useAuth } from '@/contexts/AuthContext';
 import { runResilientRequest } from '@/lib/resilientRequest';
+import { emitCacheInvalidated, onCacheInvalidated } from '@/lib/cacheEvents';
 
 const ASSETS_CACHE_TTL_MS = 60_000;
 
@@ -34,6 +35,8 @@ export function invalidateAssetsCache() {
   assetsCache = null;
   assetsCacheAt = 0;
 }
+
+onCacheInvalidated('work_orders', invalidateAssetsCache);
 
 async function loadAssetsFromApi() {
   const { data, error } = await runResilientRequest(
@@ -105,7 +108,8 @@ export function useAssets(options?: { enabled?: boolean }) {
     if (data) {
       const nextAssets = commitAssetsCache([...(assetsCache ?? []), data as Asset]);
       setAssets(nextAssets);
-      if (user) logAudit(user.id, 'CREATE', 'assets', data.id, null, data).catch(console.error);
+      emitCacheInvalidated('assets');
+      if (user) logAudit(user.id, 'CREATE', 'assets', data.id, null, data);
     }
     return { error: null };
   };
@@ -131,7 +135,8 @@ export function useAssets(options?: { enabled?: boolean }) {
       baseAssets.map((asset) => (asset.id === id ? { ...asset, ...nextPayload } : asset))
     );
     setAssets(nextAssets);
-    if (user) logAudit(user.id, 'UPDATE', 'assets', id, old ?? null, payload).catch(console.error);
+    emitCacheInvalidated('assets');
+    if (user) logAudit(user.id, 'UPDATE', 'assets', id, old ?? null, payload);
     return { error: null };
   };
 
@@ -152,7 +157,8 @@ export function useAssets(options?: { enabled?: boolean }) {
       setAssets(restoredAssets);
       return { error };
     }
-    if (user) logAudit(user.id, 'DELETE', 'assets', id, old ?? null, null).catch(console.error);
+    emitCacheInvalidated('assets');
+    if (user) logAudit(user.id, 'DELETE', 'assets', id, old ?? null, null);
     return { error: null };
   };
 

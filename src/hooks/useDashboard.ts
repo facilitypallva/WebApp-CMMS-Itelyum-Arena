@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { calculateAssetStatus } from '@/lib/assetUtils';
 import { WorkOrder } from '@/types';
+import { onCacheInvalidated } from '@/lib/cacheEvents';
+import { withRequestTimeout } from '@/lib/resilientRequest';
 
 type ChartDatum = {
   name: string;
@@ -34,18 +36,26 @@ export function invalidateDashboardCache() {
   dashboardCacheAt = 0;
 }
 
+onCacheInvalidated('work_orders', invalidateDashboardCache);
+onCacheInvalidated('assets', invalidateDashboardCache);
+onCacheInvalidated('tickets', invalidateDashboardCache);
+
 async function loadDashboardFromApi() {
   const twelveMonthsAgo = new Date();
   twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
 
-  const [assetsRes, woRes, ticketsRes, trendRes, inProgressRes, ticketsBreakdownRes] = await Promise.all([
-    supabase.from('assets').select('last_verification, verification_frequency_days'),
-    supabase.from('work_orders').select('*, asset:assets(name, category), technician:technicians(name)').in('status', ['IN_PROGRESS', 'NEW', 'ASSIGNED', 'PLANNED']).order('created_at', { ascending: false }).limit(5),
-    supabase.from('tickets').select('id', { count: 'exact', head: true }).eq('status', 'OPEN'),
-    supabase.from('work_orders').select('closed_at').eq('status', 'CLOSED').not('closed_at', 'is', null).gte('closed_at', twelveMonthsAgo.toISOString()),
-    supabase.from('work_orders').select('id', { count: 'exact', head: true }).eq('status', 'IN_PROGRESS'),
-    supabase.from('tickets').select('problem_category, location:locations(name)'),
-  ]);
+  const [assetsRes, woRes, ticketsRes, trendRes, inProgressRes, ticketsBreakdownRes] = await withRequestTimeout(
+    (signal) => Promise.all([
+      supabase.from('assets').select('last_verification, verification_frequency_days').abortSignal(signal),
+      supabase.from('work_orders').select('*, asset:assets(name, category), technician:technicians(name)').in('status', ['IN_PROGRESS', 'NEW', 'ASSIGNED', 'PLANNED']).order('created_at', { ascending: false }).limit(5).abortSignal(signal),
+      supabase.from('tickets').select('id', { count: 'exact', head: true }).eq('status', 'OPEN').abortSignal(signal),
+      supabase.from('work_orders').select('closed_at').eq('status', 'CLOSED').not('closed_at', 'is', null).gte('closed_at', twelveMonthsAgo.toISOString()).abortSignal(signal),
+      supabase.from('work_orders').select('id', { count: 'exact', head: true }).eq('status', 'IN_PROGRESS').abortSignal(signal),
+      supabase.from('tickets').select('problem_category, location:locations(name)').abortSignal(signal),
+    ]),
+    15_000,
+    'Timeout durante il caricamento della dashboard'
+  );
 
   const assetData = assetsRes.data ?? [];
   let expired = 0, expiring = 0, ok = 0;
@@ -118,6 +128,8 @@ async function loadDashboardFromApi() {
 export function useDashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(dashboardCache);
   const [loading, setLoading] = useState(!dashboardCache);
+  const [error, setError] = useState<string | null>(null);
+  const [tick, setTick] = useState(0);
 
   useEffect(() => {
     const hasFreshCache = dashboardCache && Date.now() - dashboardCacheAt < DASHBOARD_CACHE_TTL_MS;
@@ -126,13 +138,32 @@ export function useDashboard() {
       setStats(dashboardCache);
       setLoading(false);
       if (hasFreshCache) return;
+      // stale cache: background refresh, keep showing current data
+    } else {
+      setLoading(true);
+      setError(null);
     }
 
-    loadDashboardFromApi().then((nextStats) => {
-      setStats(nextStats);
-      setLoading(false);
-    });
+    const isBackgroundRefresh = dashboardCache !== null;
+
+    loadDashboardFromApi()
+      .then((nextStats) => {
+        setStats(nextStats);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Dashboard load error', err);
+        setLoading(false);
+        if (!isBackgroundRefresh) {
+          setError('Impossibile caricare i dati della dashboard. Controlla la connessione e riprova.');
+        }
+      });
+  }, [tick]);
+
+  const reload = useCallback(() => {
+    invalidateDashboardCache();
+    setTick((t) => t + 1);
   }, []);
 
-  return { stats, loading };
+  return { stats, loading, error, reload };
 }

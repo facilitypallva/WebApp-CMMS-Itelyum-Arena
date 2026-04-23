@@ -4,6 +4,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 const AppLayout = lazy(() => import('@/components/layout/AppLayout').then((module) => ({ default: module.AppLayout })));
 const Dashboard = lazy(() => import('@/components/dashboard/Dashboard').then((module) => ({ default: module.Dashboard })));
@@ -46,6 +47,7 @@ export default function App() {
     <AuthProvider>
       <TooltipProvider>
         <BrowserRouter>
+          <ErrorBoundary>
           <Suspense fallback={<RouteLoader />}>
             <Routes>
               {/* Public */}
@@ -65,6 +67,7 @@ export default function App() {
               <Route path="/users" element={<ProtectedRoute adminOnly><LayoutRoute title="Gestione Utenti"><UsersManagement /></LayoutRoute></ProtectedRoute>} />
             </Routes>
           </Suspense>
+          </ErrorBoundary>
           <Toaster position="top-right" />
         </BrowserRouter>
       </TooltipProvider>

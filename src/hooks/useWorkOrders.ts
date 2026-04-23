@@ -3,8 +3,7 @@ import { supabase } from '@/lib/supabase';
 import { WorkOrder } from '@/types';
 import { logAudit } from '@/lib/auditLog';
 import { useAuth } from '@/contexts/AuthContext';
-import { invalidateAssetsCache } from '@/hooks/useAssets';
-import { invalidateDashboardCache } from '@/hooks/useDashboard';
+import { emitCacheInvalidated } from '@/lib/cacheEvents';
 import { runResilientRequest } from '@/lib/resilientRequest';
 
 const WORK_ORDERS_CACHE_TTL_MS = 60_000;
@@ -97,9 +96,8 @@ export function useWorkOrders(options?: { enabled?: boolean }) {
     if (!error && data && user) {
       const nextWorkOrders = commitWorkOrdersCache([...(workOrdersCache ?? []), data as WorkOrder]);
       setWorkOrders(nextWorkOrders);
-      await logAudit(user.id, 'CREATE', 'work_orders', data.id, null, data);
-      invalidateAssetsCache();
-      invalidateDashboardCache();
+      logAudit(user.id, 'CREATE', 'work_orders', data.id, null, data);
+      emitCacheInvalidated('work_orders');
     }
     return { error, data };
   };
@@ -122,9 +120,8 @@ export function useWorkOrders(options?: { enabled?: boolean }) {
         (workOrdersCache ?? []).map((workOrder) => (workOrder.id === id ? { ...workOrder, ...payload } : workOrder))
       );
       setWorkOrders(nextWorkOrders);
-      await logAudit(user.id, 'UPDATE', 'work_orders', id, old ?? null, payload);
-      invalidateAssetsCache();
-      invalidateDashboardCache();
+      logAudit(user.id, 'UPDATE', 'work_orders', id, old ?? null, payload);
+      emitCacheInvalidated('work_orders');
     }
     return { error };
   };
@@ -147,9 +144,8 @@ export function useWorkOrders(options?: { enabled?: boolean }) {
       return { error };
     }
     if (user) {
-      await logAudit(user.id, 'DELETE', 'work_orders', id, old ?? null, null);
-      invalidateAssetsCache();
-      invalidateDashboardCache();
+      logAudit(user.id, 'DELETE', 'work_orders', id, old ?? null, null);
+      emitCacheInvalidated('work_orders');
     }
     return { error };
   };

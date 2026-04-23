@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie } from 'recharts';
-import { Package, CheckCircle2, AlertTriangle, Clock, ArrowRight, ChevronRight, ClipboardList, Ticket, MapPin, Layers3, FileOutput } from 'lucide-react';
+import { Package, CheckCircle2, AlertTriangle, Clock, ArrowRight, ChevronRight, ClipboardList, Ticket, MapPin, Layers3, FileOutput, RefreshCw } from 'lucide-react';
 import { useDashboard } from '@/hooks/useDashboard';
 import { useAuth } from '@/contexts/AuthContext';
 import { WORK_ORDER_STATUS_LABELS } from '@/lib/constants';
@@ -26,16 +26,31 @@ function ChartEmptyState({ label }: { label: string }) {
 }
 
 export function Dashboard() {
-  const { stats, loading } = useDashboard();
+  const { stats, loading, error, reload } = useDashboard();
   const { user, profile } = useAuth();
   const navigate = useNavigate();
 
   const userName = profile?.full_name?.trim() || user?.email?.split('@')[0] || 'Responsabile';
 
-  if (loading || !stats) {
+  if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (error || !stats) {
+    return (
+      <div className="flex h-64 flex-col items-center justify-center gap-4 rounded-3xl border border-dashed border-slate-200 bg-slate-50 text-center">
+        <AlertTriangle size={36} className="text-slate-300" />
+        <div className="space-y-1">
+          <p className="font-semibold text-slate-600">Errore nel caricamento della dashboard</p>
+          <p className="text-sm text-slate-400">{error ?? 'Dati non disponibili'}</p>
+        </div>
+        <Button variant="outline" className="gap-2 rounded-xl" onClick={reload}>
+          <RefreshCw size={14} /> Riprova
+        </Button>
       </div>
     );
   }
@@ -276,7 +291,7 @@ export function Dashboard() {
                     <AlertTriangle size={16} />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-bold text-slate-800">{(wo as any).asset?.name ?? 'Asset'}</p>
+                    <p className="truncate text-sm font-bold text-slate-800">{wo.asset?.name ?? 'Asset'}</p>
                     <p className="truncate text-xs text-slate-500">{wo.description}</p>
                     <Badge variant="outline" className="mt-1 h-4 rounded-md px-2 text-[9px] font-bold uppercase">
                       {WORK_ORDER_STATUS_LABELS[wo.status] ?? wo.status}

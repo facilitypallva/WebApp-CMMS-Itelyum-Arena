@@ -3,6 +3,7 @@ import { FolderOpen, Folder, FileText, Download, Trash2, ChevronRight, ChevronDo
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
+import { runResilientRequest, withRequestTimeout } from '@/lib/resilientRequest';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -92,19 +93,44 @@ export function RapportiniView() {
     setOpenWos((s) => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
 
   const handleDownload = async (path: string) => {
-    const { data, error } = await supabase.storage.from(BUCKET).createSignedUrl(path, 60);
-    if (error || !data?.signedUrl) { toast.error('Impossibile aprire il file'); return; }
-    window.open(data.signedUrl, '_blank');
+    try {
+      const { data, error } = await withRequestTimeout(
+        () => supabase.storage.from(BUCKET).createSignedUrl(path, 60),
+        10_000,
+        'Timeout nella generazione del link'
+      );
+      if (error || !data?.signedUrl) { toast.error('Impossibile aprire il file'); return; }
+      window.open(data.signedUrl, '_blank');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Impossibile aprire il file');
+    }
   };
 
   const handleDelete = async (wo: WOEntry, path: string) => {
     if (!confirm(`Eliminare "${fileNameFromPath(path)}"?`)) return;
-    const { error } = await supabase.storage.from(BUCKET).remove([path]);
-    if (error) { toast.error('Errore nella rimozione'); return; }
-    const nextFiles = wo.report_files.filter((f) => f !== path);
-    await supabase.from('work_orders').update({ report_files: nextFiles }).eq('id', wo.id);
-    toast.success('File eliminato');
-    await load();
+    try {
+      const { error: storageError } = await withRequestTimeout(
+        () => supabase.storage.from(BUCKET).remove([path]),
+        15_000,
+        'Timeout nella rimozione del file'
+      );
+      if (storageError) { toast.error('Errore nella rimozione'); return; }
+
+      const nextFiles = wo.report_files.filter((f) => f !== path);
+      const { error: dbError } = await runResilientRequest(
+        (signal) => supabase.from('work_orders').update({ report_files: nextFiles }).eq('id', wo.id).abortSignal(signal),
+        { label: 'rapportini delete', timeoutMessage: 'File rimosso ma errore nel salvataggio' }
+      );
+      if (dbError) {
+        toast.error('File rimosso dallo storage ma errore nel salvataggio: ricaricare la pagina');
+        return;
+      }
+
+      toast.success('File eliminato');
+      await load();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Errore nella rimozione del file');
+    }
   };
 
   if (loading) {

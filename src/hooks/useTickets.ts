@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Ticket } from '@/types';
 import { runResilientRequest } from '@/lib/resilientRequest';
+import { emitCacheInvalidated } from '@/lib/cacheEvents';
 
 const TICKETS_CACHE_TTL_MS = 30_000;
 
@@ -95,6 +96,7 @@ export function useTickets(options?: { enabled?: boolean }) {
         (ticketsCache ?? []).map((ticket) => (ticket.id === id ? { ...ticket, ...payload } : ticket))
       );
       setTickets(nextTickets);
+      emitCacheInvalidated('tickets');
     }
     return { error };
   };
@@ -115,6 +117,7 @@ export function useTickets(options?: { enabled?: boolean }) {
       setTickets(restoredTickets);
       return { error };
     }
+    emitCacheInvalidated('tickets');
     return { error };
   };
 

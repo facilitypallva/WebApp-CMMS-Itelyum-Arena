@@ -98,10 +98,15 @@ export interface Technician {
   created_at: string;
 }
 
+export interface SupplierContactInfo {
+  phone: string | null;
+  email: string | null;
+}
+
 export interface Supplier {
   id: string;
   name: string;
-  contact_info: any;
+  contact_info: SupplierContactInfo | null;
   category: string | null;
   created_at: string;
 }

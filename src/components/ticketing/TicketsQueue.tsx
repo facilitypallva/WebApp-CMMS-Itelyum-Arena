@@ -36,8 +36,8 @@ export function TicketsQueue({
 
       if (!normalizedSearch) return true;
 
-      const locationName = (ticket as any).location?.name?.toLowerCase() ?? '';
-      const assetName = (ticket as any).asset?.name?.toLowerCase() ?? '';
+      const locationName = ticket.location?.name?.toLowerCase() ?? '';
+      const assetName = ticket.asset?.name?.toLowerCase() ?? '';
 
       return (
         ticket.reporter_name.toLowerCase().includes(normalizedSearch) ||
@@ -93,7 +93,7 @@ export function TicketsQueue({
           <h2 className="text-2xl font-bold text-slate-800">Coda Segnalazioni</h2>
           <p className="text-sm text-slate-500">{tickets.filter((t) => t.status === 'OPEN').length} ticket aperti</p>
         </div>
-        <Select value={filter} onValueChange={(v) => setFilter(v as any)}>
+        <Select value={filter} onValueChange={(v) => setFilter(v as typeof filter)}>
           <SelectTrigger className="h-11 rounded-xl border-none shadow-sm bg-white w-44"><SelectValue /></SelectTrigger>
           <SelectContent className="rounded-xl">
             <SelectItem value="ALL">Tutti</SelectItem>
@@ -143,11 +143,11 @@ export function TicketsQueue({
                       {ticket.problem_category && (
                         <span className="flex items-center gap-1"><AlertCircle size={12} /> {ticket.problem_category}</span>
                       )}
-                      {(ticket as any).location?.name && (
-                        <span className="flex items-center gap-1"><MapPin size={12} /> {(ticket as any).location.name}</span>
+                      {ticket.location?.name && (
+                        <span className="flex items-center gap-1"><MapPin size={12} /> {ticket.location.name}</span>
                       )}
-                      {(ticket as any).asset?.name && (
-                        <span className="flex items-center gap-1"><CheckCircle2 size={12} /> {(ticket as any).asset.name}</span>
+                      {ticket.asset?.name && (
+                        <span className="flex items-center gap-1"><CheckCircle2 size={12} /> {ticket.asset.name}</span>
                       )}
                       {ticket.photo_url && (
                         <a
