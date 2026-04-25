@@ -346,7 +346,8 @@ export function AssetsTable({
               <TooltipContent>Tutte le categorie</TooltipContent>
             </Tooltip>
             {categoryCounts.map(({ category, count }) => (
-              <Tooltip key={category}>
+              <div key={category}>
+                <Tooltip>
                 <TooltipTrigger
                   type="button"
                   className={cn(
@@ -370,7 +371,8 @@ export function AssetsTable({
                   </span>
                 </TooltipTrigger>
                 <TooltipContent>{category}</TooltipContent>
-              </Tooltip>
+                </Tooltip>
+              </div>
             ))}
             <div className="ml-2 shrink-0 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-500 shadow-sm">
               {filterCategory === 'ALL' ? 'Tutte le categorie' : filterCategory}
@@ -446,7 +448,7 @@ export function AssetsTable({
                             <Eye size={18} />
                           </Button>
                           <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
+                            <DropdownMenuTrigger className="inline-flex">
                               <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg text-slate-400 hover:bg-primary/5 hover:text-primary">
                                 <MoreHorizontal size={18} />
                               </Button>
@@ -550,7 +552,7 @@ export function AssetsTable({
                           <Eye size={18} />
                         </Button>
                         <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
+                          <DropdownMenuTrigger className="inline-flex">
                             <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/5">
                               <MoreHorizontal size={18} />
                             </Button>

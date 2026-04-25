@@ -245,7 +245,7 @@ export function UsersManagement() {
                 <TableCell className="px-6 py-4 text-slate-500">{formatDate(profile.created_at)}</TableCell>
                 <TableCell className="px-6 py-4 text-right">
                   <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
+                    <DropdownMenuTrigger className="inline-flex">
                       <Button variant="ghost" size="icon" className="rounded-xl">
                         <MoreHorizontal size={16} />
                       </Button>

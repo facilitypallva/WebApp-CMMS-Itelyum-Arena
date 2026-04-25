@@ -279,7 +279,7 @@ export function SuppliersTable({
                         <Building2 size={22} />
                       </div>
                       <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
+                        <DropdownMenuTrigger className="inline-flex">
                           <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg"><MoreHorizontal size={16} /></Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="rounded-xl p-2">
@@ -351,7 +351,7 @@ export function SuppliersTable({
                         <UserRound size={22} />
                       </div>
                       <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
+                        <DropdownMenuTrigger className="inline-flex">
                           <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg"><MoreHorizontal size={16} /></Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="rounded-xl p-2">

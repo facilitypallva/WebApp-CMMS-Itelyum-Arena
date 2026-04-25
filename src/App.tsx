@@ -1,5 +1,6 @@
 import React, { Suspense, lazy } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Navigate, Routes, Route } from 'react-router-dom';
+import { ThemeProvider } from 'next-themes';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { AuthProvider } from '@/contexts/AuthContext';
@@ -44,33 +45,36 @@ function LayoutRoute({
 
 export default function App() {
   return (
-    <AuthProvider>
-      <TooltipProvider>
-        <BrowserRouter>
-          <ErrorBoundary>
-          <Suspense fallback={<RouteLoader />}>
-            <Routes>
-              {/* Public */}
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/report-issue" element={<PublicTicketForm />} />
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+      <AuthProvider>
+        <TooltipProvider>
+          <BrowserRouter>
+            <ErrorBoundary>
+            <Suspense fallback={<RouteLoader />}>
+              <Routes>
+                {/* Public */}
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/report-issue" element={<PublicTicketForm />} />
 
-              {/* Protected */}
-              <Route path="/" element={<ProtectedRoute><LayoutRoute title="Dashboard Generale"><Dashboard /></LayoutRoute></ProtectedRoute>} />
-              <Route path="/reports/cda" element={<ProtectedRoute allowedRoles={['ADMIN', 'RESPONSABILE']}><CdaReport /></ProtectedRoute>} />
-              <Route path="/assets" element={<ProtectedRoute><LayoutRoute title="Gestione Asset"><AssetsTable /></LayoutRoute></ProtectedRoute>} />
-              <Route path="/work-orders" element={<ProtectedRoute><LayoutRoute title="Work Orders"><WorkOrdersList /></LayoutRoute></ProtectedRoute>} />
-              <Route path="/rapportini" element={<ProtectedRoute><LayoutRoute title="Rapportini"><RapportiniView /></LayoutRoute></ProtectedRoute>} />
-              <Route path="/tickets" element={<ProtectedRoute><LayoutRoute title="Ticketing System"><TicketsQueue /></LayoutRoute></ProtectedRoute>} />
-              <Route path="/schedule" element={<ProtectedRoute><LayoutRoute title="Scadenzario Manutenzioni"><ScheduleView /></LayoutRoute></ProtectedRoute>} />
-              <Route path="/suppliers" element={<ProtectedRoute><LayoutRoute title="Fornitori e Tecnici"><SuppliersTable /></LayoutRoute></ProtectedRoute>} />
-              <Route path="/audit" element={<ProtectedRoute allowedRoles={['ADMIN', 'RESPONSABILE']}><LayoutRoute title="Audit Log"><AuditLogView /></LayoutRoute></ProtectedRoute>} />
-              <Route path="/users" element={<ProtectedRoute adminOnly><LayoutRoute title="Gestione Utenti"><UsersManagement /></LayoutRoute></ProtectedRoute>} />
-            </Routes>
-          </Suspense>
-          </ErrorBoundary>
-          <Toaster position="top-right" />
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
+                {/* Protected */}
+                <Route path="/" element={<ProtectedRoute><LayoutRoute title="Dashboard Generale"><Dashboard /></LayoutRoute></ProtectedRoute>} />
+                <Route path="/reports/cda" element={<ProtectedRoute allowedRoles={['ADMIN', 'RESPONSABILE']}><CdaReport /></ProtectedRoute>} />
+                <Route path="/assets" element={<ProtectedRoute><LayoutRoute title="Gestione Asset"><AssetsTable /></LayoutRoute></ProtectedRoute>} />
+                <Route path="/work-orders" element={<ProtectedRoute><LayoutRoute title="Work Orders"><WorkOrdersList /></LayoutRoute></ProtectedRoute>} />
+                <Route path="/rapportini" element={<ProtectedRoute><LayoutRoute title="Rapportini"><RapportiniView /></LayoutRoute></ProtectedRoute>} />
+                <Route path="/tickets" element={<ProtectedRoute><LayoutRoute title="Ticketing System"><TicketsQueue /></LayoutRoute></ProtectedRoute>} />
+                <Route path="/schedule" element={<ProtectedRoute><LayoutRoute title="Scadenzario Manutenzioni"><ScheduleView /></LayoutRoute></ProtectedRoute>} />
+                <Route path="/suppliers" element={<ProtectedRoute><LayoutRoute title="Fornitori e Tecnici"><SuppliersTable /></LayoutRoute></ProtectedRoute>} />
+                <Route path="/audit" element={<ProtectedRoute allowedRoles={['ADMIN', 'RESPONSABILE']}><LayoutRoute title="Audit Log"><AuditLogView /></LayoutRoute></ProtectedRoute>} />
+                <Route path="/users" element={<ProtectedRoute adminOnly><LayoutRoute title="Gestione Utenti"><UsersManagement /></LayoutRoute></ProtectedRoute>} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </Suspense>
+            </ErrorBoundary>
+            <Toaster position="top-right" />
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

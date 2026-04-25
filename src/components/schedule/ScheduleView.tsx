@@ -19,7 +19,7 @@ import {
   addDays, addMonths, subMonths, isSameMonth, isToday, differenceInDays,
 } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { Asset, Priority, WorkOrderType } from '@/types';
+import { Asset, Priority, WorkOrder, WorkOrderType } from '@/types';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 
@@ -163,10 +163,10 @@ export function ScheduleView() {
     const plannedMap = new Map<string, CalendarEvent[]>();
     const inProgressMap = new Map<string, CalendarEvent[]>();
     const assetById = new Map(assets.map((asset) => [asset.id, asset]));
-    const activeWorkOrdersByAssetId = new Map(
+    const activeWorkOrdersByAssetId = new Map<string, WorkOrder>(
       workOrders
         .filter((workOrder) => ACTIVE_WORK_ORDER_STATUSES.has(workOrder.status))
-        .map((workOrder) => [workOrder.asset_id, workOrder])
+        .map((workOrder) => [workOrder.asset_id, workOrder] as const)
     );
 
     for (const asset of assets) {

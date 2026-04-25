@@ -10,6 +10,11 @@ type ChartDatum = {
   value: number;
 };
 
+type TicketBreakdownRow = {
+  problem_category: string | null;
+  location: { name: string } | { name: string }[] | null;
+};
+
 interface DashboardStats {
   totalAssets: number;
   expiredAssets: number;
@@ -88,9 +93,10 @@ async function loadDashboardFromApi() {
   const ticketsByCategoryMap = new Map<string, number>();
   const ticketsByLocationMap = new Map<string, number>();
 
-  for (const ticket of ticketsBreakdownRes.data ?? []) {
+  for (const ticket of (ticketsBreakdownRes.data ?? []) as TicketBreakdownRow[]) {
     const categoryName = ticket.problem_category?.trim() || 'Non categorizzato';
-    const locationName = ticket.location?.name?.trim() || 'Ubicazione non definita';
+    const location = Array.isArray(ticket.location) ? ticket.location[0] : ticket.location;
+    const locationName = location?.name?.trim() || 'Ubicazione non definita';
 
     ticketsByCategoryMap.set(categoryName, (ticketsByCategoryMap.get(categoryName) ?? 0) + 1);
     ticketsByLocationMap.set(locationName, (ticketsByLocationMap.get(locationName) ?? 0) + 1);

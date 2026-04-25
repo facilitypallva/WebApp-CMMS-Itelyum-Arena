@@ -77,8 +77,8 @@ export function Sidebar() {
                   className={({ isActive }) => cn(
                     'flex flex-1 items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group',
                     isActive
-                      ? 'bg-primary text-white shadow-md shadow-primary/30'
-                      : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-primary'
+                      ? 'bg-primary text-white shadow-md shadow-primary/30 dark:bg-blue-600 dark:text-white dark:shadow-blue-950/40'
+                      : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-primary dark:hover:bg-slate-800 dark:hover:text-blue-300'
                   )}
                 >
                   <item.icon size={20} className="shrink-0 group-hover:scale-110 transition-transform duration-200" />
@@ -105,8 +105,8 @@ export function Sidebar() {
                       className={({ isActive }) => cn(
                         'flex items-center gap-3 px-4 py-2 rounded-xl transition-all duration-200 group text-sm',
                         isActive
-                          ? 'bg-primary/10 text-primary font-semibold'
-                          : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-primary'
+                          ? 'bg-primary/10 text-primary font-semibold dark:bg-blue-500/15 dark:text-blue-300'
+                          : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-primary dark:hover:bg-slate-800 dark:hover:text-blue-300'
                       )}
                     >
                       <child.icon size={16} className="shrink-0 group-hover:scale-110 transition-transform duration-200" />

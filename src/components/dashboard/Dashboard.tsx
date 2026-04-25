@@ -311,10 +311,10 @@ export function Dashboard() {
             <CardTitle className="text-xl font-bold text-slate-800">Ticket Aperti</CardTitle>
             <p className="text-xs text-slate-500">Controllo rapido della coda segnalazioni</p>
           </div>
-          <div className="rounded-[2rem] bg-orange-50 p-6 text-orange-900">
-            <p className="text-sm font-medium text-orange-700">Segnalazioni da gestire</p>
+          <div className="rounded-[2rem] bg-orange-50 p-6 text-orange-900 dark:bg-orange-500/15 dark:text-orange-100">
+            <p className="text-sm font-medium text-orange-700 dark:text-orange-300">Segnalazioni da gestire</p>
             <p className="mt-2 text-5xl font-bold">{stats.openTickets}</p>
-            <p className="mt-3 text-sm text-orange-700/80">
+            <p className="mt-3 text-sm text-orange-700/80 dark:text-orange-200/80">
               Monitora le richieste in ingresso e trasforma rapidamente i ticket in work order.
             </p>
           </div>
@@ -325,26 +325,26 @@ export function Dashboard() {
       </div>
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        <Button variant="secondary" className="group flex h-36 flex-col items-center justify-center gap-3 rounded-[2rem] border-none bg-primary/5 text-primary hover:bg-primary/10" onClick={() => navigate('/assets')}>
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-white shadow-xl shadow-primary/20 transition-transform group-hover:scale-110">
+        <Button variant="secondary" className="group flex h-36 flex-col items-center justify-center gap-3 rounded-[2rem] border-none bg-primary/5 text-primary hover:bg-primary/10 dark:bg-primary/15 dark:text-blue-200 dark:hover:bg-primary/25" onClick={() => navigate('/assets')}>
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-white shadow-xl shadow-primary/20 transition-transform group-hover:scale-110 dark:shadow-slate-950/40">
             <Package size={28} />
           </div>
           <span className="text-sm font-bold">Asset</span>
         </Button>
-        <Button variant="secondary" className="group flex h-36 flex-col items-center justify-center gap-3 rounded-[2rem] border-none bg-emerald-50 text-emerald-700 hover:bg-emerald-100" onClick={() => navigate('/work-orders')}>
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500 text-white shadow-xl shadow-emerald-500/20 transition-transform group-hover:scale-110">
+        <Button variant="secondary" className="group flex h-36 flex-col items-center justify-center gap-3 rounded-[2rem] border-none bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-500/15 dark:text-emerald-200 dark:hover:bg-emerald-500/25" onClick={() => navigate('/work-orders')}>
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500 text-white shadow-xl shadow-emerald-500/20 transition-transform group-hover:scale-110 dark:shadow-slate-950/40">
             <ClipboardList size={28} />
           </div>
           <span className="text-sm font-bold">Work Orders</span>
         </Button>
-        <Button variant="secondary" className="group flex h-36 flex-col items-center justify-center gap-3 rounded-[2rem] border-none bg-orange-50 text-orange-700 hover:bg-orange-100" onClick={() => navigate('/tickets')}>
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-500 text-white shadow-xl shadow-orange-500/20 transition-transform group-hover:scale-110">
+        <Button variant="secondary" className="group flex h-36 flex-col items-center justify-center gap-3 rounded-[2rem] border-none bg-orange-50 text-orange-700 hover:bg-orange-100 dark:bg-orange-500/15 dark:text-orange-200 dark:hover:bg-orange-500/25" onClick={() => navigate('/tickets')}>
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-500 text-white shadow-xl shadow-orange-500/20 transition-transform group-hover:scale-110 dark:shadow-slate-950/40">
             <Ticket size={28} />
           </div>
           <span className="text-sm font-bold">Tickets</span>
         </Button>
-        <Button variant="secondary" className="group flex h-36 flex-col items-center justify-center gap-3 rounded-[2rem] border-none bg-slate-100 text-slate-700 hover:bg-slate-200" onClick={() => navigate('/schedule')}>
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-700 text-white shadow-xl shadow-slate-700/20 transition-transform group-hover:scale-110">
+        <Button variant="secondary" className="group flex h-36 flex-col items-center justify-center gap-3 rounded-[2rem] border-none bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700/50 dark:text-slate-200 dark:hover:bg-slate-700/80" onClick={() => navigate('/schedule')}>
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-700 text-white shadow-xl shadow-slate-700/20 transition-transform group-hover:scale-110 dark:bg-slate-600 dark:shadow-slate-950/40">
             <Clock size={28} />
           </div>
           <span className="text-sm font-bold">Scadenzario</span>

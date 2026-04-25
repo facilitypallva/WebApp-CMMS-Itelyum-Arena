@@ -91,14 +91,14 @@ function PriorityIcon({ priority }: { priority: Priority }) {
 }
 
 function getStatusCardClasses(status: WorkOrderStatus) {
-  if (status === 'VALIDATED') return 'border-emerald-200 bg-emerald-50/40';
-  if (status === 'ABANDONED') return 'border-slate-300 bg-slate-100/80';
-  if (status === 'CLOSED') return 'border-emerald-100 bg-emerald-50/20';
-  if (status === 'IN_PROGRESS') return 'border-blue-200 bg-blue-50/40';
-  if (status === 'SUSPENDED') return 'border-red-200 bg-red-50/35';
-  if (status === 'ASSIGNED') return 'border-amber-200 bg-amber-50/35';
-  if (status === 'PLANNED') return 'border-slate-200 bg-slate-50/70';
-  return 'border-slate-200 bg-white';
+  if (status === 'VALIDATED') return 'border-emerald-200 bg-emerald-50/40 dark:border-emerald-500/25 dark:bg-emerald-500/10';
+  if (status === 'ABANDONED') return 'border-slate-300 bg-slate-100/80 dark:border-slate-600 dark:bg-slate-800/70';
+  if (status === 'CLOSED') return 'border-emerald-100 bg-emerald-50/20 dark:border-emerald-500/20 dark:bg-emerald-500/10';
+  if (status === 'IN_PROGRESS') return 'border-blue-200 bg-blue-50/40 dark:border-blue-500/25 dark:bg-blue-500/10';
+  if (status === 'SUSPENDED') return 'border-red-200 bg-red-50/35 dark:border-red-500/25 dark:bg-red-500/10';
+  if (status === 'ASSIGNED') return 'border-amber-200 bg-amber-50/35 dark:border-amber-500/25 dark:bg-amber-500/10';
+  if (status === 'PLANNED') return 'border-slate-200 bg-slate-50/70 dark:border-slate-700 dark:bg-slate-800/55';
+  return 'border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900/80';
 }
 
 function WorkOrderTimeline({
@@ -133,11 +133,11 @@ function WorkOrderTimeline({
                     interactive && onStepClick ? 'cursor-pointer hover:scale-105' : 'cursor-default',
                     isCurrent
                       ? status === 'SUSPENDED'
-                        ? 'border-red-200 bg-red-100 text-red-700'
-                        : 'border-primary/20 bg-primary text-white'
+                        ? 'border-red-200 bg-red-100 text-red-700 dark:border-red-500/35 dark:bg-red-500/20 dark:text-red-200'
+                        : 'border-primary/20 bg-primary text-white dark:border-blue-400/40 dark:bg-blue-600 dark:text-white'
                       : isCompleted
-                        ? 'border-emerald-200 bg-emerald-100 text-emerald-700'
-                        : 'border-slate-200 bg-white text-slate-400'
+                        ? 'border-emerald-200 bg-emerald-100 text-emerald-700 dark:border-emerald-400/35 dark:bg-emerald-500/20 dark:text-emerald-200'
+                        : 'border-slate-200 bg-white text-slate-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-500'
                   )}
                 >
                   {index + 1}
@@ -626,7 +626,7 @@ export function WorkOrdersList({
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <Input
               placeholder="Cerca intervento..."
-              className="pl-10 h-11 bg-white border-none shadow-sm rounded-xl"
+              className="pl-10 h-11 bg-white border-none shadow-sm rounded-xl dark:bg-slate-900/80"
               value={searchValue}
               onChange={(e) => {
                 const nextValue = e.target.value;
@@ -636,7 +636,7 @@ export function WorkOrdersList({
             />
           </div>
           <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as WorkOrderStatus | 'ALL')}>
-            <SelectTrigger className="h-11 rounded-xl border-none shadow-sm bg-white w-44"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="h-11 rounded-xl border-none shadow-sm bg-white w-44 dark:bg-slate-900/80"><SelectValue /></SelectTrigger>
             <SelectContent className="rounded-xl">
               <SelectItem value="ALL">Tutti gli stati</SelectItem>
               {STATUSES.map((s) => <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>)}
@@ -666,8 +666,8 @@ export function WorkOrdersList({
             >
               <CardContent className="p-0">
                 <div className="flex flex-col md:flex-row">
-                  <div className="p-6 md:w-44 bg-white/60 flex flex-col justify-center items-center text-center gap-2 border-b md:border-b-0 md:border-r border-slate-100">
-                    <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                  <div className="p-6 md:w-44 bg-white/60 flex flex-col justify-center items-center text-center gap-2 border-b md:border-b-0 md:border-r border-slate-100 dark:bg-slate-950/20">
+                    <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-primary group-hover:scale-110 transition-transform dark:bg-slate-800">
                       <ClipboardList size={24} />
                     </div>
                     <p className="text-[10px] font-black text-slate-400 tracking-widest truncate max-w-full">{wo.code ?? wo.id.slice(0, 8).toUpperCase()}</p>
@@ -708,7 +708,7 @@ export function WorkOrdersList({
                         <Button
                           type="button"
                           variant="outline"
-                          className="h-9 rounded-xl border-slate-200 bg-white font-semibold text-slate-700 hover:bg-slate-50"
+                          className="h-9 rounded-xl border-slate-200 bg-white font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                           disabled={!NEXT_STATUS_MAP[wo.status] || wo.status === 'VALIDATED' || wo.status === 'ABANDONED'}
                           onClick={(event) => {
                             event.stopPropagation();
@@ -722,7 +722,7 @@ export function WorkOrdersList({
                         <Button
                           type="button"
                           variant="outline"
-                          className="h-9 rounded-xl border-red-200 bg-white font-semibold text-red-600 hover:bg-red-50"
+                          className="h-9 rounded-xl border-red-200 bg-white font-semibold text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300 dark:hover:bg-red-500/20"
                           disabled={wo.status === 'SUSPENDED' || wo.status === 'CLOSED' || wo.status === 'VALIDATED' || wo.status === 'ABANDONED'}
                           onClick={(event) => {
                             event.stopPropagation();
@@ -734,7 +734,7 @@ export function WorkOrdersList({
                         <Button
                           type="button"
                           variant="outline"
-                          className="h-9 rounded-xl border-slate-300 bg-white font-semibold text-slate-700 hover:bg-slate-50"
+                          className="h-9 rounded-xl border-slate-300 bg-white font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                           disabled={wo.status === 'VALIDATED' || wo.status === 'ABANDONED'}
                           onClick={(event) => {
                             event.stopPropagation();
@@ -771,17 +771,17 @@ export function WorkOrdersList({
                     <p className="text-xs text-slate-500">Clicca uno stato per aggiornare rapidamente il WO.</p>
                   </div>
                   <div className="flex gap-2">
-                    <Button type="button" variant="outline" className="h-9 rounded-xl border-red-200 bg-white font-semibold text-red-600 hover:bg-red-50"
+                    <Button type="button" variant="outline" className="h-9 rounded-xl border-red-200 bg-white font-semibold text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300 dark:hover:bg-red-500/20"
                       disabled={form.status === 'SUSPENDED' || form.status === 'CLOSED' || form.status === 'VALIDATED' || form.status === 'ABANDONED'}
                       onClick={() => handleTimelineStatusChange('SUSPENDED')}>
                       Sospendi
                     </Button>
-                    <Button type="button" variant="outline" className="h-9 rounded-xl border-slate-300 bg-white font-semibold text-slate-700 hover:bg-slate-50"
+                    <Button type="button" variant="outline" className="h-9 rounded-xl border-slate-300 bg-white font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                       disabled={form.status === 'VALIDATED' || form.status === 'ABANDONED'}
                       onClick={() => handleTimelineStatusChange('ABANDONED')}>
                       Abbandona
                     </Button>
-                    <Button type="button" variant="outline" className="h-9 rounded-xl border-slate-200 bg-white font-semibold text-slate-700 hover:bg-slate-50"
+                    <Button type="button" variant="outline" className="h-9 rounded-xl border-slate-200 bg-white font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                       disabled={!NEXT_STATUS_MAP[form.status] || form.status === 'VALIDATED' || form.status === 'ABANDONED'}
                       onClick={() => handleTimelineStatusChange(NEXT_STATUS_MAP[form.status] as WorkOrderStatus)}>
                       {NEXT_STATUS_MAP[form.status] ? `Avanza a ${STATUS_LABELS[NEXT_STATUS_MAP[form.status] as WorkOrderStatus]}` : 'Flusso completato'}

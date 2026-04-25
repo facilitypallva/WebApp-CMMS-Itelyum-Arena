@@ -33,6 +33,10 @@ interface AssetGroup {
   totalFiles: number;
 }
 
+type WorkOrderRow = WOEntry & {
+  asset: AssetMeta[] | AssetMeta | null;
+};
+
 function fileNameFromPath(path: string) {
   return path.split('/').pop() ?? path;
 }
@@ -60,12 +64,14 @@ export function RapportiniView() {
       .select('id, code, description, asset_id, report_files, created_at, asset:assets(id, name, serial_number, category)')
       .order('created_at', { ascending: false });
 
-    const withFiles = (woData ?? []).filter((w) => w.report_files?.length > 0) as (WOEntry & { asset: AssetMeta | null })[];
+    const rows = (woData ?? []) as WorkOrderRow[];
+    const withFiles = rows.filter((w) => w.report_files?.length > 0);
     const map = new Map<string, AssetMeta>();
     for (const w of withFiles) {
-      if (w.asset) map.set(w.asset_id, w.asset);
+      const asset = Array.isArray(w.asset) ? w.asset[0] : w.asset;
+      if (asset) map.set(w.asset_id, asset);
     }
-    setWos(withFiles);
+    setWos(withFiles.map(({ asset: _asset, ...wo }) => wo));
     setAssetsMap(map);
     setLoading(false);
   };

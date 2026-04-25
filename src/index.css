@@ -161,3 +161,113 @@
     @apply font-sans;
     }
 }
+
+@layer utilities {
+  .dark body {
+    color-scheme: dark;
+  }
+
+  .dark [class~="bg-white"],
+  .dark [class~="bg-white/80"],
+  .dark [class~="bg-white/70"],
+  .dark [class~="bg-white/60"] {
+    background-color: rgb(15 23 42 / 0.94) !important;
+  }
+
+  .dark [class~="bg-slate-50"],
+  .dark [class~="bg-slate-50/50"],
+  .dark [class~="bg-slate-100"],
+  .dark [class~="bg-slate-100/50"] {
+    background-color: rgb(30 41 59 / 0.72) !important;
+  }
+
+  .dark [class~="bg-slate-200"],
+  .dark [class~="bg-slate-200/60"] {
+    background-color: rgb(51 65 85 / 0.78) !important;
+  }
+
+  .dark [class~="bg-blue-50"],
+  .dark [class~="bg-blue-50/40"] {
+    background-color: rgb(30 64 175 / 0.18) !important;
+  }
+
+  .dark [class~="bg-emerald-50"],
+  .dark [class~="bg-emerald-50/20"],
+  .dark [class~="bg-emerald-50/40"] {
+    background-color: rgb(6 95 70 / 0.2) !important;
+  }
+
+  .dark [class~="bg-orange-50"],
+  .dark [class~="bg-amber-50/35"] {
+    background-color: rgb(154 52 18 / 0.2) !important;
+  }
+
+  .dark [class~="bg-red-50"],
+  .dark [class~="bg-red-50/35"] {
+    background-color: rgb(127 29 29 / 0.22) !important;
+  }
+
+  .dark [class~="hover:bg-white"]:hover,
+  .dark [class~="hover:bg-white/60"]:hover,
+  .dark [class~="hover:bg-slate-50"]:hover,
+  .dark [class~="hover:bg-slate-50/50"]:hover,
+  .dark [class~="hover:bg-slate-50/60"]:hover,
+  .dark [class~="hover:bg-slate-50/70"]:hover,
+  .dark [class~="hover:bg-slate-100"]:hover {
+    background-color: rgb(51 65 85 / 0.7) !important;
+  }
+
+  .dark [class~="hover:bg-blue-50"]:hover,
+  .dark [class~="hover:bg-primary/5"]:hover,
+  .dark [class~="hover:bg-primary/10"]:hover {
+    background-color: rgb(37 99 235 / 0.18) !important;
+  }
+
+  .dark [class~="hover:bg-emerald-100"]:hover {
+    background-color: rgb(5 150 105 / 0.24) !important;
+  }
+
+  .dark [class~="hover:bg-orange-100"]:hover {
+    background-color: rgb(234 88 12 / 0.24) !important;
+  }
+
+  .dark [class~="hover:bg-red-50"]:hover {
+    background-color: rgb(127 29 29 / 0.32) !important;
+  }
+
+  .dark [class~="text-slate-950"],
+  .dark [class~="text-slate-900"],
+  .dark [class~="text-slate-800"],
+  .dark [class~="text-slate-700"] {
+    color: rgb(226 232 240) !important;
+  }
+
+  .dark [class~="text-slate-600"],
+  .dark [class~="text-slate-500"],
+  .dark [class~="text-slate-400"] {
+    color: rgb(148 163 184) !important;
+  }
+
+  .dark [class~="border-slate-100"],
+  .dark [class~="border-slate-200"],
+  .dark [class~="border-slate-300"] {
+    border-color: rgb(51 65 85 / 0.9) !important;
+  }
+
+  .dark [class~="shadow-slate-200/60"] {
+    --tw-shadow-color: rgb(2 6 23 / 0.5) !important;
+  }
+
+  .dark [class~="shadow-slate-200/50"],
+  .dark [class~="shadow-primary/20"],
+  .dark [class~="shadow-emerald-500/20"],
+  .dark [class~="shadow-orange-500/20"],
+  .dark [class~="shadow-slate-700/20"] {
+    --tw-shadow-color: rgb(2 6 23 / 0.45) !important;
+  }
+
+  .dark [class~="shadow-xl"],
+  .dark [class~="shadow-2xl"] {
+    --tw-shadow-color: rgb(2 6 23 / 0.55) !important;
+  }
+}

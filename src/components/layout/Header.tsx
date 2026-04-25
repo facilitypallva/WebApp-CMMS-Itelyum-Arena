@@ -1,5 +1,5 @@
 import React, { useDeferredValue, useMemo, useRef, useState } from 'react';
-import { AlertCircle, Bell, BriefcaseBusiness, ClipboardList, MapPin, Menu, Search, ShieldCheck, UserRound } from 'lucide-react';
+import { AlertCircle, Bell, BriefcaseBusiness, ClipboardList, MapPin, Menu, Moon, Search, ShieldCheck, Sun, UserRound } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,6 +13,7 @@ import { useNotifications } from '@/hooks/useNotifications';
 import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { it } from 'date-fns/locale';
+import { useTheme } from 'next-themes';
 
 interface HeaderProps {
   title: string;
@@ -73,8 +74,10 @@ export function Header({
   const { suppliers } = useSuppliers({ enabled: searchEnabled });
   const { technicians } = useTechnicians({ enabled: searchEnabled });
   const { notifications, unreadCount, markAsRead } = useNotifications();
+  const { resolvedTheme, setTheme } = useTheme();
   const deferredSearch = useDeferredValue(globalSearch.trim().toLowerCase());
   const closeTimeoutRef = useRef<number | null>(null);
+  const isDarkMode = resolvedTheme === 'dark';
 
   const results = useMemo(() => {
     if (!deferredSearch) return [];
@@ -232,6 +235,10 @@ export function Header({
     }
   };
 
+  const handleThemeToggle = () => {
+    setTheme(isDarkMode ? 'light' : 'dark');
+  };
+
   return (
     <header className="h-20 border-b bg-white/80 backdrop-blur-md sticky top-0 z-40 flex items-center justify-between px-8 shadow-sm shadow-slate-200/60">
       <div className="flex items-center gap-4">
@@ -322,6 +329,16 @@ export function Header({
         </div>
 
         <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-11 w-11 rounded-xl text-slate-500 hover:bg-primary/5 hover:text-primary"
+            onClick={handleThemeToggle}
+            aria-label={isDarkMode ? 'Attiva modalita chiara' : 'Attiva modalita scura'}
+            title={isDarkMode ? 'Modalita chiara' : 'Modalita scura'}
+          >
+            {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+          </Button>
           <div className="relative">
             <Button
               variant="ghost"
