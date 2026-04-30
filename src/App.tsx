@@ -11,6 +11,7 @@ const AppLayout = lazy(() => import('@/components/layout/AppLayout').then((modul
 const Dashboard = lazy(() => import('@/components/dashboard/Dashboard').then((module) => ({ default: module.Dashboard })));
 const CdaReport = lazy(() => import('@/components/dashboard/CdaReport').then((module) => ({ default: module.CdaReport })));
 const LoginPage = lazy(() => import('@/components/auth/LoginPage').then((module) => ({ default: module.LoginPage })));
+const ResetPasswordPage = lazy(() => import('@/components/auth/ResetPasswordPage').then((module) => ({ default: module.ResetPasswordPage })));
 const AssetsTable = lazy(() => import('@/components/assets/AssetsTable').then((module) => ({ default: module.AssetsTable })));
 const WorkOrdersList = lazy(() => import('@/components/work-orders/WorkOrdersList').then((module) => ({ default: module.WorkOrdersList })));
 const PublicTicketForm = lazy(() => import('@/components/ticketing/PublicTicketForm').then((module) => ({ default: module.PublicTicketForm })));
@@ -54,6 +55,7 @@ export default function App() {
               <Routes>
                 {/* Public */}
                 <Route path="/login" element={<LoginPage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
                 <Route path="/report-issue" element={<PublicTicketForm />} />
 
                 {/* Protected */}

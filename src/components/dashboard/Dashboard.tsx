@@ -10,7 +10,6 @@ import { Package, CheckCircle2, AlertTriangle, Clock, ArrowRight, ChevronRight, 
 import { useDashboard } from '@/hooks/useDashboard';
 import { useAuth } from '@/contexts/AuthContext';
 import { WORK_ORDER_STATUS_LABELS } from '@/lib/constants';
-import vareseLogo from '@/assets/pallacanestro-varese-logo.png';
 import ikeIroegbuPhoto from '@/assets/ike-iroegbu.jpg';
 
 const ASSET_STATUS_COLORS = ['#10b981', '#f59e0b', '#ef4444'];
@@ -77,12 +76,6 @@ export function Dashboard() {
         <div className="absolute inset-0 bg-slate-950/58" />
         <div className="absolute inset-0 bg-gradient-to-r from-slate-950/82 via-slate-950/62 to-slate-950/72" />
         <div className="relative z-10 space-y-2">
-          <div className="mb-3 flex items-center gap-3">
-            <div className="flex h-16 w-16 items-center justify-center p-1">
-              <img src={vareseLogo} alt="Pallacanestro Varese" className="h-full w-full object-contain" />
-            </div>
-            <p className="text-sm font-bold uppercase tracking-[0.18em] text-white/70">Pallacanestro Varese</p>
-          </div>
           <h2 className="text-3xl font-bold">Benvenuto, {userName}</h2>
           <p className="max-w-lg text-blue-100 opacity-90">
             {stats.expiredAssets > 0 ? (

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Printer, CalendarDays, Building2 } from 'lucide-react';
-import vareseLogo from '@/assets/pallacanestro-varese-logo.png';
+import arenaOsLogo from '@/assets/arenaos-logo-horizontal.svg';
 import { useDashboard } from '@/hooks/useDashboard';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
@@ -130,11 +130,8 @@ export function CdaReport() {
         <section className="report-card overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
           <div className="flex flex-col gap-8 border-b border-slate-100 px-8 py-8 md:flex-row md:items-center md:justify-between dark:border-slate-700">
             <div className="flex items-center gap-4">
-              <div className="flex h-20 w-20 items-center justify-center rounded-[1.5rem] bg-slate-50 p-3 dark:bg-slate-800">
-                <img src={vareseLogo} alt="Pallacanestro Varese" className="h-full w-full object-contain" />
-              </div>
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">Pallacanestro Varese</p>
+                <img src={arenaOsLogo} alt="ArenaOS" className="h-12 w-auto max-w-[220px] object-contain dark:brightness-0 dark:invert" />
                 <h1 className="mt-2 text-4xl font-bold tracking-tight text-slate-950">Report manutenzione impianti</h1>
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
                   Documento sintetico con stato manutentivo, criticità aperte e trend operativi della piattaforma.

@@ -4,7 +4,7 @@ import { LayoutDashboard, Box, ClipboardList, Ticket, Users, ShieldCheck, Calend
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import vareseLogo from '@/assets/pallacanestro-varese-logo.png';
+import arenaOsLogo from '@/assets/arenaos-logo-horizontal.svg';
 import { APP_ROLE_LABELS } from '@/lib/constants';
 import { AppRole } from '@/types';
 
@@ -53,11 +53,8 @@ export function Sidebar() {
 
   return (
     <aside className="w-64 h-screen bg-sidebar border-r flex flex-col shrink-0 sticky top-0 overflow-y-auto">
-      <div className="p-6 flex items-center gap-3">
-        <div className="flex h-14 w-14 items-center justify-center p-1">
-          <img src={vareseLogo} alt="Pallacanestro Varese" className="h-full w-full object-contain" />
-        </div>
-        <span className="font-bold text-xl tracking-tight text-slate-800">Pallacanestro Varese</span>
+      <div className="p-6">
+        <img src={arenaOsLogo} alt="ArenaOS" className="h-12 w-auto max-w-[200px] object-contain" />
       </div>
 
       <nav className="flex-1 px-4 py-4 space-y-1">

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
+import { setRememberSession } from '@/lib/authStorage';
 import { AppRole, UserProfile } from '@/types';
 import { withRequestTimeout } from '@/lib/resilientRequest';
 
@@ -13,7 +14,9 @@ interface AuthContextType {
   isAdmin: boolean;
   isActive: boolean;
   refreshProfile: () => Promise<void>;
-  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
+  signIn: (email: string, password: string, rememberSession?: boolean) => Promise<{ error: Error | null }>;
+  resetPassword: (email: string) => Promise<{ error: Error | null }>;
+  updatePassword: (password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
 }
 
@@ -112,8 +115,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await loadProfile(user);
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string, rememberSession = true) => {
+    setRememberSession(rememberSession);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
+    return { error };
+  };
+
+  const resetPassword = async (email: string) => {
+    const redirectTo = `${window.location.origin}/reset-password`;
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+    return { error };
+  };
+
+  const updatePassword = async (password: string) => {
+    const { error } = await supabase.auth.updateUser({ password });
     return { error };
   };
 
@@ -122,7 +137,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, profile, role, loading, isAdmin, isActive, refreshProfile, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, session, profile, role, loading, isAdmin, isActive, refreshProfile, signIn, resetPassword, updatePassword, signOut }}>
       {children}
     </AuthContext.Provider>
   );
