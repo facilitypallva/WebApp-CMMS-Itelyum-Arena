@@ -90,12 +90,12 @@ export function TicketsQueue({
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800">Coda Segnalazioni</h2>
+          <h2 className="arena-heading text-2xl">Coda Segnalazioni</h2>
           <p className="text-sm text-slate-500">{tickets.filter((t) => t.status === 'OPEN').length} ticket aperti</p>
         </div>
         <Select value={filter} onValueChange={(v) => setFilter(v as typeof filter)}>
-          <SelectTrigger className="h-11 rounded-xl border-none shadow-sm bg-white w-44"><SelectValue /></SelectTrigger>
-          <SelectContent className="rounded-xl">
+          <SelectTrigger className="h-11 rounded-lg border border-slate-200 bg-white shadow-sm w-44"><SelectValue /></SelectTrigger>
+          <SelectContent className="rounded-lg">
             <SelectItem value="ALL">Tutti</SelectItem>
             <SelectItem value="OPEN">Aperti</SelectItem>
             <SelectItem value="IN_PROGRESS">In Lavorazione</SelectItem>
@@ -107,17 +107,17 @@ export function TicketsQueue({
       {loading ? (
         <div className="flex justify-center py-20"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-20 bg-white rounded-3xl text-slate-400">
+        <div className="arena-card text-center py-20 text-slate-400">
           <Ticket size={48} className="mx-auto mb-4 opacity-30" />
           <p className="font-medium">Nessuna segnalazione trovata</p>
         </div>
       ) : (
         <div className="grid gap-4">
           {filtered.map((ticket) => (
-            <Card key={ticket.id} className="border-none shadow-sm rounded-3xl bg-white hover:shadow-md transition-all">
+            <Card key={ticket.id} className="arena-card hover:shadow-md transition-all">
               <CardContent className="p-6">
                 <div className="flex flex-col md:flex-row gap-4">
-                  <div className={cn('w-12 h-12 rounded-2xl flex items-center justify-center shrink-0',
+                  <div className={cn('w-12 h-12 rounded-lg flex items-center justify-center shrink-0',
                     ticket.status === 'OPEN' ? 'bg-red-100 text-red-600' :
                     ticket.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-600' : 'bg-emerald-100 text-emerald-600')}>
                     <AlertCircle size={22} />

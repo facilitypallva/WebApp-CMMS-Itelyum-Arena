@@ -1,19 +1,20 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Sora:wght@500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-heading: "Sora", "Inter", ui-sans-serif, system-ui, sans-serif;
   
   --radius-lg: 1rem;
   --radius-md: calc(1rem - 2px);
   --radius-sm: calc(1rem - 4px);
 
-  --color-primary: #2563eb;
-  --color-sidebar: #ffffff;
-  --color-sidebar-foreground: #64748b;
-  --color-sidebar-primary: #2563eb;
-  --color-sidebar-accent: #f1f5f9;
+  --color-primary: #1e40af;
+  --color-sidebar: #0b1220;
+  --color-sidebar-foreground: #94a3b8;
+  --color-sidebar-primary: #06b6d4;
+  --color-sidebar-accent: rgb(255 255 255 / 0.04);
 }
 
 @layer base {
@@ -135,13 +136,22 @@
 }
 
 :root {
+    --arena-navy: #0b1220;
+    --arena-navy-2: #0f1a2e;
+    --arena-blue: #1e40af;
+    --arena-blue-700: #1d3a9e;
+    --arena-cyan: #06b6d4;
+    --arena-bg: #f8fafc;
+    --arena-ink: #0f172a;
+    --arena-muted: #64748b;
+    --arena-border: #e2e8f0;
     --background: oklch(1 0 0);
     --foreground: oklch(0.145 0 0);
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.145 0 0);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
+    --primary: #1e40af;
     --primary-foreground: oklch(0.985 0 0);
     --secondary: oklch(0.97 0 0);
     --secondary-foreground: oklch(0.205 0 0);
@@ -152,21 +162,21 @@
     --destructive: oklch(0.577 0.245 27.325);
     --border: oklch(0.922 0 0);
     --input: oklch(0.922 0 0);
-    --ring: oklch(0.708 0 0);
+    --ring: #1e40af;
     --chart-1: oklch(0.87 0 0);
     --chart-2: oklch(0.556 0 0);
     --chart-3: oklch(0.439 0 0);
     --chart-4: oklch(0.371 0 0);
     --chart-5: oklch(0.269 0 0);
     --radius: 0.625rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
+    --sidebar: #0b1220;
+    --sidebar-foreground: #94a3b8;
+    --sidebar-primary: #06b6d4;
     --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.708 0 0);
+    --sidebar-accent: rgb(255 255 255 / 0.04);
+    --sidebar-accent-foreground: #e2e8f0;
+    --sidebar-border: rgb(255 255 255 / 0.06);
+    --sidebar-ring: #06b6d4;
 }
 
 .dark {
@@ -213,6 +223,21 @@
   html {
     @apply font-sans;
     }
+}
+
+@layer components {
+  .arena-card {
+    @apply rounded-xl border border-slate-200 bg-white shadow-sm shadow-slate-200/70;
+  }
+
+  .arena-kicker {
+    @apply text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500;
+  }
+
+  .arena-heading {
+    font-family: var(--font-heading);
+    letter-spacing: -0.02em;
+  }
 }
 
 @layer utilities {

@@ -48,16 +48,16 @@ export function AppLayout({ children, title }: LayoutProps) {
   }, [children, globalSearch]);
 
   return (
-    <div className="flex min-h-screen bg-slate-50/50">
+    <div className="flex min-h-screen bg-[#f8fafc] text-slate-950">
       <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex min-w-0 flex-1 flex-col">
         <Header
           title={title}
           globalSearch={globalSearch}
           onGlobalSearchChange={handleGlobalSearchChange}
           onGlobalSearchApply={handleGlobalSearchApply}
         />
-        <main className="flex-1 p-8 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto p-6 lg:p-7">
           {content}
         </main>
       </div>

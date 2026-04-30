@@ -626,7 +626,7 @@ export function WorkOrdersList({
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <Input
               placeholder="Cerca intervento..."
-              className="pl-10 h-11 bg-white border-none shadow-sm rounded-xl dark:bg-slate-900/80"
+              className="pl-10 h-11 bg-white border border-slate-200 shadow-sm rounded-lg dark:bg-slate-900/80"
               value={searchValue}
               onChange={(e) => {
                 const nextValue = e.target.value;
@@ -636,14 +636,14 @@ export function WorkOrdersList({
             />
           </div>
           <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as WorkOrderStatus | 'ALL')}>
-            <SelectTrigger className="h-11 rounded-xl border-none shadow-sm bg-white w-44 dark:bg-slate-900/80"><SelectValue /></SelectTrigger>
-            <SelectContent className="rounded-xl">
+            <SelectTrigger className="h-11 rounded-lg border border-slate-200 shadow-sm bg-white w-44 dark:bg-slate-900/80"><SelectValue /></SelectTrigger>
+            <SelectContent className="rounded-lg">
               <SelectItem value="ALL">Tutti gli stati</SelectItem>
               {STATUSES.map((s) => <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
-        <Button className="h-11 rounded-xl shadow-lg shadow-primary/20 bg-primary font-bold px-6 gap-2" onClick={openCreate}>
+        <Button className="h-11 rounded-lg shadow-lg shadow-primary/20 bg-primary font-bold px-6 gap-2" onClick={openCreate}>
           <Plus size={18} /> Nuovo Ordine di Lavoro
         </Button>
       </div>
@@ -653,13 +653,13 @@ export function WorkOrdersList({
       ) : (
         <div className="grid grid-cols-1 gap-4">
           {filtered.length === 0 && (
-            <div className="text-center py-16 text-slate-400 bg-white rounded-3xl">Nessun ordine di lavoro trovato</div>
+            <div className="arena-card text-center py-16 text-slate-400">Nessun ordine di lavoro trovato</div>
           )}
           {filtered.map((wo) => (
             <Card
               key={wo.id}
               className={cn(
-                'rounded-3xl overflow-hidden border shadow-sm hover:shadow-md transition-all group cursor-pointer',
+                'rounded-xl overflow-hidden border shadow-sm hover:shadow-md transition-all group cursor-pointer',
                 getStatusCardClasses(wo.status)
               )}
               onClick={() => openEdit(wo)}
@@ -667,7 +667,7 @@ export function WorkOrdersList({
               <CardContent className="p-0">
                 <div className="flex flex-col md:flex-row">
                   <div className="p-6 md:w-44 bg-white/60 flex flex-col justify-center items-center text-center gap-2 border-b md:border-b-0 md:border-r border-slate-100 dark:bg-slate-950/20">
-                    <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-primary group-hover:scale-110 transition-transform dark:bg-slate-800">
+                    <div className="w-12 h-12 rounded-lg bg-white shadow-sm flex items-center justify-center text-primary group-hover:scale-110 transition-transform dark:bg-slate-800">
                       <ClipboardList size={24} />
                     </div>
                     <p className="text-[10px] font-black text-slate-400 tracking-widest truncate max-w-full">{wo.code ?? wo.id.slice(0, 8).toUpperCase()}</p>
@@ -708,7 +708,7 @@ export function WorkOrdersList({
                         <Button
                           type="button"
                           variant="outline"
-                          className="h-9 rounded-xl border-slate-200 bg-white font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                          className="h-9 rounded-lg border-slate-200 bg-white font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                           disabled={!NEXT_STATUS_MAP[wo.status] || wo.status === 'VALIDATED' || wo.status === 'ABANDONED'}
                           onClick={(event) => {
                             event.stopPropagation();
@@ -722,7 +722,7 @@ export function WorkOrdersList({
                         <Button
                           type="button"
                           variant="outline"
-                          className="h-9 rounded-xl border-red-200 bg-white font-semibold text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300 dark:hover:bg-red-500/20"
+                          className="h-9 rounded-lg border-red-200 bg-white font-semibold text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300 dark:hover:bg-red-500/20"
                           disabled={wo.status === 'SUSPENDED' || wo.status === 'CLOSED' || wo.status === 'VALIDATED' || wo.status === 'ABANDONED'}
                           onClick={(event) => {
                             event.stopPropagation();
@@ -734,7 +734,7 @@ export function WorkOrdersList({
                         <Button
                           type="button"
                           variant="outline"
-                          className="h-9 rounded-xl border-slate-300 bg-white font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                          className="h-9 rounded-lg border-slate-300 bg-white font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                           disabled={wo.status === 'VALIDATED' || wo.status === 'ABANDONED'}
                           onClick={(event) => {
                             event.stopPropagation();
@@ -757,31 +757,31 @@ export function WorkOrdersList({
       )}
 
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent className="rounded-3xl w-[min(96vw,1100px)] max-w-[1100px] sm:max-w-[1100px] max-h-[90vh] overflow-y-auto">
+        <DialogContent className="rounded-xl w-[min(96vw,1100px)] max-w-[1100px] sm:max-w-[1100px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editing ? 'Modifica Ordine di Lavoro' : 'Nuovo Ordine di Lavoro'}</DialogTitle>
           </DialogHeader>
           <div className="space-y-6 py-2">
             {/* Timeline */}
             {editing && (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+              <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4">
                 <div className="mb-3 flex items-center justify-between gap-3">
                   <div>
                     <p className="text-sm font-bold text-slate-800">Timeline Intervento</p>
                     <p className="text-xs text-slate-500">Clicca uno stato per aggiornare rapidamente il WO.</p>
                   </div>
                   <div className="flex gap-2">
-                    <Button type="button" variant="outline" className="h-9 rounded-xl border-red-200 bg-white font-semibold text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300 dark:hover:bg-red-500/20"
+                    <Button type="button" variant="outline" className="h-9 rounded-lg border-red-200 bg-white font-semibold text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300 dark:hover:bg-red-500/20"
                       disabled={form.status === 'SUSPENDED' || form.status === 'CLOSED' || form.status === 'VALIDATED' || form.status === 'ABANDONED'}
                       onClick={() => handleTimelineStatusChange('SUSPENDED')}>
                       Sospendi
                     </Button>
-                    <Button type="button" variant="outline" className="h-9 rounded-xl border-slate-300 bg-white font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                    <Button type="button" variant="outline" className="h-9 rounded-lg border-slate-300 bg-white font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                       disabled={form.status === 'VALIDATED' || form.status === 'ABANDONED'}
                       onClick={() => handleTimelineStatusChange('ABANDONED')}>
                       Abbandona
                     </Button>
-                    <Button type="button" variant="outline" className="h-9 rounded-xl border-slate-200 bg-white font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                    <Button type="button" variant="outline" className="h-9 rounded-lg border-slate-200 bg-white font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                       disabled={!NEXT_STATUS_MAP[form.status] || form.status === 'VALIDATED' || form.status === 'ABANDONED'}
                       onClick={() => handleTimelineStatusChange(NEXT_STATUS_MAP[form.status] as WorkOrderStatus)}>
                       {NEXT_STATUS_MAP[form.status] ? `Avanza a ${STATUS_LABELS[NEXT_STATUS_MAP[form.status] as WorkOrderStatus]}` : 'Flusso completato'}
@@ -802,7 +802,7 @@ export function WorkOrdersList({
                 <Label>Asset *</Label>
                 <Popover open={assetPopoverOpen} onOpenChange={setAssetPopoverOpen}>
                   <PopoverTrigger className="w-full">
-                    <button type="button" className="flex h-12 w-full items-center justify-between rounded-xl border border-input bg-background px-4 text-left text-sm ring-offset-background transition-colors hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                    <button type="button" className="flex h-12 w-full items-center justify-between rounded-lg border border-input bg-background px-4 text-left text-sm ring-offset-background transition-colors hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
                       <div className="min-w-0">
                         {selectedAsset ? (
                           <div className="min-w-0">
@@ -816,7 +816,7 @@ export function WorkOrdersList({
                       <Search size={16} className="shrink-0 text-slate-400" />
                     </button>
                   </PopoverTrigger>
-                  <PopoverContent align="start" className="w-[var(--radix-popover-trigger-width)] rounded-2xl p-3">
+                  <PopoverContent align="start" className="w-[var(--radix-popover-trigger-width)] rounded-xl p-3">
                     <div className="space-y-3">
                       <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />

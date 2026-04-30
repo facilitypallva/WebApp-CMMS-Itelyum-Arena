@@ -290,11 +290,11 @@ export function AssetsTable({
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[auto_auto_minmax(0,1fr)_auto] xl:items-end">
         <div className="self-end">
           <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as AssetStatus | 'ALL')}>
-            <SelectTrigger className="h-11 w-44 rounded-xl border-none bg-white shadow-sm">
+            <SelectTrigger className="h-11 w-44 rounded-lg border border-slate-200 bg-white shadow-sm">
               <Filter size={16} className="mr-2 text-slate-400" />
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="rounded-xl">
+            <SelectContent className="rounded-lg">
               <SelectItem value="ALL">Tutti gli stati</SelectItem>
               <SelectItem value="IN REGOLA">In Regola</SelectItem>
               <SelectItem value="IN SCADENZA">In Scadenza</SelectItem>
@@ -306,11 +306,11 @@ export function AssetsTable({
         </div>
 
         <div className="self-end">
-          <div className="inline-flex rounded-2xl border border-slate-200 bg-white p-1 shadow-sm">
+          <div className="inline-flex rounded-xl border border-slate-200 bg-white p-1 shadow-sm">
             <Button
               type="button"
               variant="ghost"
-              className={cn('h-9 rounded-xl px-4', viewMode === 'TABLE' && 'bg-slate-900 text-white hover:bg-slate-900 hover:text-white')}
+              className={cn('h-9 rounded-lg px-4', viewMode === 'TABLE' && 'bg-slate-900 text-white hover:bg-slate-900 hover:text-white')}
               onClick={() => setViewMode('TABLE')}
             >
               <Rows3 size={16} />
@@ -319,7 +319,7 @@ export function AssetsTable({
             <Button
               type="button"
               variant="ghost"
-              className={cn('h-9 rounded-xl px-4', viewMode === 'GROUPED' && 'bg-slate-900 text-white hover:bg-slate-900 hover:text-white')}
+              className={cn('h-9 rounded-lg px-4', viewMode === 'GROUPED' && 'bg-slate-900 text-white hover:bg-slate-900 hover:text-white')}
               onClick={() => setViewMode('GROUPED')}
             >
               <Layers3 size={16} />
@@ -392,15 +392,15 @@ export function AssetsTable({
       ) : viewMode === 'GROUPED' ? (
         <div className="space-y-5">
           {groupedAssets.length === 0 && (
-            <div className="rounded-[2rem] border border-slate-100 bg-white py-16 text-center font-medium text-slate-400 shadow-sm">
+            <div className="arena-card py-16 text-center font-medium text-slate-400">
               Nessun asset trovato
             </div>
           )}
           {groupedAssets.map((group) => (
-            <div key={group.category} className="overflow-hidden rounded-[2rem] border border-slate-100 bg-white shadow-sm">
+            <div key={group.category} className="arena-card overflow-hidden">
               <div className="flex flex-col gap-3 border-b border-slate-100 px-8 py-6 md:flex-row md:items-center md:justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-slate-100">
                     <AssetCategoryIcon category={group.category} />
                   </div>
                   <div>
@@ -427,11 +427,11 @@ export function AssetsTable({
                   const locationLabel = formatLocationDisplayName(locationName);
 
                   return (
-                    <div key={asset.id} className="group rounded-[1.75rem] border border-slate-200 bg-slate-50/60 p-5 transition-colors hover:border-slate-300 hover:bg-white">
+                    <div key={asset.id} className="group rounded-xl border border-slate-200 bg-slate-50/60 p-5 transition-colors hover:border-slate-300 hover:bg-white">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white shadow-sm">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white shadow-sm">
                               <AssetCategoryIcon category={asset.category} />
                             </div>
                             <div className="min-w-0">
@@ -474,7 +474,7 @@ export function AssetsTable({
                         </div>
                       </div>
 
-                      <div className="mt-4 space-y-2 rounded-2xl bg-white p-4 shadow-sm">
+                      <div className="mt-4 space-y-2 rounded-lg bg-white p-4 shadow-sm">
                         <div className="flex items-center justify-between gap-3 text-sm">
                           <span className="font-medium text-slate-500">Prossima verifica</span>
                           <span className="font-bold text-slate-700">
@@ -494,7 +494,7 @@ export function AssetsTable({
           ))}
         </div>
       ) : (
-        <div className="bg-white rounded-[2rem] shadow-sm overflow-hidden border border-slate-100">
+        <div className="arena-card overflow-hidden">
           <Table>
             <TableHeader className="bg-slate-50/50">
               <TableRow className="border-none hover:bg-transparent">
@@ -523,7 +523,7 @@ export function AssetsTable({
                   <TableRow key={asset.id} className="border-slate-50 hover:bg-slate-50/50 transition-colors group">
                     <TableCell className="pl-8 py-5">
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <div className="w-12 h-12 rounded-lg bg-slate-100 flex items-center justify-center group-hover:scale-110 transition-transform">
                           <AssetCategoryIcon category={asset.category} />
                         </div>
                         <div>
@@ -575,7 +575,7 @@ export function AssetsTable({
 
       {/* Create / Edit Modal */}
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent className="rounded-3xl max-w-lg">
+        <DialogContent className="rounded-xl max-w-lg">
           <DialogHeader>
             <DialogTitle>{editing ? 'Modifica Asset' : 'Nuovo Asset'}</DialogTitle>
           </DialogHeader>
@@ -679,7 +679,7 @@ export function AssetsTable({
 
       {/* Detail Modal */}
       <Dialog open={!!detailAsset} onOpenChange={() => setDetailAsset(null)}>
-        <DialogContent className="rounded-3xl max-w-md">
+        <DialogContent className="rounded-xl max-w-md">
           <DialogHeader><DialogTitle>Dettaglio Asset</DialogTitle></DialogHeader>
           {detailAsset && (
             <div className="space-y-3 text-sm">

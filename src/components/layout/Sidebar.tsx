@@ -13,7 +13,7 @@ type NavGroup = NavItem & { children?: NavItem[] };
 
 const navGroups: NavGroup[] = [
   { icon: LayoutDashboard, label: 'Dashboard', href: '/' },
-  { icon: Box, label: 'Asset', href: '/assets' },
+  { icon: Box, label: 'Asset MEP', href: '/assets' },
   {
     icon: ClipboardList, label: 'Work Orders', href: '/work-orders',
     children: [
@@ -52,14 +52,14 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="w-64 h-screen bg-sidebar border-r flex flex-col shrink-0 sticky top-0 overflow-y-auto">
-      <div className="p-6">
-        <img src={arenaOsLogo} alt="ArenaOS" className="h-12 w-auto max-w-[200px] object-contain" />
+    <aside className="sticky top-0 flex h-screen w-[248px] shrink-0 flex-col overflow-y-auto border-r border-white/5 bg-[#0b1220] text-slate-400">
+      <div className="border-b border-white/[0.06] px-[18px] py-5">
+        <img src={arenaOsLogo} alt="ArenaOS" className="h-10 w-auto max-w-[190px] object-contain brightness-0 invert" />
       </div>
 
-      <nav className="flex-1 px-4 py-4 space-y-1">
-        <div className="text-[10px] font-bold text-sidebar-foreground uppercase tracking-wider px-4 mb-4 opacity-50">
-          Menu Principale
+      <nav className="flex-1 overflow-y-auto px-2 py-4">
+        <div className="px-5 pb-3 pt-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-600">
+          Operations
         </div>
         {groups.map((item) => {
           const hasChildren = item.children && item.children.length > 0;
@@ -72,19 +72,19 @@ export function Sidebar() {
                   to={item.href}
                   end={item.href === '/'}
                   className={({ isActive }) => cn(
-                    'flex flex-1 items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group',
+                    'group relative my-px flex flex-1 items-center gap-3 rounded-lg border-l-2 px-4 py-2.5 text-[13.5px] transition-all duration-200',
                     isActive
-                      ? 'bg-primary text-white shadow-md shadow-primary/30 dark:bg-blue-600 dark:text-white dark:shadow-blue-950/40'
-                      : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-primary dark:hover:bg-slate-800 dark:hover:text-blue-300'
+                      ? 'border-cyan-400 bg-cyan-400/[0.08] text-white'
+                      : 'border-transparent text-slate-400 hover:bg-white/[0.04] hover:text-slate-200'
                   )}
                 >
-                  <item.icon size={20} className="shrink-0 group-hover:scale-110 transition-transform duration-200" />
+                  <item.icon size={18} className="shrink-0 transition-transform duration-200 group-hover:scale-105" />
                   <span className="font-medium">{item.label}</span>
                 </NavLink>
                 {hasChildren && (
                   <button
                     onClick={() => toggle(item.href)}
-                    className="p-2 rounded-lg text-slate-400 hover:text-primary hover:bg-sidebar-accent transition-colors"
+                    className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-white/[0.04] hover:text-slate-200"
                   >
                     {isOpen
                       ? <ChevronDown size={14} />
@@ -94,19 +94,19 @@ export function Sidebar() {
               </div>
 
               {hasChildren && isOpen && (
-                <div className="mt-0.5 ml-4 space-y-0.5">
+                <div className="ml-4 mt-1 space-y-0.5 border-l border-white/[0.06] pl-2">
                   {item.children!.map((child) => (
                     <NavLink
                       key={child.href}
                       to={child.href}
                       className={({ isActive }) => cn(
-                        'flex items-center gap-3 px-4 py-2 rounded-xl transition-all duration-200 group text-sm',
+                        'group flex items-center gap-3 rounded-lg px-4 py-2 text-sm transition-all duration-200',
                         isActive
-                          ? 'bg-primary/10 text-primary font-semibold dark:bg-blue-500/15 dark:text-blue-300'
-                          : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-primary dark:hover:bg-slate-800 dark:hover:text-blue-300'
+                          ? 'bg-cyan-400/[0.08] font-semibold text-cyan-200'
+                          : 'text-slate-500 hover:bg-white/[0.04] hover:text-slate-200'
                       )}
                     >
-                      <child.icon size={16} className="shrink-0 group-hover:scale-110 transition-transform duration-200" />
+                      <child.icon size={16} className="shrink-0 transition-transform duration-200 group-hover:scale-105" />
                       <span className="font-medium">{child.label}</span>
                     </NavLink>
                   ))}
@@ -117,19 +117,19 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="p-4 mt-auto border-t space-y-2">
-        <div className="bg-slate-50 p-4 rounded-2xl flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold shrink-0">
+      <div className="mt-auto space-y-2 border-t border-white/[0.06] p-3">
+        <div className="flex items-center gap-3 rounded-xl border border-white/[0.05] bg-white/[0.035] p-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-700 to-cyan-400 text-xs font-bold text-white">
             {initials}
           </div>
           <div className="flex-1 overflow-hidden">
-            <p className="text-xs font-semibold text-slate-900 truncate">{emailLabel}</p>
-            <p className="text-[10px] text-slate-500">Pallacanestro Varese • {APP_ROLE_LABELS[role]}</p>
+            <p className="truncate text-xs font-semibold text-white">{emailLabel}</p>
+            <p className="text-[10px] text-slate-500">Pallacanestro Varese - {APP_ROLE_LABELS[role]}</p>
           </div>
         </div>
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl text-slate-500 hover:bg-red-50 hover:text-red-600 transition-colors text-sm font-medium"
+          className="flex w-full items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-slate-500 transition-colors hover:bg-red-500/10 hover:text-red-300"
         >
           <LogOut size={16} />
           Disconnetti

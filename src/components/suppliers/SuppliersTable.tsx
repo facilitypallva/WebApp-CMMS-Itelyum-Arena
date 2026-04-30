@@ -260,7 +260,7 @@ export function SuppliersTable({
             <TabsTrigger value="suppliers" className="rounded-lg">Fornitori</TabsTrigger>
             <TabsTrigger value="technicians" className="rounded-lg">Tecnici</TabsTrigger>
           </TabsList>
-          <Button className="h-10 rounded-xl shadow-lg shadow-primary/20 bg-primary font-bold px-5 gap-2" onClick={handlePrimaryAction}>
+          <Button className="h-10 rounded-lg shadow-lg shadow-primary/20 bg-primary font-bold px-5 gap-2" onClick={handlePrimaryAction}>
             <Plus size={16} /> {actionLabel}
           </Button>
         </div>
@@ -272,10 +272,10 @@ export function SuppliersTable({
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredSuppliers.length === 0 && <p className="text-slate-400 col-span-3 text-center py-10">Nessun fornitore trovato</p>}
               {filteredSuppliers.map((s) => (
-                <Card key={s.id} className="border-none shadow-sm rounded-3xl bg-white hover:shadow-md transition-all">
+                <Card key={s.id} className="arena-card hover:shadow-md transition-all">
                   <CardContent className="p-6 space-y-3">
                     <div className="flex justify-between items-start">
-                      <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                      <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                         <Building2 size={22} />
                       </div>
                       <DropdownMenu>
@@ -304,7 +304,7 @@ export function SuppliersTable({
                               </button>
                             }
                           />
-                          <PopoverContent align="start" className="w-80 rounded-2xl p-3">
+                          <PopoverContent align="start" className="w-80 rounded-xl p-3">
                             <div className="space-y-3">
                               <div>
                                 <p className="text-sm font-bold text-slate-800">{s.name}</p>
@@ -344,10 +344,10 @@ export function SuppliersTable({
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredTechnicians.length === 0 && <p className="text-slate-400 col-span-3 text-center py-10">Nessun tecnico trovato</p>}
               {filteredTechnicians.map((t) => (
-                <Card key={t.id} className="border-none shadow-sm rounded-3xl bg-white hover:shadow-md transition-all">
+                <Card key={t.id} className="arena-card hover:shadow-md transition-all">
                   <CardContent className="p-6 space-y-3">
                     <div className="flex justify-between items-start">
-                      <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-primary">
+                      <div className="w-12 h-12 rounded-lg bg-slate-100 flex items-center justify-center text-primary">
                         <UserRound size={22} />
                       </div>
                       <DropdownMenu>
@@ -384,7 +384,7 @@ export function SuppliersTable({
       </Tabs>
 
       <Dialog open={supplierModalOpen} onOpenChange={(open) => { setSupplierModalOpen(open); if (!open) setSavingSupplier(false); }}>
-        <DialogContent className="rounded-3xl max-w-md">
+        <DialogContent className="rounded-xl max-w-md">
           <DialogHeader><DialogTitle>{editingSupplier ? 'Modifica Fornitore' : 'Nuovo Fornitore'}</DialogTitle></DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1">
@@ -412,7 +412,7 @@ export function SuppliersTable({
       </Dialog>
 
       <Dialog open={technicianModalOpen} onOpenChange={setTechnicianModalOpen}>
-        <DialogContent className="rounded-3xl max-w-md">
+        <DialogContent className="rounded-xl max-w-md">
           <DialogHeader><DialogTitle>{editingTechnician ? 'Modifica Tecnico' : 'Nuovo Tecnico'}</DialogTitle></DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1">

@@ -10,7 +10,6 @@ import { Package, CheckCircle2, AlertTriangle, Clock, ArrowRight, ChevronRight, 
 import { useDashboard } from '@/hooks/useDashboard';
 import { useAuth } from '@/contexts/AuthContext';
 import { WORK_ORDER_STATUS_LABELS } from '@/lib/constants';
-import ikeIroegbuPhoto from '@/assets/ike-iroegbu.jpg';
 
 const ASSET_STATUS_COLORS = ['#10b981', '#f59e0b', '#ef4444'];
 const CATEGORY_BAR_COLOR = '#2563eb';
@@ -18,7 +17,7 @@ const LOCATION_BAR_COLOR = '#0f766e';
 
 function ChartEmptyState({ label }: { label: string }) {
   return (
-    <div className="flex h-full items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-slate-50/70 text-sm text-slate-400">
+    <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50/70 text-sm text-slate-400">
       Nessun dato disponibile per {label.toLowerCase()}
     </div>
   );
@@ -41,7 +40,7 @@ export function Dashboard() {
 
   if (error || !stats) {
     return (
-      <div className="flex h-64 flex-col items-center justify-center gap-4 rounded-3xl border border-dashed border-slate-200 bg-slate-50 text-center">
+      <div className="flex h-64 flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-slate-200 bg-slate-50 text-center">
         <AlertTriangle size={36} className="text-slate-300" />
         <div className="space-y-1">
           <p className="font-semibold text-slate-600">Errore nel caricamento della dashboard</p>
@@ -62,77 +61,55 @@ export function Dashboard() {
   ];
 
   return (
-    <div className="mx-auto max-w-[1600px] space-y-8">
+    <div className="mx-auto max-w-[1600px] space-y-6">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative flex flex-col items-center justify-between gap-6 overflow-hidden rounded-[2rem] p-8 text-white shadow-2xl shadow-primary/20 md:flex-row"
+        className="arena-card flex flex-col justify-between gap-6 p-6 md:flex-row md:items-end"
       >
-        <img
-          src={ikeIroegbuPhoto}
-          alt="Pallacanestro Varese in azione"
-          className="absolute inset-0 h-full w-full object-cover object-center [object-position:center_58%]"
-        />
-        <div className="absolute inset-0 bg-slate-950/58" />
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/82 via-slate-950/62 to-slate-950/72" />
-        <div className="relative z-10 space-y-2">
-          <h2 className="text-3xl font-bold">Benvenuto, {userName}</h2>
-          <p className="max-w-lg text-blue-100 opacity-90">
+        <div className="space-y-2">
+          <p className="arena-kicker">Itelyum Arena - Varese</p>
+          <h2 className="arena-heading text-2xl font-semibold text-slate-950">Buongiorno {userName} - tutto sotto controllo</h2>
+          <p className="max-w-2xl text-sm leading-6 text-slate-500">
             {stats.expiredAssets > 0 ? (
               <>
-                <span className="font-bold underline">{stats.expiredAssets} asset scaduti</span> richiedono attenzione immediata.
+                <span className="font-semibold text-red-700">{stats.expiredAssets} asset scaduti</span> richiedono attenzione immediata.
               </>
             ) : (
               'Tutti gli asset sono in regola. Ottimo lavoro!'
             )}
             {stats.openTickets > 0 && (
               <>
-                {' '}
-                Hai <span className="font-bold underline">{stats.openTickets} ticket aperti</span>.
+                {' '}Hai <span className="font-semibold text-slate-900">{stats.openTickets} ticket aperti</span>.
               </>
             )}
           </p>
-          <div className="flex gap-3 pt-4">
-            <Button variant="secondary" className="h-11 rounded-xl px-6 font-semibold text-primary" onClick={() => navigate('/work-orders')}>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          <Button variant="outline" className="h-9 rounded-lg border-blue-800 px-4 font-medium text-blue-800 hover:bg-blue-50" onClick={() => navigate('/work-orders')}>
               Vedi Interventi
             </Button>
-            <Button variant="ghost" className="h-11 rounded-xl px-6 font-semibold text-white hover:bg-white/10" onClick={() => navigate('/tickets')}>
+          <Button variant="outline" className="h-9 rounded-lg border-slate-200 px-4 font-medium text-slate-700 hover:bg-slate-50" onClick={() => navigate('/tickets')}>
               Gestisci Ticket
             </Button>
-            <Button variant="ghost" className="h-11 rounded-xl px-6 font-semibold text-white hover:bg-white/10" onClick={() => navigate('/reports/cda')}>
+          <Button className="h-9 rounded-lg bg-blue-800 px-4 font-medium text-white hover:bg-blue-900" onClick={() => navigate('/reports/cda')}>
               <FileOutput size={16} />
               Report
             </Button>
-          </div>
         </div>
-        {stats.expiringAssets > 0 && (
-          <div className="relative z-10 hidden min-w-[260px] rounded-3xl border border-white/20 bg-white/10 p-6 backdrop-blur-md lg:block">
-            <div className="mb-2 flex items-center justify-between">
-              <span className="text-sm font-medium">Asset in scadenza</span>
-              <Badge variant="secondary" className="border-none bg-orange-500/30 text-orange-100">
-                {stats.expiringAssets}
-              </Badge>
-            </div>
-            <p className="text-sm text-blue-100 opacity-70">Verifica prevista entro 30 giorni</p>
-            <Button variant="ghost" size="sm" className="mt-3 gap-1 px-0 text-white hover:bg-white/10" onClick={() => navigate('/schedule')}>
-              Vedi scadenzario <ChevronRight size={14} />
-            </Button>
-          </div>
-        )}
-        <div className="absolute inset-y-0 left-0 w-1/3 bg-slate-900/20" />
       </motion.div>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         {kpis.map((kpi, i) => (
           <motion.div key={kpi.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
-            <Card className="overflow-hidden rounded-3xl border-none shadow-sm shadow-slate-200/50 transition-all duration-300 hover:shadow-md">
-              <CardContent className="flex items-center justify-between p-6">
+            <Card className="arena-card overflow-hidden py-0 transition-all duration-300 hover:shadow-md">
+              <CardContent className="flex items-center justify-between p-5">
                 <div className="space-y-1">
-                  <p className="text-sm font-medium tracking-wide text-slate-500">{kpi.label}</p>
-                  <p className="text-3xl font-bold text-slate-800">{kpi.value}</p>
+                  <p className="arena-kicker">{kpi.label}</p>
+                  <p className="arena-heading text-3xl font-bold text-slate-950">{kpi.value}</p>
                 </div>
-                <div className={cn('flex h-12 w-12 items-center justify-center rounded-2xl text-white', kpi.color)}>
-                  <kpi.icon size={24} />
+                <div className={cn('flex h-10 w-10 items-center justify-center rounded-lg text-white', kpi.color)}>
+                  <kpi.icon size={20} />
                 </div>
               </CardContent>
             </Card>
@@ -140,11 +117,11 @@ export function Dashboard() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-        <Card className="space-y-8 overflow-hidden rounded-[2rem] border-none bg-white p-8 shadow-sm lg:col-span-2">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+        <Card className="arena-card space-y-6 overflow-hidden p-6 lg:col-span-2">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <CardTitle className="text-xl font-bold">Trend Manutenzioni</CardTitle>
+              <CardTitle className="arena-heading text-lg font-semibold">Trend Manutenzioni</CardTitle>
               <p className="text-xs text-slate-500">WO chiusi negli ultimi 12 mesi</p>
             </div>
           </div>
@@ -165,10 +142,10 @@ export function Dashboard() {
           </div>
         </Card>
 
-        <Card className="space-y-6 overflow-hidden rounded-[2rem] border-none bg-white p-8 shadow-sm">
+        <Card className="arena-card space-y-6 overflow-hidden p-6">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <CardTitle className="text-xl font-bold text-slate-800">Stato Asset</CardTitle>
+              <CardTitle className="arena-heading text-lg font-semibold text-slate-950">Stato Asset</CardTitle>
               <p className="text-xs text-slate-500">Distribuzione per stato operativo</p>
             </div>
             <Layers3 size={20} className="text-primary" />
@@ -191,7 +168,7 @@ export function Dashboard() {
           </div>
           <div className="grid grid-cols-1 gap-3">
             {stats.assetStatusBreakdown.map((item, index) => (
-              <div key={item.name} className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
+              <div key={item.name} className="flex items-center justify-between rounded-lg bg-slate-50 px-4 py-3">
                 <div className="flex items-center gap-3">
                   <span className="h-3 w-3 rounded-full" style={{ backgroundColor: ASSET_STATUS_COLORS[index % ASSET_STATUS_COLORS.length] }} />
                   <span className="text-sm font-medium text-slate-600">{item.name}</span>
@@ -203,11 +180,11 @@ export function Dashboard() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
-        <Card className="space-y-6 overflow-hidden rounded-[2rem] border-none bg-white p-8 shadow-sm">
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
+        <Card className="arena-card space-y-6 overflow-hidden p-6">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <CardTitle className="text-xl font-bold text-slate-800">Ticket per Categoria</CardTitle>
+              <CardTitle className="arena-heading text-lg font-semibold text-slate-950">Ticket per Categoria</CardTitle>
               <p className="text-xs text-slate-500">Le anomalie piu frequenti segnalate dai dipendenti</p>
             </div>
             <Ticket size={20} className="text-primary" />
@@ -229,10 +206,10 @@ export function Dashboard() {
           </div>
         </Card>
 
-        <Card className="space-y-6 overflow-hidden rounded-[2rem] border-none bg-white p-8 shadow-sm">
+        <Card className="arena-card space-y-6 overflow-hidden p-6">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <CardTitle className="text-xl font-bold text-slate-800">Ticket per Ubicazione</CardTitle>
+              <CardTitle className="arena-heading text-lg font-semibold text-slate-950">Ticket per Ubicazione</CardTitle>
               <p className="text-xs text-slate-500">Le aree piu colpite dai malfunzionamenti</p>
             </div>
             <MapPin size={20} className="text-primary" />
@@ -255,11 +232,11 @@ export function Dashboard() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-        <Card className="space-y-6 overflow-hidden rounded-[2rem] border-none bg-white p-8 shadow-sm lg:col-span-2">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+        <Card className="arena-card space-y-6 overflow-hidden p-6 lg:col-span-2">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <CardTitle className="text-xl font-bold text-slate-800">Interventi Attivi</CardTitle>
+              <CardTitle className="arena-heading text-lg font-semibold text-slate-950">Interventi Attivi</CardTitle>
               <p className="text-xs text-slate-500">Gli ultimi work order ancora in lavorazione</p>
             </div>
             <ClipboardList size={20} className="text-primary" />
@@ -269,11 +246,11 @@ export function Dashboard() {
               <p className="py-8 text-center text-sm text-slate-400">Nessun intervento attivo</p>
             )}
             {stats.recentWorkOrders.map((wo) => (
-              <div key={wo.id} className="group cursor-pointer rounded-3xl border border-transparent p-4 transition-all hover:border-slate-100 hover:bg-slate-50" onClick={() => navigate('/work-orders')}>
+              <div key={wo.id} className="group cursor-pointer rounded-lg border border-transparent p-4 transition-all hover:border-slate-200 hover:bg-slate-50" onClick={() => navigate('/work-orders')}>
                 <div className="flex items-start gap-3">
                   <div
                     className={cn(
-                      'flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl text-xs font-bold',
+                      'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-xs font-bold',
                       wo.priority === 'CRITICAL' || wo.priority === 'HIGH'
                         ? 'bg-red-100 text-red-600'
                         : wo.priority === 'MEDIUM'
@@ -294,50 +271,50 @@ export function Dashboard() {
               </div>
             ))}
           </div>
-          <Button variant="ghost" className="h-12 w-full gap-2 rounded-2xl font-bold text-primary hover:bg-primary/5" onClick={() => navigate('/work-orders')}>
+          <Button variant="ghost" className="h-10 w-full gap-2 rounded-lg font-semibold text-blue-800 hover:bg-blue-50" onClick={() => navigate('/work-orders')}>
             Vai alla coda lavori <ArrowRight size={16} />
           </Button>
         </Card>
 
-        <Card className="space-y-6 overflow-hidden rounded-[2rem] border-none bg-white p-8 shadow-sm">
+        <Card className="arena-card space-y-6 overflow-hidden p-6">
           <div className="space-y-1">
-            <CardTitle className="text-xl font-bold text-slate-800">Ticket Aperti</CardTitle>
+            <CardTitle className="arena-heading text-lg font-semibold text-slate-950">Ticket Aperti</CardTitle>
             <p className="text-xs text-slate-500">Controllo rapido della coda segnalazioni</p>
           </div>
-          <div className="rounded-[2rem] bg-orange-50 p-6 text-orange-900 dark:bg-orange-500/15 dark:text-orange-100">
+          <div className="rounded-xl bg-orange-50 p-6 text-orange-900 dark:bg-orange-500/15 dark:text-orange-100">
             <p className="text-sm font-medium text-orange-700 dark:text-orange-300">Segnalazioni da gestire</p>
             <p className="mt-2 text-5xl font-bold">{stats.openTickets}</p>
             <p className="mt-3 text-sm text-orange-700/80 dark:text-orange-200/80">
               Monitora le richieste in ingresso e trasforma rapidamente i ticket in work order.
             </p>
           </div>
-          <Button variant="ghost" className="h-12 w-full gap-2 rounded-2xl font-bold text-primary hover:bg-primary/5" onClick={() => navigate('/tickets')}>
+          <Button variant="ghost" className="h-10 w-full gap-2 rounded-lg font-semibold text-blue-800 hover:bg-blue-50" onClick={() => navigate('/tickets')}>
             Vai ai ticket <ArrowRight size={16} />
           </Button>
         </Card>
       </div>
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        <Button variant="secondary" className="group flex h-36 flex-col items-center justify-center gap-3 rounded-[2rem] border-none bg-primary/5 text-primary hover:bg-primary/10 dark:bg-primary/15 dark:text-blue-200 dark:hover:bg-primary/25" onClick={() => navigate('/assets')}>
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-white shadow-xl shadow-primary/20 transition-transform group-hover:scale-110 dark:shadow-slate-950/40">
+        <Button variant="secondary" className="group flex h-32 flex-col items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white text-blue-800 shadow-sm hover:bg-blue-50" onClick={() => navigate('/assets')}>
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-800 text-white shadow-lg shadow-blue-900/15 transition-transform group-hover:scale-105">
             <Package size={28} />
           </div>
           <span className="text-sm font-bold">Asset</span>
         </Button>
-        <Button variant="secondary" className="group flex h-36 flex-col items-center justify-center gap-3 rounded-[2rem] border-none bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-500/15 dark:text-emerald-200 dark:hover:bg-emerald-500/25" onClick={() => navigate('/work-orders')}>
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500 text-white shadow-xl shadow-emerald-500/20 transition-transform group-hover:scale-110 dark:shadow-slate-950/40">
+        <Button variant="secondary" className="group flex h-32 flex-col items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white text-emerald-700 shadow-sm hover:bg-emerald-50" onClick={() => navigate('/work-orders')}>
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-500 text-white shadow-lg shadow-emerald-500/15 transition-transform group-hover:scale-105">
             <ClipboardList size={28} />
           </div>
           <span className="text-sm font-bold">Work Orders</span>
         </Button>
-        <Button variant="secondary" className="group flex h-36 flex-col items-center justify-center gap-3 rounded-[2rem] border-none bg-orange-50 text-orange-700 hover:bg-orange-100 dark:bg-orange-500/15 dark:text-orange-200 dark:hover:bg-orange-500/25" onClick={() => navigate('/tickets')}>
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-500 text-white shadow-xl shadow-orange-500/20 transition-transform group-hover:scale-110 dark:shadow-slate-950/40">
+        <Button variant="secondary" className="group flex h-32 flex-col items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white text-orange-700 shadow-sm hover:bg-orange-50" onClick={() => navigate('/tickets')}>
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-orange-500 text-white shadow-lg shadow-orange-500/15 transition-transform group-hover:scale-105">
             <Ticket size={28} />
           </div>
           <span className="text-sm font-bold">Tickets</span>
         </Button>
-        <Button variant="secondary" className="group flex h-36 flex-col items-center justify-center gap-3 rounded-[2rem] border-none bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700/50 dark:text-slate-200 dark:hover:bg-slate-700/80" onClick={() => navigate('/schedule')}>
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-700 text-white shadow-xl shadow-slate-700/20 transition-transform group-hover:scale-110 dark:bg-slate-600 dark:shadow-slate-950/40">
+        <Button variant="secondary" className="group flex h-32 flex-col items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm hover:bg-slate-50" onClick={() => navigate('/schedule')}>
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-slate-700 text-white shadow-lg shadow-slate-700/15 transition-transform group-hover:scale-105">
             <Clock size={28} />
           </div>
           <span className="text-sm font-bold">Scadenzario</span>

@@ -149,7 +149,7 @@ export function RapportiniView() {
 
   if (groups.length === 0) {
     return (
-      <div className="text-center py-20 bg-white rounded-3xl text-slate-400 border border-slate-100">
+      <div className="arena-card text-center py-20 text-slate-400">
         <Archive size={48} className="mx-auto mb-4 opacity-30" />
         <p className="font-bold text-slate-600 text-lg">Nessun rapportino allegato</p>
         <p className="text-sm mt-1">I rapportini allegati ai Work Order appariranno qui</p>
@@ -162,7 +162,7 @@ export function RapportiniView() {
       {groups.map(({ asset, wos: assetWos, totalFiles }) => {
         const assetOpen = openAssets.has(asset.id);
         return (
-          <div key={asset.id} className="bg-white rounded-[1.5rem] border border-slate-100 shadow-sm overflow-hidden">
+          <div key={asset.id} className="arena-card overflow-hidden">
             {/* Asset row */}
             <button
               onClick={() => toggleAsset(asset.id)}

@@ -96,7 +96,7 @@ export function AuditLogView() {
     <div className="space-y-4">
       {!loading && entries.length > 0 && (
         <div className="flex justify-end">
-          <Button variant="outline" className="rounded-xl gap-2" onClick={() => exportToCsv(entries, profileMap)}>
+          <Button variant="outline" className="rounded-lg gap-2" onClick={() => exportToCsv(entries, profileMap)}>
             <Download size={16} />
             Esporta Excel
           </Button>
@@ -108,12 +108,12 @@ export function AuditLogView() {
           <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
         </div>
       ) : entries.length === 0 ? (
-        <div className="text-center py-20 bg-white rounded-3xl text-slate-400">
+        <div className="arena-card text-center py-20 text-slate-400">
           <ShieldCheck size={48} className="mx-auto mb-4 opacity-30" />
           <p className="font-medium">Nessuna attività registrata</p>
         </div>
       ) : (
-        <div className="bg-white rounded-[2rem] shadow-sm overflow-hidden border border-slate-100">
+        <div className="arena-card overflow-hidden">
           {entries.map((entry, idx) => {
             const cfg = ACTION_CONFIG[entry.action] ?? ACTION_CONFIG.UPDATE;
             const Icon = cfg.Icon;

@@ -165,7 +165,7 @@ export function UsersManagement() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex items-center gap-3 rounded-2xl border bg-white px-4 py-3 shadow-sm">
+        <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
           <Search className="h-5 w-5 text-slate-400" />
           <Input
             value={query}
@@ -176,18 +176,18 @@ export function UsersManagement() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Button variant="outline" className="rounded-xl gap-2" onClick={() => fetchProfiles(true)}>
+          <Button variant="outline" className="rounded-lg gap-2" onClick={() => fetchProfiles(true)}>
             <RefreshCw size={16} />
             Aggiorna
           </Button>
-          <Button className="rounded-xl gap-2 font-bold shadow-lg shadow-primary/20" onClick={openCreateModal}>
+          <Button className="rounded-lg gap-2 font-bold shadow-lg shadow-primary/20" onClick={openCreateModal}>
             <Plus size={16} />
             Nuovo Utente
           </Button>
         </div>
       </div>
 
-      <div className="rounded-3xl border bg-white shadow-sm">
+      <div className="arena-card overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent">
@@ -220,7 +220,7 @@ export function UsersManagement() {
               <TableRow key={profile.id}>
                 <TableCell className="px-6 py-4">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-700">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
                       {profile.role === 'ADMIN' ? <ShieldCheck size={18} /> : <UserCog size={18} />}
                     </div>
                     <div>
@@ -246,11 +246,11 @@ export function UsersManagement() {
                 <TableCell className="px-6 py-4 text-right">
                   <DropdownMenu>
                     <DropdownMenuTrigger className="inline-flex">
-                      <Button variant="ghost" size="icon" className="rounded-xl">
+                        <Button variant="ghost" size="icon" className="rounded-lg">
                         <MoreHorizontal size={16} />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="rounded-xl">
+                    <DropdownMenuContent align="end" className="rounded-lg">
                       <DropdownMenuItem onClick={() => openEditModal(profile)} className="gap-2">
                         <Pencil size={14} />
                         Modifica
@@ -273,9 +273,9 @@ export function UsersManagement() {
       </div>
 
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent className="max-w-2xl rounded-[32px] p-0 overflow-hidden">
+        <DialogContent className="max-w-2xl rounded-xl p-0 overflow-hidden">
           <DialogHeader className="border-b px-8 py-6">
-            <DialogTitle className="text-3xl font-bold">
+            <DialogTitle className="text-2xl font-bold">
               {editingUser ? 'Modifica Utente' : 'Nuovo Utente'}
             </DialogTitle>
           </DialogHeader>
@@ -288,7 +288,7 @@ export function UsersManagement() {
                 value={form.full_name}
                 onChange={(event) => setForm((current) => ({ ...current, full_name: event.target.value }))}
                 placeholder="Mario Rossi"
-                className="h-12 rounded-2xl"
+                className="h-12 rounded-lg"
               />
             </div>
 
@@ -300,17 +300,17 @@ export function UsersManagement() {
                 value={form.email}
                 onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))}
                 placeholder="mario.rossi@varesebasket.it"
-                className="h-12 rounded-2xl"
+                className="h-12 rounded-lg"
               />
             </div>
 
             <div className="space-y-2">
               <Label>Ruolo</Label>
               <Select value={form.role} onValueChange={(value) => setForm((current) => ({ ...current, role: value as AppRole }))}>
-                <SelectTrigger className="h-12 rounded-2xl">
+                <SelectTrigger className="h-12 rounded-lg">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="rounded-2xl">
+                <SelectContent className="rounded-lg">
                   {Object.entries(APP_ROLE_LABELS).map(([value, label]) => (
                     <SelectItem key={value} value={value}>
                       {label}
@@ -326,10 +326,10 @@ export function UsersManagement() {
                 value={form.is_active ? 'active' : 'inactive'}
                 onValueChange={(value) => setForm((current) => ({ ...current, is_active: value === 'active' }))}
               >
-                <SelectTrigger className="h-12 rounded-2xl">
+                <SelectTrigger className="h-12 rounded-lg">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="rounded-2xl">
+                <SelectContent className="rounded-lg">
                   <SelectItem value="active">Attivo</SelectItem>
                   <SelectItem value="inactive">Disattivato</SelectItem>
                 </SelectContent>
@@ -346,16 +346,16 @@ export function UsersManagement() {
                 value={form.password}
                 onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
                 placeholder={editingUser ? 'Lascia vuoto per non cambiarla' : 'Inserisci una password iniziale'}
-                className="h-12 rounded-2xl"
+                className="h-12 rounded-lg"
               />
             </div>
           </div>
 
           <DialogFooter className="border-t px-8 py-6">
-            <Button variant="outline" className="rounded-xl" onClick={() => setModalOpen(false)}>
+            <Button variant="outline" className="rounded-lg" onClick={() => setModalOpen(false)}>
               Annulla
             </Button>
-            <Button className="rounded-xl" onClick={() => void handleSave()} disabled={saving}>
+            <Button className="rounded-lg" onClick={() => void handleSave()} disabled={saving}>
               {saving ? 'Salvataggio...' : 'Salva'}
             </Button>
           </DialogFooter>

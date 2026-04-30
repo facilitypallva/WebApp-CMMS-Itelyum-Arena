@@ -12,7 +12,7 @@ import { it } from 'date-fns/locale';
 
 function MetricCard({ label, value, tone }: { label: string; value: string; tone: string }) {
   return (
-    <div className={`rounded-[1.5rem] border p-5 ${tone}`}>
+    <div className={`rounded-xl border p-5 ${tone}`}>
       <p className="text-sm font-medium text-slate-500 dark:text-slate-300">{label}</p>
       <p className="mt-2 text-4xl font-bold text-slate-900 dark:text-slate-50">{value}</p>
     </div>
@@ -33,14 +33,14 @@ function HorizontalBars({
   const max = Math.max(...items.map((item) => item.value), 1);
 
   return (
-    <Card className="rounded-[2rem] border border-slate-200 shadow-none dark:border-slate-700 dark:bg-slate-900/80">
+    <Card className="rounded-xl border border-slate-200 shadow-none dark:border-slate-700 dark:bg-slate-900/80">
       <CardContent className="space-y-5 p-8">
         <div>
           <CardTitle className="text-xl font-bold text-slate-900">{title}</CardTitle>
           <p className="mt-1 text-sm text-slate-500">{subtitle}</p>
         </div>
         {items.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-400 dark:border-slate-700 dark:bg-slate-800/60">
+          <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-400 dark:border-slate-700 dark:bg-slate-800/60">
             Nessun dato disponibile
           </div>
         ) : (
@@ -127,7 +127,7 @@ export function CdaReport() {
       </div>
 
       <div className="mx-auto max-w-6xl space-y-8 px-6 py-8 print:px-0 print:py-0">
-        <section className="report-card overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
+        <section className="report-card arena-card overflow-hidden dark:border-slate-700 dark:bg-slate-900/80">
           <div className="flex flex-col gap-8 border-b border-slate-100 px-8 py-8 md:flex-row md:items-center md:justify-between dark:border-slate-700">
             <div className="flex items-center gap-4">
               <div>
@@ -159,7 +159,7 @@ export function CdaReport() {
         </section>
 
         <section className="grid grid-cols-1 gap-8 xl:grid-cols-2">
-          <Card className="report-card rounded-[2rem] border border-slate-200 shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
+          <Card className="report-card rounded-xl border border-slate-200 shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
             <CardContent className="space-y-6 p-8">
               <div>
                 <CardTitle className="text-xl font-bold text-slate-900">Stato asset</CardTitle>
@@ -191,7 +191,7 @@ export function CdaReport() {
             </CardContent>
           </Card>
 
-          <Card className="report-card rounded-[2rem] border border-slate-200 shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
+          <Card className="report-card rounded-xl border border-slate-200 shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
             <CardContent className="space-y-6 p-8">
               <div>
                 <CardTitle className="text-xl font-bold text-slate-900">Trend manutenzioni</CardTitle>
@@ -234,20 +234,20 @@ export function CdaReport() {
         </section>
 
         <section className="grid grid-cols-1 gap-8 xl:grid-cols-[1.1fr_0.9fr]">
-          <Card className="report-card rounded-[2rem] border border-slate-200 shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
+          <Card className="report-card rounded-xl border border-slate-200 shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
             <CardContent className="space-y-6 p-8">
               <div>
                 <CardTitle className="text-xl font-bold text-slate-900">Interventi attivi</CardTitle>
                 <p className="mt-1 text-sm text-slate-500">Ultimi work order aperti o in lavorazione.</p>
               </div>
               {stats.recentWorkOrders.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-400 dark:border-slate-700 dark:bg-slate-800/60">
+                <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-400 dark:border-slate-700 dark:bg-slate-800/60">
                   Nessun intervento attivo
                 </div>
               ) : (
                 <div className="space-y-3">
                   {stats.recentWorkOrders.map((workOrder) => (
-                    <div key={workOrder.id} className="rounded-[1.5rem] border border-slate-200 p-4 dark:border-slate-700 dark:bg-slate-800/45">
+                    <div key={workOrder.id} className="rounded-xl border border-slate-200 p-4 dark:border-slate-700 dark:bg-slate-800/45">
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div className="space-y-1">
                           <div className="flex flex-wrap items-center gap-2">
@@ -274,14 +274,14 @@ export function CdaReport() {
             </CardContent>
           </Card>
 
-          <Card className="report-card rounded-[2rem] border border-slate-200 shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
+          <Card className="report-card rounded-xl border border-slate-200 shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
             <CardContent className="space-y-6 p-8">
               <div>
                 <CardTitle className="text-xl font-bold text-slate-900">Sintesi esecutiva</CardTitle>
                 <p className="mt-1 text-sm text-slate-500">Messaggi chiave per lettura rapida del report.</p>
               </div>
               <div className="space-y-4">
-                <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/60">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/60">
                   <p className="text-sm font-semibold text-slate-900">Conformità impianti</p>
                   <p className="mt-1 text-sm leading-6 text-slate-600">
                     Il parco asset registra una conformità del <span className="font-bold text-slate-900">{stats.conformanceRate}%</span>, con
@@ -289,14 +289,14 @@ export function CdaReport() {
                     <span className="font-bold text-orange-600">{stats.expiringAssets} in scadenza</span>.
                   </p>
                 </div>
-                <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/60">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/60">
                   <p className="text-sm font-semibold text-slate-900">Carico operativo</p>
                   <p className="mt-1 text-sm leading-6 text-slate-600">
                     Sono presenti <span className="font-bold text-slate-900">{stats.woInProgress} work order in corso</span> e{' '}
                     <span className="font-bold text-slate-900">{stats.openTickets} ticket aperti</span> da monitorare.
                   </p>
                 </div>
-                <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/60">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/60">
                   <p className="text-sm font-semibold text-slate-900">Aree critiche</p>
                   <p className="mt-1 text-sm leading-6 text-slate-600">
                     Le segnalazioni si concentrano soprattutto su{' '}

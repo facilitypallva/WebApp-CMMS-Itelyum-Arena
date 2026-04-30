@@ -240,32 +240,33 @@ export function Header({
   };
 
   return (
-    <header className="h-20 border-b bg-white/80 backdrop-blur-md sticky top-0 z-40 flex items-center justify-between px-8 shadow-sm shadow-slate-200/60">
+    <header className="sticky top-0 z-40 flex h-[60px] items-center justify-between border-b border-slate-200 bg-white px-6">
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" className="md:hidden">
           <Menu size={24} />
         </Button>
-        <div className="hidden md:flex flex-col">
-          <h1 className="text-xl font-bold text-slate-800">{title}</h1>
-          <p className="text-xs text-slate-500 font-medium">Itelyum Arena – Varese</p>
+        <div className="hidden md:flex items-center gap-2 text-sm">
+          <span className="font-medium text-slate-500">Operations</span>
+          <span className="text-slate-300">/</span>
+          <h1 className="arena-heading text-sm font-semibold text-slate-950">{title}</h1>
         </div>
       </div>
 
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-3">
         <div
-          className="hidden lg:flex items-center relative w-80"
+          className="relative hidden w-80 items-center lg:flex"
           onFocus={openSearchPanel}
           onBlur={closeSearchPanel}
         >
           <Search className="absolute left-3 text-slate-400" size={18} />
           <Input 
             placeholder="Cerca asset, ticket o WO..." 
-            className="pl-10 h-11 bg-slate-100/50 border-none rounded-xl focus-visible:ring-primary/20"
+            className="h-9 rounded-lg border-slate-200 bg-slate-50 pl-10 text-sm focus-visible:border-blue-800 focus-visible:ring-blue-800/15"
             value={globalSearch}
             onChange={(event) => onGlobalSearchChange?.(event.target.value)}
           />
           {shouldShowSearchPanel && (
-            <div className="absolute top-[calc(100%+0.75rem)] left-0 z-30 flex max-h-[30rem] w-[30rem] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl">
+            <div className="absolute left-0 top-[calc(100%+0.75rem)] z-30 flex max-h-[30rem] w-[30rem] flex-col overflow-hidden rounded-xl border border-slate-200 bg-white p-2 shadow-2xl">
               <div className="flex items-center justify-between px-3 py-2">
                 <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Ricerca Globale</p>
                 <Badge variant="outline" className="rounded-full border-slate-200 text-[10px] font-bold text-slate-500">
@@ -332,7 +333,7 @@ export function Header({
           <Button
             variant="ghost"
             size="icon"
-            className="h-11 w-11 rounded-xl text-slate-500 hover:bg-primary/5 hover:text-primary"
+            className="h-9 w-9 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-blue-800"
             onClick={handleThemeToggle}
             aria-label={isDarkMode ? 'Attiva modalita chiara' : 'Attiva modalita scura'}
             title={isDarkMode ? 'Modalita chiara' : 'Modalita scura'}
@@ -343,19 +344,19 @@ export function Header({
             <Button
               variant="ghost"
               size="icon"
-              className="relative h-11 w-11 rounded-xl text-slate-500 hover:bg-primary/5 hover:text-primary"
+              className="relative h-9 w-9 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-blue-800"
               onClick={() => setIsNotificationsOpen((current) => !current)}
             >
               <Bell size={20} />
               {unreadCount > 0 && (
-                <span className="absolute right-2 top-2 flex min-h-5 min-w-5 items-center justify-center rounded-full border-2 border-white bg-red-500 px-1 text-[10px] font-bold text-white">
+                <span className="absolute right-1.5 top-1.5 flex min-h-4 min-w-4 items-center justify-center rounded-full border-2 border-white bg-red-500 px-1 text-[9px] font-bold text-white">
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
             </Button>
 
             {isNotificationsOpen && (
-              <div className="absolute right-0 top-[calc(100%+0.75rem)] z-20 flex max-h-[30rem] w-[24rem] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl">
+              <div className="absolute right-0 top-[calc(100%+0.75rem)] z-20 flex max-h-[30rem] w-[24rem] flex-col overflow-hidden rounded-xl border border-slate-200 bg-white p-2 shadow-2xl">
                 <div className="flex items-center justify-between px-3 py-2">
                   <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Notifiche</p>
                   <Badge variant="outline" className="rounded-full border-slate-200 text-[10px] font-bold text-slate-500">
@@ -397,7 +398,7 @@ export function Header({
               </div>
             )}
           </div>
-          <Button variant="outline" className="hidden sm:flex border-slate-200 text-slate-600 hover:bg-slate-50 rounded-xl h-11 px-6">
+          <Button variant="outline" className="hidden h-9 rounded-lg border-slate-200 px-4 text-slate-600 hover:bg-slate-50 sm:flex">
             Help Center
           </Button>
         </div>

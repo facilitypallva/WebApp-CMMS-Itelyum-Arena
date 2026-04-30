@@ -423,9 +423,9 @@ export function ScheduleView() {
           ['IN LAVORAZIONE', 'bg-blue-500', Hammer],
           ['IN REGOLA', 'bg-emerald-500', CheckCircle2],
         ] as const).map(([status, color, Icon]) => (
-          <Card key={status} className="border-none shadow-sm rounded-3xl">
+          <Card key={status} className="arena-card">
             <CardContent className="p-5 flex items-center gap-4">
-              <div className={cn('w-11 h-11 rounded-2xl flex items-center justify-center text-white', color)}>
+              <div className={cn('w-11 h-11 rounded-lg flex items-center justify-center text-white', color)}>
                 <Icon size={20} />
               </div>
               <div>
@@ -437,7 +437,7 @@ export function ScheduleView() {
         ))}
       </div>
 
-      <div className="rounded-[2rem] border border-slate-100 bg-white px-6 py-5 shadow-sm">
+      <div className="arena-card px-6 py-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-sm font-bold text-slate-800">Vista planner</p>
@@ -448,7 +448,7 @@ export function ScheduleView() {
           <div className="w-full max-w-sm space-y-1.5">
             <Label>Filtro fornitore</Label>
             <Select value={supplierFilter} onValueChange={setSupplierFilter}>
-              <SelectTrigger className="rounded-xl">
+              <SelectTrigger className="rounded-lg">
                 <span className="truncate text-left">
                   {supplierFilter === ALL_SUPPLIERS_VALUE
                     ? 'Tutti i fornitori'
@@ -457,7 +457,7 @@ export function ScheduleView() {
                       : suppliers.find((supplier) => supplier.id === supplierFilter)?.name ?? 'Tutti i fornitori'}
                 </span>
               </SelectTrigger>
-              <SelectContent className="rounded-xl">
+              <SelectContent className="rounded-lg">
                 <SelectItem value={ALL_SUPPLIERS_VALUE}>Tutti i fornitori</SelectItem>
                 <SelectItem value={NO_SUPPLIER_VALUE}>Senza fornitore</SelectItem>
                 {suppliers.map((supplier) => (
@@ -487,7 +487,7 @@ export function ScheduleView() {
       </div>
 
       <div className={cn('grid gap-6', selectedDay ? 'xl:grid-cols-[22rem_minmax(0,1fr)]' : 'grid-cols-1')}>
-        <Card className="border-none shadow-sm rounded-[2rem] overflow-hidden">
+        <Card className="arena-card overflow-hidden">
           <CardContent className="p-0">
             <div className="border-b border-slate-100 px-6 py-5">
               <div className="flex items-center gap-2">
@@ -502,11 +502,11 @@ export function ScheduleView() {
             </div>
             <div className="max-h-[38rem] overflow-y-auto px-4 py-4">
               {!selectedDay ? (
-                <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-400">
+                <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-400">
                   Nessun giorno selezionato
                 </div>
               ) : selectedEvents.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-400">
+                <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-400">
                   Tutte le scadenze di questo giorno sono già state pianificate.
                 </div>
               ) : (
@@ -527,7 +527,7 @@ export function ScheduleView() {
                           setDragOverDay(null);
                         }}
                         className={cn(
-                          'w-full rounded-3xl border px-4 py-4 text-left transition-all',
+                          'w-full rounded-xl border px-4 py-4 text-left transition-all',
                           draggedEvent?.asset.id === ev.asset.id ? 'border-primary/40 bg-primary/5 opacity-70' : 'border-slate-200 bg-white hover:border-primary/30 hover:bg-slate-50'
                         )}
                       >
@@ -574,7 +574,7 @@ export function ScheduleView() {
         </Card>
 
       {/* Calendar */}
-      <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+      <div className="arena-card overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-8 py-5 border-b border-slate-100">
           <button onClick={prevMonth} className="p-2 rounded-xl hover:bg-slate-100 transition-colors text-slate-500">
@@ -717,7 +717,7 @@ export function ScheduleView() {
 
       {/* Detail panel */}
       {selectedDay && (selectedPlannedEvents.length > 0 || selectedInProgressEvents.length > 0) && (
-        <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+        <div className="arena-card overflow-hidden">
           <div className="px-8 py-5 border-b border-slate-50 flex items-center justify-between">
             <h3 className="font-bold text-slate-800 text-lg capitalize">
               {format(new Date(`${selectedDay}T12:00:00`), 'd MMMM yyyy', { locale: it })}
@@ -881,7 +881,7 @@ export function ScheduleView() {
 
       {/* WO creation dialog */}
       <Dialog open={woModalOpen} onOpenChange={setWoModalOpen}>
-        <DialogContent className="sm:max-w-2xl rounded-[2rem] p-0 overflow-hidden">
+        <DialogContent className="sm:max-w-2xl rounded-xl p-0 overflow-hidden">
           <DialogHeader className="border-b px-8 py-6">
             <DialogTitle className="text-2xl font-bold">Avvia manutenzione</DialogTitle>
             {woAsset && (() => {
@@ -911,7 +911,7 @@ export function ScheduleView() {
               <Textarea
                 value={woForm.description}
                 onChange={(e) => setWoForm((f) => ({ ...f, description: e.target.value }))}
-                className="rounded-2xl min-h-20"
+                className="rounded-lg min-h-20"
                 rows={3}
               />
             </div>
@@ -1005,7 +1005,7 @@ export function ScheduleView() {
               <Textarea
                 value={woForm.notes}
                 onChange={(e) => setWoForm((f) => ({ ...f, notes: e.target.value }))}
-                className="rounded-2xl min-h-17.5"
+                className="rounded-lg min-h-17.5"
                 rows={2}
                 placeholder="Annotazioni aggiuntive..."
               />
@@ -1033,11 +1033,11 @@ export function ScheduleView() {
           }
         }}
       >
-        <DialogContent className="sm:max-w-lg rounded-[2rem] p-0 overflow-hidden">
+        <DialogContent className="sm:max-w-lg rounded-xl p-0 overflow-hidden">
           <DialogHeader className="border-b px-8 py-6">
             <DialogTitle className="text-2xl font-bold">Pianifica intervento</DialogTitle>
             {planningEvent && planningTargetDay && (
-              <div className="mt-4 rounded-3xl border border-slate-200 bg-slate-50 px-4 py-4">
+              <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-4">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="rounded-full bg-slate-900 px-3 py-1 text-[11px] font-bold text-white">
                     Asset
@@ -1121,7 +1121,7 @@ export function ScheduleView() {
           }
         }}
       >
-        <DialogContent className="sm:max-w-md rounded-[2rem] p-0 overflow-hidden">
+        <DialogContent className="sm:max-w-md rounded-xl p-0 overflow-hidden">
           <DialogHeader className="border-b px-8 py-6">
             <DialogTitle className="text-2xl font-bold">Aggiorna fornitore</DialogTitle>
           </DialogHeader>
