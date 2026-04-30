@@ -11,6 +11,11 @@ export default async function handler(req: any, res: any) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
+  if (process.env.EMAIL_ENABLED !== 'true') {
+    console.log('[EMAIL_DISABLED] Notification skipped', { assetName, expiryDate, recipientEmail });
+    return res.status(200).json({ skipped: true, reason: 'EMAIL_DISABLED' });
+  }
+
   const resend = new Resend(process.env.RESEND_API_KEY);
 
   try {

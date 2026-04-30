@@ -8,3 +8,20 @@ coverage/
 !.env.example
 .vercel
 .env*.local
+
+# dump files - never commit
+schema_prod.sql
+*_patched.sql
+*.dump
+*.sql.bak
+
+# local setup notes - never commit
+STAGING_SETUP_PROGRESS.md
+
+# vercel env snapshots - never commit
+vercel_env_snapshot_*.txt
+.env.production.snapshot
+.env.*.snapshot
+
+# Supabase local CLI state - never commit
+supabase/.temp/
