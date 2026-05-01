@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight, AlertTriangle, Clock, CheckCircle2, Wrench, Hammer, MapPin, FolderOpen, CalendarDays, GripVertical, Truck, X } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
@@ -94,6 +94,53 @@ interface WoFormState {
   notes: string;
 }
 
+function buildCalendarData(assets: Asset[], workOrders: WorkOrder[], targetMonth: Date) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const monthStart = startOfMonth(targetMonth);
+  const monthEnd = endOfMonth(targetMonth);
+  const calStart = startOfWeek(monthStart, { weekStartsOn: 1 });
+  const calEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
+  const days: Date[] = [];
+  let d = calStart;
+  while (d <= calEnd) { days.push(d); d = addDays(d, 1); }
+  const map = new Map<string, CalendarEvent[]>();
+  const plannedMap = new Map<string, CalendarEvent[]>();
+  const inProgressMap = new Map<string, CalendarEvent[]>();
+  const assetById = new Map(assets.map((a) => [a.id, a]));
+  const activeWOByAssetId = new Map<string, WorkOrder>(
+    workOrders.filter((wo) => ACTIVE_WORK_ORDER_STATUSES.has(wo.status)).map((wo) => [wo.asset_id, wo] as const)
+  );
+  for (const asset of assets) {
+    if (!asset.last_verification || !asset.verification_frequency_days) continue;
+    const activeWO = activeWOByAssetId.get(asset.id);
+    if (activeWO?.planned_date) {
+      const key = activeWO.planned_date.slice(0, 10);
+      const daysFromToday = differenceInDays(new Date(`${key}T12:00:00`), today);
+      const targetMap = activeWO.status === 'IN_PROGRESS' ? inProgressMap : plannedMap;
+      if (!targetMap.has(key)) targetMap.set(key, []);
+      targetMap.get(key)!.push({
+        asset: assetById.get(activeWO.asset_id) ?? asset,
+        daysFromToday, dayKey: key, workOrderId: activeWO.id, workOrderCode: activeWO.code,
+        visualStatus: activeWO.status === 'IN_PROGRESS' ? 'IN_PROGRESS' : 'PLANNED',
+      });
+      continue;
+    }
+    for (const date of getOccurrencesInRange(asset.last_verification, asset.verification_frequency_days, calStart, calEnd)) {
+      const key = format(date, 'yyyy-MM-dd');
+      const daysFromToday = differenceInDays(date, today);
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push({ asset, daysFromToday, dayKey: key, visualStatus: 'DUE' });
+    }
+  }
+  map.forEach((evs) => evs.sort((a, b) => a.daysFromToday - b.daysFromToday));
+  plannedMap.forEach((evs) => evs.sort((a, b) => a.asset.name.localeCompare(b.asset.name, 'it')));
+  inProgressMap.forEach((evs) => evs.sort((a, b) => a.asset.name.localeCompare(b.asset.name, 'it')));
+  return { calDays: days, eventsByDay: map, plannedByDay: plannedMap, inProgressByDay: inProgressMap };
+}
+
+const PLANNING_MONTHS: Date[] = Array.from({ length: 12 }, (_, i) => addMonths(startOfMonth(new Date()), i));
+
 export function ScheduleView() {
   const { assets, loading, updateAsset } = useAssets();
   const { createWorkOrder, updateWorkOrder, workOrders } = useWorkOrders();
@@ -128,6 +175,9 @@ export function ScheduleView() {
   const [editingSupplierWorkOrderId, setEditingSupplierWorkOrderId] = useState<string | null>(null);
   const [editingSupplierValue, setEditingSupplierValue] = useState(NO_SUPPLIER_VALUE);
   const [savingSupplierChange, setSavingSupplierChange] = useState(false);
+  const [planningAsset, setPlanningAsset] = useState<Asset | null>(null);
+  const [planningRightMode, setPlanningRightMode] = useState<'months' | 'calendar' | null>(null);
+  const [planningCalendarMonth, setPlanningCalendarMonth] = useState<Date>(() => startOfMonth(new Date()));
 
   const selectedTechnician = technicians.find((t) => t.id === woForm.technician_id) ?? null;
   const selectedPlanningSupplier = suppliers.find((supplier) => supplier.id === planningSupplierId) ?? null;
@@ -149,80 +199,15 @@ export function ScheduleView() {
     }
   }, [selectedTechnician]);
 
-  const { calDays, eventsByDay, plannedByDay, inProgressByDay } = useMemo(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+  const { calDays, eventsByDay, plannedByDay, inProgressByDay } = useMemo(
+    () => buildCalendarData(assets, workOrders, currentMonth),
+    [assets, workOrders, currentMonth],
+  );
 
-    const monthStart = startOfMonth(currentMonth);
-    const monthEnd = endOfMonth(currentMonth);
-    const calStart = startOfWeek(monthStart, { weekStartsOn: 1 });
-    const calEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
-
-    const days: Date[] = [];
-    let d = calStart;
-    while (d <= calEnd) {
-      days.push(d);
-      d = addDays(d, 1);
-    }
-
-    const map = new Map<string, CalendarEvent[]>();
-    const plannedMap = new Map<string, CalendarEvent[]>();
-    const inProgressMap = new Map<string, CalendarEvent[]>();
-    const assetById = new Map(assets.map((asset) => [asset.id, asset]));
-    const activeWorkOrdersByAssetId = new Map<string, WorkOrder>(
-      workOrders
-        .filter((workOrder) => ACTIVE_WORK_ORDER_STATUSES.has(workOrder.status))
-        .map((workOrder) => [workOrder.asset_id, workOrder] as const)
-    );
-
-    for (const asset of assets) {
-      if (!asset.last_verification || !asset.verification_frequency_days) continue;
-
-      const activeWorkOrder = activeWorkOrdersByAssetId.get(asset.id);
-      if (activeWorkOrder?.planned_date) {
-        const plannedKey = activeWorkOrder.planned_date.slice(0, 10);
-        const plannedDate = new Date(`${plannedKey}T12:00:00`);
-        const daysFromToday = differenceInDays(plannedDate, today);
-        const normalizedAsset = assetById.get(activeWorkOrder.asset_id) ?? asset;
-        const targetMap = activeWorkOrder.status === 'IN_PROGRESS' ? inProgressMap : plannedMap;
-
-        if (!targetMap.has(plannedKey)) targetMap.set(plannedKey, []);
-        targetMap.get(plannedKey)!.push({
-          asset: normalizedAsset,
-          daysFromToday,
-          dayKey: plannedKey,
-          workOrderId: activeWorkOrder.id,
-          workOrderCode: activeWorkOrder.code,
-          visualStatus: activeWorkOrder.status === 'IN_PROGRESS' ? 'IN_PROGRESS' : 'PLANNED',
-        });
-        continue;
-      }
-
-      const occurrences = getOccurrencesInRange(
-        asset.last_verification,
-        asset.verification_frequency_days,
-        calStart,
-        calEnd,
-      );
-      for (const date of occurrences) {
-        const key = format(date, 'yyyy-MM-dd');
-        const daysFromToday = differenceInDays(date, today);
-        if (!map.has(key)) map.set(key, []);
-        map.get(key)!.push({
-          asset,
-          daysFromToday,
-          dayKey: key,
-          visualStatus: 'DUE',
-        });
-      }
-    }
-
-    map.forEach((events) => events.sort((a, b) => a.daysFromToday - b.daysFromToday));
-    plannedMap.forEach((events) => events.sort((a, b) => a.asset.name.localeCompare(b.asset.name, 'it')));
-    inProgressMap.forEach((events) => events.sort((a, b) => a.asset.name.localeCompare(b.asset.name, 'it')));
-
-    return { calDays: days, eventsByDay: map, plannedByDay: plannedMap, inProgressByDay: inProgressMap };
-  }, [assets, currentMonth, workOrders]);
+  const { calDays: planCalDays, eventsByDay: planEventsByDay, plannedByDay: planPlannedByDay, inProgressByDay: planInProgressByDay } = useMemo(
+    () => buildCalendarData(assets, workOrders, planningCalendarMonth),
+    [assets, workOrders, planningCalendarMonth],
+  );
 
   const counts = useMemo(() => ({
     SCADUTO: assets.filter((a) => a.status === 'SCADUTO').length,
@@ -415,98 +400,8 @@ export function ScheduleView() {
   };
 
   return (
-    <div className="space-y-4">
-      <div className={cn('grid h-[calc(100dvh-10.5rem)] min-h-[32rem] min-w-0 gap-4', selectedDay ? 'xl:grid-cols-[22rem_minmax(0,1fr)]' : 'grid-cols-1')}>
-        {selectedDay && (
-        <Card className="arena-card overflow-hidden">
-          <CardContent className="p-0">
-            <div className="border-b border-slate-100 px-6 py-5">
-              <div className="flex items-center gap-2">
-                <CalendarDays size={18} className="text-primary" />
-                <h3 className="text-lg font-bold text-slate-800">Backlog scadenze</h3>
-              </div>
-              <p className="mt-1 text-sm text-slate-500">
-                {selectedDay
-                  ? `Asset in scadenza il ${format(new Date(`${selectedDay}T12:00:00`), 'd MMMM yyyy', { locale: it })}`
-                  : 'Seleziona un giorno con scadenze per trascinare gli asset nel calendario.'}
-              </p>
-            </div>
-            <div className="max-h-[38rem] overflow-y-auto px-4 py-4">
-              {!selectedDay ? (
-                <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-400">
-                  Nessun giorno selezionato
-                </div>
-              ) : selectedEvents.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-400">
-                  Tutte le scadenze di questo giorno sono già state pianificate.
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {selectedEvents.map((ev) => {
-                    const locationRaw = ev.asset.location?.name?.replace(/^00_/, '').toUpperCase()
-                      ?? parseAssetSerial(ev.asset.serial_number)?.locationCode
-                      ?? null;
-
-                    return (
-                      <button
-                        key={`backlog-${ev.asset.id}`}
-                        type="button"
-                        draggable
-                        onDragStart={() => handleEventDragStart(ev)}
-                        onDragEnd={() => {
-                          setDraggedEvent(null);
-                          setDragOverDay(null);
-                        }}
-                        className={cn(
-                          'w-full rounded-xl border px-4 py-4 text-left transition-all',
-                          draggedEvent?.asset.id === ev.asset.id ? 'border-primary/40 bg-primary/5 opacity-70' : 'border-slate-200 bg-white hover:border-primary/30 hover:bg-slate-50'
-                        )}
-                      >
-                        <div className="flex items-start gap-3">
-                          <div className="mt-0.5 rounded-xl bg-slate-100 p-2 text-slate-500">
-                            <GripVertical size={14} />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <p className="truncate text-sm font-bold text-slate-800">{ev.asset.name}</p>
-                              {ev.asset.serial_number && (
-                                <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500">
-                                  {ev.asset.serial_number}
-                                </span>
-                              )}
-                            </div>
-                            <p className="mt-1 text-xs text-slate-500">
-                              {ev.asset.category} · {ev.asset.brand} {ev.asset.model}
-                            </p>
-                            <div className="mt-2 flex flex-wrap items-center gap-2">
-                              <span className={cn('rounded-full px-2.5 py-1 text-[10px] font-bold', eventColor(ev.daysFromToday))}>
-                                {ev.daysFromToday < 0
-                                  ? `Scaduto da ${Math.abs(ev.daysFromToday)}g`
-                                  : ev.daysFromToday === 0
-                                    ? 'Scade oggi'
-                                    : `Tra ${ev.daysFromToday}g`}
-                              </span>
-                              {locationRaw && (
-                                <span className="flex items-center gap-1 text-[11px] text-slate-400">
-                                  <MapPin size={10} />
-                                  {locationRaw}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-        )}
-
-      {/* Calendar */}
-      <div className="arena-card flex min-h-0 flex-col overflow-hidden">
+    <div>
+      <div className="arena-card flex h-[calc(100dvh-10.5rem)] min-h-[32rem] flex-col overflow-hidden">
         {/* Header */}
         <div className="flex items-center gap-4 border-b border-slate-100 px-5 py-3 lg:px-6">
           <button onClick={prevMonth} className="h-10 w-10 rounded-xl text-slate-500 transition-colors hover:bg-slate-100">
@@ -677,171 +572,400 @@ export function ScheduleView() {
           </div>
         )}
       </div>
-      </div>
 
-      {/* Detail panel */}
-      {selectedDay && (selectedPlannedEvents.length > 0 || selectedInProgressEvents.length > 0) && (
-        <div className="arena-card overflow-hidden">
-          <div className="px-8 py-5 border-b border-slate-50 flex items-center justify-between">
-            <h3 className="font-bold text-slate-800 text-lg capitalize">
-              {format(new Date(`${selectedDay}T12:00:00`), 'd MMMM yyyy', { locale: it })}
-            </h3>
-            <span className="text-sm text-slate-400 font-medium">
-              {selectedPlannedEvents.length} {selectedPlannedEvents.length === 1 ? 'intervento pianificato' : 'interventi pianificati'}
-            </span>
-          </div>
-          {selectedPlannedEvents.length > 0 && (
-            <div className="divide-y divide-slate-50">
-              {selectedPlannedEvents.map((ev) => {
-              const locationRaw = ev.asset.location?.name?.replace(/^00_/, '').toUpperCase()
-                ?? parseAssetSerial(ev.asset.serial_number)?.locationCode
-                ?? null;
-              return (
-              <div
-                key={ev.asset.id}
-                draggable={Boolean(ev.workOrderId)}
-                onDragStart={() => handleEventDragStart(ev)}
-                onDragEnd={() => {
-                  setDraggedEvent(null);
-                  setDragOverDay(null);
+      {/* Day drawer */}
+      <Sheet
+        open={selectedDay !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedDay(null);
+            setPlanningAsset(null);
+            setPlanningRightMode(null);
+          }
+        }}
+      >
+        <SheetContent
+          side="left"
+          showCloseButton={false}
+          style={{ width: 'auto', maxWidth: 'none' }}
+          className="flex flex-row gap-0 p-0 data-[side=left]:w-auto data-[side=left]:sm:max-w-none"
+        >
+          {/* Left panel */}
+          <div className="flex w-[370px] shrink-0 flex-col">
+            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+              <div>
+                <h3 className="font-bold text-slate-800">
+                  {selectedDay ? format(new Date(`${selectedDay}T12:00:00`), 'd MMMM yyyy', { locale: it }) : ''}
+                </h3>
+                <p className="mt-0.5 text-xs text-slate-400">Scadenze del giorno</p>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => {
+                  setSelectedDay(null);
+                  setPlanningAsset(null);
+                  setPlanningRightMode(null);
                 }}
-                className={cn(
-                  'flex items-center gap-4 px-8 py-5 transition-colors',
-                  ev.workOrderId ? 'cursor-grab hover:bg-slate-50/50 active:cursor-grabbing' : 'hover:bg-slate-50/50'
-                )}
               >
-                <div className="h-2.5 w-2.5 shrink-0 rounded-full bg-blue-500" />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="font-bold text-slate-800 truncate">{ev.asset.name}</p>
-                    {ev.asset.serial_number && (
-                      <span className="text-[10px] font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md shrink-0">
-                        {ev.asset.serial_number}
-                      </span>
-                    )}
-                          {ev.workOrderCode && (
-                            <span className="shrink-0 rounded-md bg-slate-900 px-2 py-0.5 text-[10px] font-bold text-white">
-                              {ev.workOrderCode}
-                            </span>
+                <X size={16} />
+              </Button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto py-3">
+              {selectedEvents.length > 0 && (
+                <div className="mb-2">
+                  <p className="px-5 pb-1 pt-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    Backlog scadenze
+                  </p>
+                  <div className="space-y-1 px-3">
+                    {selectedEvents.map((ev) => {
+                      const loc = ev.asset.location?.name?.replace(/^00_/, '').toUpperCase()
+                        ?? parseAssetSerial(ev.asset.serial_number)?.locationCode
+                        ?? null;
+                      return (
+                        <div
+                          key={`bl-${ev.asset.id}`}
+                          draggable
+                          onDragStart={() => handleEventDragStart(ev)}
+                          onDragEnd={() => { setDraggedEvent(null); setDragOverDay(null); }}
+                          className={cn(
+                            'flex items-center gap-2 rounded-xl border px-3 py-3 transition-all',
+                            draggedEvent?.asset.id === ev.asset.id
+                              ? 'border-primary/40 bg-primary/5 opacity-70'
+                              : 'border-slate-200 bg-white hover:border-primary/30 hover:bg-slate-50',
                           )}
-                          {workOrders.find((workOrder) => workOrder.id === ev.workOrderId)?.supplier?.name && (
-                            <span className="shrink-0 rounded-full bg-indigo-50 px-2.5 py-1 text-[10px] font-bold text-indigo-700">
-                              {getEventSupplierName(ev)}
-                            </span>
-                          )}
+                        >
+                          <GripVertical size={14} className="shrink-0 text-slate-300" />
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-bold text-slate-800">{ev.asset.name}</p>
+                            <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+                              <span className={cn('rounded-full px-2 py-0.5 text-[10px] font-bold', eventColor(ev.daysFromToday))}>
+                                {ev.daysFromToday < 0
+                                  ? `Scaduto da ${Math.abs(ev.daysFromToday)}g`
+                                  : ev.daysFromToday === 0
+                                    ? 'Scade oggi'
+                                    : `Tra ${ev.daysFromToday}g`}
+                              </span>
+                              {loc && (
+                                <span className="flex items-center gap-1 text-[11px] text-slate-400">
+                                  <MapPin size={9} />
+                                  {loc}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setPlanningAsset(ev.asset);
+                              setPlanningRightMode('months');
+                            }}
+                            className="shrink-0 rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-primary"
+                            title="Pianifica"
+                          >
+                            <CalendarDays size={16} />
+                          </button>
                         </div>
-                  <div className="flex items-center gap-3 mt-0.5">
-                    <span className="text-xs text-slate-500">{ev.asset.category} · {ev.asset.brand} {ev.asset.model} · ogni {ev.asset.verification_frequency_days}gg</span>
-                    {locationRaw && (
-                      <span className="flex items-center gap-1 text-xs text-slate-400">
-                        <MapPin size={10} />
-                        {locationRaw}
-                      </span>
-                    )}
+                      );
+                    })}
                   </div>
                 </div>
-                <span className="shrink-0 rounded-full bg-indigo-100 px-3 py-1.5 text-xs font-bold text-indigo-700">
-                  Pianificato
-                </span>
-                {ev.workOrderId && (
+              )}
+
+              {selectedPlannedEvents.length > 0 && (
+                <div className="mb-2">
+                  <p className="px-5 pb-1 pt-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    Pianificati
+                  </p>
+                  <div className="space-y-1 px-3">
+                    {selectedPlannedEvents.map((ev) => {
+                      const loc = ev.asset.location?.name?.replace(/^00_/, '').toUpperCase()
+                        ?? parseAssetSerial(ev.asset.serial_number)?.locationCode
+                        ?? null;
+                      return (
+                        <div
+                          key={`pl-${ev.asset.id}`}
+                          draggable={Boolean(ev.workOrderId)}
+                          onDragStart={() => handleEventDragStart(ev)}
+                          onDragEnd={() => { setDraggedEvent(null); setDragOverDay(null); }}
+                          className={cn(
+                            'flex items-center gap-2 rounded-xl border px-3 py-3 transition-all',
+                            ev.workOrderId
+                              ? draggedEvent?.asset.id === ev.asset.id
+                                ? 'border-indigo-200 bg-indigo-50 opacity-70 cursor-grab'
+                                : 'cursor-grab border-indigo-100 bg-indigo-50/50 hover:border-indigo-200'
+                              : 'border-slate-200 bg-white',
+                          )}
+                        >
+                          {ev.workOrderId && <GripVertical size={14} className="shrink-0 text-indigo-300" />}
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-bold text-slate-800">{ev.asset.name}</p>
+                            <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+                              {ev.workOrderCode && (
+                                <span className="rounded-md bg-slate-900 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                                  {ev.workOrderCode}
+                                </span>
+                              )}
+                              {getEventSupplierName(ev) && (
+                                <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-bold text-indigo-700">
+                                  {getEventSupplierName(ev)}
+                                </span>
+                              )}
+                              {loc && (
+                                <span className="flex items-center gap-1 text-[11px] text-slate-400">
+                                  <MapPin size={9} />
+                                  {loc}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex shrink-0 items-center gap-1">
+                            {ev.workOrderId && (
+                              <button
+                                type="button"
+                                onClick={() => openSupplierEditor(ev)}
+                                className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+                                title="Fornitore"
+                              >
+                                <Truck size={14} />
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => openRelatedWorkOrder(ev.asset, ev.workOrderId)}
+                              className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+                              title="Apri WO"
+                            >
+                              <FolderOpen size={14} />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {selectedInProgressEvents.length > 0 && (
+                <div className="mb-2">
+                  <p className="px-5 pb-1 pt-2 text-[10px] font-bold uppercase tracking-wider text-sky-500">
+                    In lavorazione
+                  </p>
+                  <div className="space-y-1 px-3">
+                    {selectedInProgressEvents.map((ev) => {
+                      const loc = ev.asset.location?.name?.replace(/^00_/, '').toUpperCase()
+                        ?? parseAssetSerial(ev.asset.serial_number)?.locationCode
+                        ?? null;
+                      return (
+                        <div
+                          key={`ip-${ev.asset.id}`}
+                          className="flex items-center gap-2 rounded-xl border border-sky-100 bg-sky-50/50 px-3 py-3"
+                        >
+                          <div className="h-2 w-2 shrink-0 rounded-full bg-sky-400" />
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-bold text-slate-800">{ev.asset.name}</p>
+                            <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+                              {ev.workOrderCode && (
+                                <span className="rounded-md bg-slate-900 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                                  {ev.workOrderCode}
+                                </span>
+                              )}
+                              {loc && (
+                                <span className="flex items-center gap-1 text-[11px] text-slate-400">
+                                  <MapPin size={9} />
+                                  {loc}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => openRelatedWorkOrder(ev.asset, ev.workOrderId)}
+                            className="shrink-0 rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+                            title="Apri WO"
+                          >
+                            <FolderOpen size={14} />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {selectedEvents.length === 0 && selectedPlannedEvents.length === 0 && selectedInProgressEvents.length === 0 && (
+                <div className="px-5 py-8 text-center text-sm text-slate-400">
+                  Nessuna scadenza per questo giorno.
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Right panel */}
+          <div
+            className={cn(
+              'flex flex-col overflow-hidden border-l border-slate-100 transition-[width] duration-300',
+              planningRightMode ? 'w-[620px]' : 'w-0',
+            )}
+          >
+            {planningAsset && (
+              <>
+                <div className="flex items-center gap-3 border-b border-slate-100 px-5 py-4">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Pianifica</p>
+                    <p className="truncate font-bold text-slate-800">{planningAsset.name}</p>
+                  </div>
                   <button
                     type="button"
-                    onDragStart={() => handleEventDragStart(ev)}
-                    onDragEnd={() => {
-                      setDraggedEvent(null);
-                      setDragOverDay(null);
-                    }}
-                    draggable
-                    className="hidden shrink-0 items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-slate-500 lg:inline-flex"
+                    onClick={() => { setPlanningAsset(null); setPlanningRightMode(null); }}
+                    className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100"
                   >
-                    <GripVertical size={11} />
-                    Trascina
+                    <X size={16} />
                   </button>
-                )}
-                {ev.workOrderId && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="rounded-xl gap-1.5 shrink-0 border-slate-200"
-                    onClick={() => openSupplierEditor(ev)}
-                  >
-                    <Truck size={13} />
-                    Fornitore
-                  </Button>
-                )}
-                <Button size="sm" variant="outline" className="rounded-xl gap-1.5 shrink-0" onClick={() => openRelatedWorkOrder(ev.asset, ev.workOrderId)}>
-                  <FolderOpen size={13} />
-                  Apri WO
-                </Button>
-              </div>
-              );
-              })}
-            </div>
-          )}
-
-          {selectedInProgressEvents.length > 0 && (
-            <div className={cn(selectedPlannedEvents.length > 0 && 'border-t border-slate-100')}>
-              <div className="flex items-center justify-between bg-sky-50/80 px-8 py-4">
-                <div className="flex items-center gap-2">
-                  <Hammer size={16} className="text-sky-600" />
-                  <p className="text-sm font-bold text-sky-800">Gia presi in carico</p>
                 </div>
-                <span className="rounded-full bg-sky-100 px-3 py-1 text-xs font-bold text-sky-700">
-                  {selectedInProgressEvents.length}
-                </span>
-              </div>
-              <div className="divide-y divide-slate-50">
-                {selectedInProgressEvents.map((ev) => {
-                  const locationRaw = ev.asset.location?.name?.replace(/^00_/, '').toUpperCase()
-                    ?? parseAssetSerial(ev.asset.serial_number)?.locationCode
-                    ?? null;
-                  return (
-                    <div key={`in-progress-${ev.asset.id}`} className="flex items-center gap-4 px-8 py-5 bg-sky-50/30">
-                      <div className="h-2.5 w-2.5 shrink-0 rounded-full bg-sky-500" />
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <p className="truncate font-bold text-slate-800">{ev.asset.name}</p>
-                          {ev.asset.serial_number && (
-                            <span className="shrink-0 rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500">
-                              {ev.asset.serial_number}
-                            </span>
-                          )}
-                          {ev.workOrderCode && (
-                            <span className="shrink-0 rounded-md bg-slate-900 px-2 py-0.5 text-[10px] font-bold text-white">
-                              {ev.workOrderCode}
-                            </span>
-                          )}
-                          <span className="shrink-0 rounded-full bg-sky-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-sky-700">
-                            In lavorazione
-                          </span>
-                        </div>
-                        <div className="mt-0.5 flex items-center gap-3">
-                          <span className="text-xs text-slate-500">{ev.asset.category} · {ev.asset.brand} {ev.asset.model}</span>
-                          {locationRaw && (
-                            <span className="flex items-center gap-1 text-xs text-slate-400">
-                              <MapPin size={10} />
-                              {locationRaw}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="shrink-0 gap-1.5 rounded-xl border-sky-200 bg-white text-sky-700 hover:bg-sky-50 hover:text-sky-800"
-                        onClick={() => openRelatedWorkOrder(ev.asset, ev.workOrderId)}
-                      >
-                        <FolderOpen size={13} />
-                        Apri WO
-                      </Button>
+
+                {planningRightMode === 'months' && (
+                  <div className="flex-1 overflow-y-auto p-5">
+                    <p className="mb-4 text-sm font-bold text-slate-700">Seleziona un mese</p>
+                    <div className="grid grid-cols-3 gap-3">
+                      {PLANNING_MONTHS.map((month) => (
+                        <button
+                          key={month.toISOString()}
+                          type="button"
+                          onClick={() => {
+                            setPlanningCalendarMonth(month);
+                            setPlanningRightMode('calendar');
+                          }}
+                          className="rounded-xl border border-slate-200 bg-white px-3 py-4 text-center transition-all hover:border-primary/40 hover:bg-primary/5"
+                        >
+                          <p className="text-sm font-bold capitalize text-slate-800">
+                            {format(month, 'MMMM', { locale: it })}
+                          </p>
+                          <p className="text-xs text-slate-400">{format(month, 'yyyy')}</p>
+                        </button>
+                      ))}
                     </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
+                  </div>
+                )}
+
+                {planningRightMode === 'calendar' && (
+                  <div className="flex min-h-0 flex-1 flex-col">
+                    <div className="flex items-center gap-1 overflow-x-auto border-b border-slate-100 px-4 py-2">
+                      {PLANNING_MONTHS.map((month) => (
+                        <button
+                          key={month.toISOString()}
+                          type="button"
+                          onClick={() => setPlanningCalendarMonth(month)}
+                          className={cn(
+                            'shrink-0 rounded-lg px-3 py-1.5 text-xs font-bold capitalize transition-colors',
+                            isSameMonth(month, planningCalendarMonth)
+                              ? 'bg-slate-900 text-white'
+                              : 'text-slate-500 hover:bg-slate-100',
+                          )}
+                        >
+                          {format(month, 'MMM', { locale: it })}
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="flex min-h-0 flex-1 flex-col p-4">
+                      <p className="mb-3 text-sm font-bold capitalize text-slate-700">
+                        {format(planningCalendarMonth, 'MMMM yyyy', { locale: it })}
+                      </p>
+                      <div className="mb-1 grid grid-cols-7 border-b border-slate-100 pb-1">
+                        {DOW_LABELS.map((label, idx) => (
+                          <div
+                            key={label}
+                            className={cn(
+                              'py-1 text-center text-[10px] font-bold uppercase tracking-wider',
+                              idx >= 5 ? 'text-slate-300' : 'text-slate-400',
+                            )}
+                          >
+                            {label}
+                          </div>
+                        ))}
+                      </div>
+                      <div
+                        className="grid min-h-0 flex-1 grid-cols-7 divide-x divide-y divide-slate-50 overflow-hidden rounded-xl border border-slate-100"
+                        style={{ gridTemplateRows: `repeat(${Math.ceil(planCalDays.length / 7)}, minmax(0, 1fr))` }}
+                      >
+                        {planCalDays.map((day) => {
+                          const key = format(day, 'yyyy-MM-dd');
+                          const planEvents = [
+                            ...(planEventsByDay.get(key) ?? []).filter(matchesStatusFilter),
+                            ...(planPlannedByDay.get(key) ?? []).filter(matchesStatusFilter),
+                            ...(planInProgressByDay.get(key) ?? []).filter(matchesStatusFilter),
+                          ];
+                          const inMonth = isSameMonth(day, planningCalendarMonth);
+                          const isTodayDay = isToday(day);
+                          const isWeekend = day.getDay() === 0 || day.getDay() === 6;
+                          const isDragOver = dragOverDay === key;
+                          return (
+                            <div
+                              key={key}
+                              onClick={() => {
+                                setSelectedDay(key);
+                                if (!isSameMonth(day, currentMonth)) setCurrentMonth(startOfMonth(day));
+                              }}
+                              onDragOver={(e) => {
+                                if (!draggedEvent) return;
+                                e.preventDefault();
+                                setDragOverDay(key);
+                              }}
+                              onDragLeave={() => { if (dragOverDay === key) setDragOverDay(null); }}
+                              onDrop={(e) => { e.preventDefault(); void handleDropOnDay(key); }}
+                              className={cn(
+                                'cursor-pointer overflow-hidden p-1.5 transition-colors hover:bg-slate-50',
+                                isWeekend && !isTodayDay && 'bg-slate-50/60',
+                                !inMonth && 'opacity-30',
+                                isTodayDay && 'bg-primary/5',
+                                isDragOver && 'bg-primary/5 ring-2 ring-inset ring-primary/40',
+                              )}
+                            >
+                              <div className={cn(
+                                'mx-auto mb-0.5 flex h-6 w-6 items-center justify-center rounded-full text-xs',
+                                isTodayDay
+                                  ? 'bg-primary font-bold text-white'
+                                  : isWeekend
+                                    ? inMonth ? 'font-medium text-slate-400' : 'text-slate-300'
+                                    : inMonth ? 'font-medium text-slate-700' : 'text-slate-300',
+                              )}>
+                                {format(day, 'd')}
+                              </div>
+                              <div className="flex flex-wrap justify-center gap-0.5 overflow-hidden">
+                                {planEvents.slice(0, 4).map((ev, index) => (
+                                  <div
+                                    key={`pe-${ev.visualStatus ?? 'due'}-${ev.workOrderId ?? ev.asset.id}-${index}`}
+                                    className={cn(
+                                      'h-4 w-4 rounded-sm border bg-white',
+                                      ev.visualStatus === 'PLANNED' && 'border-indigo-200 bg-indigo-50',
+                                      ev.visualStatus === 'IN_PROGRESS' && 'border-sky-200 bg-sky-50',
+                                      ev.visualStatus === 'DUE' && ev.daysFromToday < 0 && 'border-red-200 bg-red-50',
+                                      ev.visualStatus === 'DUE' && ev.daysFromToday >= 0 && ev.daysFromToday <= 30 && 'border-orange-200 bg-orange-50',
+                                      ev.visualStatus === 'DUE' && ev.daysFromToday > 30 && 'border-emerald-200 bg-emerald-50',
+                                    )}
+                                    title={ev.asset.name}
+                                  />
+                                ))}
+                                {planEvents.length > 4 && (
+                                  <div className="flex h-4 min-w-4 items-center justify-center rounded-sm bg-slate-100 px-0.5 text-[9px] font-bold text-slate-500">
+                                    +{planEvents.length - 4}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
 
       {/* WO creation dialog */}
       <Dialog open={woModalOpen} onOpenChange={setWoModalOpen}>
@@ -919,7 +1043,7 @@ export function ScheduleView() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label>Tecnico</Label>
-                <Select value={woForm.technician_id} onValueChange={(v) => setWoForm((f) => ({ ...f, technician_id: v }))}>
+                <Select value={woForm.technician_id} onValueChange={(v) => setWoForm((f) => ({ ...f, technician_id: v ?? '' }))}>
                   <SelectTrigger className="rounded-xl">
                     <span className="truncate text-left">
                       {selectedTechnician
@@ -943,7 +1067,7 @@ export function ScheduleView() {
                 <Label>Fornitore</Label>
                 <Select
                   value={woForm.supplier_id}
-                  onValueChange={(v) => setWoForm((f) => ({ ...f, supplier_id: v }))}
+                  onValueChange={(v) => setWoForm((f) => ({ ...f, supplier_id: v ?? '' }))}
                   disabled={selectedTechnician?.employment_type === 'EXTERNAL'}
                 >
                   <SelectTrigger className="rounded-xl">
@@ -1037,7 +1161,7 @@ export function ScheduleView() {
               <Label>Fornitore</Label>
               <Select
                 value={planningSupplierId || NO_SUPPLIER_VALUE}
-                onValueChange={(value) => setPlanningSupplierId(value === NO_SUPPLIER_VALUE ? '' : value)}
+                onValueChange={(value) => setPlanningSupplierId(value === NO_SUPPLIER_VALUE ? '' : (value ?? ''))}
               >
                 <SelectTrigger className="rounded-xl">
                   <span className="truncate text-left">
@@ -1093,7 +1217,7 @@ export function ScheduleView() {
           <div className="grid gap-4 px-8 py-6">
             <div className="space-y-1.5">
               <Label>Fornitore</Label>
-              <Select value={editingSupplierValue} onValueChange={setEditingSupplierValue}>
+              <Select value={editingSupplierValue} onValueChange={(v) => setEditingSupplierValue(v ?? '')}>
                 <SelectTrigger className="rounded-xl">
                   <span className="truncate text-left">
                     {editingSupplierValue === NO_SUPPLIER_VALUE
