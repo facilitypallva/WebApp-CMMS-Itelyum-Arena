@@ -81,7 +81,7 @@ export function LoginPage() {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="nome@itelyumarena.it"
+                    placeholder="email"
                     autoComplete="email"
                     required
                     value={email}

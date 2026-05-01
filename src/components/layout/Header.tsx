@@ -398,9 +398,6 @@ export function Header({
               </div>
             )}
           </div>
-          <Button variant="outline" className="hidden h-9 rounded-lg border-slate-200 px-4 text-slate-600 hover:bg-slate-50 sm:flex">
-            Help Center
-          </Button>
         </div>
       </div>
     </header>

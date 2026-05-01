@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { ClipboardList, Clock, CheckCircle2, AlertTriangle, User, Plus, ChevronRight, Search, FileCheck, Paperclip, Download, Trash2, Loader2 } from 'lucide-react';
+import { Clock, Plus, ChevronRight, Search, FileCheck, Paperclip, Download, Trash2, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -78,27 +78,61 @@ function StatusBadge({ status }: { status: WorkOrderStatus }) {
   const cls =
     status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-700' :
     status === 'CLOSED' || status === 'VALIDATED' ? 'bg-emerald-100 text-emerald-700' :
-    status === 'ABANDONED' ? 'bg-slate-800 text-white' :
+    status === 'ABANDONED' ? 'bg-slate-900 text-white' :
     status === 'SUSPENDED' ? 'bg-red-100 text-red-700' :
-    'bg-slate-100 text-slate-700';
-  return <Badge className={cn(cls, 'border-none rounded-lg px-3 py-1 font-bold text-[10px]')}>{STATUS_LABELS[status]}</Badge>;
+    status === 'ASSIGNED' ? 'bg-blue-100 text-blue-700' :
+    status === 'PLANNED' ? 'bg-slate-100 text-slate-700' :
+    'bg-sky-50 text-sky-700';
+  return (
+    <Badge className={cn(cls, 'gap-1.5 border-none rounded-full px-3 py-1 font-bold text-[10px] uppercase tracking-[0.16em]')}>
+      <span className="h-1.5 w-1.5 rounded-full bg-current" />
+      {STATUS_LABELS[status]}
+    </Badge>
+  );
 }
 
-function PriorityIcon({ priority }: { priority: Priority }) {
-  if (priority === 'HIGH' || priority === 'CRITICAL') return <AlertTriangle size={16} className="text-red-500" />;
-  if (priority === 'MEDIUM') return <Clock size={16} className="text-orange-500" />;
-  return <CheckCircle2 size={16} className="text-emerald-500" />;
+function PriorityBadge({ priority }: { priority: Priority }) {
+  const cls =
+    priority === 'CRITICAL' || priority === 'HIGH' ? 'bg-red-100 text-red-700' :
+    priority === 'MEDIUM' ? 'bg-amber-100 text-amber-700' :
+    'bg-blue-100 text-blue-700';
+
+  return (
+    <Badge className={cn(cls, 'gap-1.5 border-none rounded-md px-2.5 py-1 font-bold text-[11px] uppercase tracking-[0.12em]')}>
+      <span className="h-1.5 w-1.5 rounded-full bg-current" />
+      {PRIORITY_TRANSLATIONS[priority]}
+    </Badge>
+  );
 }
 
-function getStatusCardClasses(status: WorkOrderStatus) {
-  if (status === 'VALIDATED') return 'border-emerald-200 bg-emerald-50/40 dark:border-emerald-500/25 dark:bg-emerald-500/10';
-  if (status === 'ABANDONED') return 'border-slate-300 bg-slate-100/80 dark:border-slate-600 dark:bg-slate-800/70';
-  if (status === 'CLOSED') return 'border-emerald-100 bg-emerald-50/20 dark:border-emerald-500/20 dark:bg-emerald-500/10';
-  if (status === 'IN_PROGRESS') return 'border-blue-200 bg-blue-50/40 dark:border-blue-500/25 dark:bg-blue-500/10';
-  if (status === 'SUSPENDED') return 'border-red-200 bg-red-50/35 dark:border-red-500/25 dark:bg-red-500/10';
-  if (status === 'ASSIGNED') return 'border-amber-200 bg-amber-50/35 dark:border-amber-500/25 dark:bg-amber-500/10';
-  if (status === 'PLANNED') return 'border-slate-200 bg-slate-50/70 dark:border-slate-700 dark:bg-slate-800/55';
-  return 'border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900/80';
+function getInitials(name: string | null | undefined) {
+  if (!name) return 'NA';
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  return parts.map((part) => part[0]).slice(0, 2).join('').toUpperCase();
+}
+
+function getWorkOrderTitle(workOrder: WorkOrder) {
+  return workOrder.description?.split('\n')[0]?.trim() || workOrder.asset?.name || 'Ordine di lavoro';
+}
+
+function getAssetSubtitle(workOrder: WorkOrder) {
+  const parts = [
+    workOrder.asset?.name,
+    workOrder.asset?.category,
+    workOrder.asset?.location?.name?.replace(/^00_/, ''),
+  ].filter(Boolean);
+
+  return parts.join(' · ') || TYPE_LABELS[workOrder.type];
+}
+
+function getPrimaryActionLabel(status: WorkOrderStatus) {
+  if (status === 'NEW') return 'Pianifica';
+  if (status === 'PLANNED') return 'Prendi in carico';
+  if (status === 'ASSIGNED') return 'Avvia';
+  if (status === 'IN_PROGRESS') return 'Chiudi';
+  if (status === 'SUSPENDED') return 'Riprendi';
+  if (status === 'CLOSED') return 'Valida';
+  return 'Completato';
 }
 
 function WorkOrderTimeline({
@@ -620,8 +654,16 @@ export function WorkOrdersList({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-        <div className="flex gap-3 w-full sm:w-auto">
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+        <div>
+          <p className="arena-kicker">Card manutenzione & work order</p>
+          <h2 className="arena-heading mt-1 text-2xl">Interventi operativi</h2>
+          <p className="mt-1 text-sm text-slate-500">
+            {filtered.length} {filtered.length === 1 ? 'ordine visibile' : 'ordini visibili'} su {workOrders.length}
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative flex-1 sm:w-72">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <Input
@@ -642,117 +684,135 @@ export function WorkOrdersList({
               {STATUSES.map((s) => <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>)}
             </SelectContent>
           </Select>
+          <Button className="h-11 rounded-lg shadow-lg shadow-primary/20 bg-primary font-bold px-6 gap-2" onClick={openCreate}>
+            <Plus size={18} /> Nuovo Ordine di Lavoro
+          </Button>
         </div>
-        <Button className="h-11 rounded-lg shadow-lg shadow-primary/20 bg-primary font-bold px-6 gap-2" onClick={openCreate}>
-          <Plus size={18} /> Nuovo Ordine di Lavoro
-        </Button>
       </div>
 
       {loading ? (
         <div className="flex justify-center py-20"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>
       ) : (
-        <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-1 gap-5 xl:grid-cols-2 2xl:grid-cols-3">
           {filtered.length === 0 && (
-            <div className="arena-card text-center py-16 text-slate-400">Nessun ordine di lavoro trovato</div>
+            <div className="arena-card col-span-full text-center py-16 text-slate-400">Nessun ordine di lavoro trovato</div>
           )}
-          {filtered.map((wo) => (
-            <Card
-              key={wo.id}
-              className={cn(
-                'rounded-xl overflow-hidden border shadow-sm hover:shadow-md transition-all group cursor-pointer',
-                getStatusCardClasses(wo.status)
-              )}
-              onClick={() => openEdit(wo)}
-            >
-              <CardContent className="p-0">
-                <div className="flex flex-col md:flex-row">
-                  <div className="p-6 md:w-44 bg-white/60 flex flex-col justify-center items-center text-center gap-2 border-b md:border-b-0 md:border-r border-slate-100 dark:bg-slate-950/20">
-                    <div className="w-12 h-12 rounded-lg bg-white shadow-sm flex items-center justify-center text-primary group-hover:scale-110 transition-transform dark:bg-slate-800">
-                      <ClipboardList size={24} />
-                    </div>
-                    <p className="text-[10px] font-black text-slate-400 tracking-widest truncate max-w-full">{wo.code ?? wo.id.slice(0, 8).toUpperCase()}</p>
-                    <Badge variant="outline" className="text-[9px] uppercase font-bold border-slate-200 text-slate-500">{TYPE_LABELS[wo.type]}</Badge>
+          {filtered.map((wo) => {
+            const technicianName = wo.technician?.name ?? 'Non assegnato';
+            const nextStatus = NEXT_STATUS_MAP[wo.status];
+            const canAdvance = Boolean(nextStatus) && wo.status !== 'VALIDATED' && wo.status !== 'ABANDONED';
+            const canCloseDirectly = wo.status !== 'CLOSED' && wo.status !== 'VALIDATED' && wo.status !== 'ABANDONED';
+
+            return (
+              <Card
+                key={wo.id}
+                className="arena-card group cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-md"
+                onClick={() => openEdit(wo)}
+              >
+                <CardContent className="flex h-full min-h-72 flex-col p-6">
+                  <div className="mb-5 flex items-center justify-between gap-3">
+                    <span className="font-mono text-sm font-semibold tracking-[0.14em] text-slate-500">
+                      {wo.code ?? wo.id.slice(0, 8).toUpperCase()}
+                    </span>
+                    <PriorityBadge priority={wo.priority} />
                   </div>
-                  <div className="flex-1 p-6 space-y-3">
-                    <div className="flex justify-between items-start gap-2">
-                      <div className="space-y-1 flex-1 min-w-0">
-                        <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                          <PriorityIcon priority={wo.priority} />
-                          <span className="truncate">{wo.asset?.name ?? 'Asset'}</span>
-                        </h3>
-                        <p className="text-sm text-slate-500 line-clamp-2">{wo.description}</p>
-                        <p className="text-xs text-slate-400">Creato il {format(new Date(wo.created_at), 'd MMM yyyy', { locale: it })}</p>
+
+                  <div className="min-h-24">
+                    <h3 className="line-clamp-2 text-xl font-bold leading-tight text-slate-950">
+                      {getWorkOrderTitle(wo)}
+                    </h3>
+                    <p className="mt-2 line-clamp-2 text-sm font-medium text-slate-500">
+                      {getAssetSubtitle(wo)}
+                    </p>
+                  </div>
+
+                  <div className="mt-auto flex items-center justify-between gap-4">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-700 to-cyan-500 text-xs font-bold text-white shadow-sm">
+                        {getInitials(technicianName)}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-slate-700">{technicianName}</p>
+                        <p className="text-xs text-slate-500">
+                          Creato {format(new Date(wo.created_at), 'd MMM · HH:mm', { locale: it })}
+                        </p>
                       </div>
-                      <StatusBadge status={wo.status} />
                     </div>
-                    <WorkOrderTimeline status={wo.status} />
-                    <div className="flex flex-wrap gap-4 pt-1">
-                      <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center"><User size={12} className="text-slate-400" /></div>
-                        <span className="text-xs font-bold text-slate-600">
-                          {wo.technician?.name ?? 'Non assegnato'}
-                          {wo.technician?.employment_type === 'EXTERNAL' && wo.technician.supplier?.name
-                            ? ` • ${wo.technician.supplier.name}`
-                            : ''}
-                        </span>
-                      </div>
-                      {wo.planned_date && (
-                        <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center"><Clock size={12} className="text-slate-400" /></div>
-                          <span className="text-xs font-bold text-slate-600">{format(new Date(wo.planned_date), 'd MMM yyyy', { locale: it })}</span>
-                        </div>
+                    <StatusBadge status={wo.status} />
+                  </div>
+
+                  <div className="mt-5 flex items-center justify-between border-t border-slate-200 pt-4">
+                    <div className="flex min-w-0 items-center gap-2 text-xs font-semibold text-slate-500">
+                      {wo.planned_date ? (
+                        <>
+                          <Clock size={14} />
+                          <span className="truncate">{format(new Date(wo.planned_date), 'd MMM yyyy', { locale: it })}</span>
+                        </>
+                      ) : (
+                        <span className="truncate">{TYPE_LABELS[wo.type]}</span>
                       )}
                     </div>
-                    <div className="pt-1">
-                      <div className="flex flex-wrap gap-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className="h-9 rounded-lg border-slate-200 bg-white font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-                          disabled={!NEXT_STATUS_MAP[wo.status] || wo.status === 'VALIDATED' || wo.status === 'ABANDONED'}
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            void handleAdvanceStatus(wo);
-                          }}
-                        >
-                          {NEXT_STATUS_MAP[wo.status]
-                            ? `Avanza a ${STATUS_LABELS[NEXT_STATUS_MAP[wo.status] as WorkOrderStatus]}`
-                            : 'Flusso completato'}
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className="h-9 rounded-lg border-red-200 bg-white font-semibold text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300 dark:hover:bg-red-500/20"
-                          disabled={wo.status === 'SUSPENDED' || wo.status === 'CLOSED' || wo.status === 'VALIDATED' || wo.status === 'ABANDONED'}
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            void handleSuspendStatus(wo);
-                          }}
-                        >
-                          Sospendi
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className="h-9 rounded-lg border-slate-300 bg-white font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-                          disabled={wo.status === 'VALIDATED' || wo.status === 'ABANDONED'}
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            void handleAbandonStatus(wo);
-                          }}
-                        >
-                          Abbandona
-                        </Button>
-                      </div>
-                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="h-8 rounded-lg px-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        openEdit(wo);
+                      }}
+                    >
+                      Apri scheda
+                      <ChevronRight size={15} />
+                    </Button>
                   </div>
-                  <div className="p-6 flex items-center justify-center border-t md:border-t-0 md:border-l border-slate-100">
-                    <ChevronRight size={24} className="text-slate-300 group-hover:text-primary transition-colors" />
+
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      className="h-10 rounded-lg bg-primary px-5 font-bold shadow-lg shadow-primary/15 hover:bg-primary/90"
+                      disabled={!canAdvance}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        void handleAdvanceStatus(wo);
+                      }}
+                    >
+                      {getPrimaryActionLabel(wo.status)}
+                    </Button>
+                    {canCloseDirectly && wo.status !== 'IN_PROGRESS' && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className="h-10 rounded-lg px-5 font-bold text-slate-700 hover:bg-slate-100"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          void updateWorkOrder(wo.id, {
+                            status: 'CLOSED',
+                            executed_at: wo.executed_at ?? new Date().toISOString(),
+                            closed_at: wo.closed_at ?? new Date().toISOString(),
+                          });
+                        }}
+                      >
+                        Chiudi
+                      </Button>
+                    )}
+                    {wo.status !== 'SUSPENDED' && wo.status !== 'CLOSED' && wo.status !== 'VALIDATED' && wo.status !== 'ABANDONED' && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className="h-10 rounded-lg px-4 font-bold text-red-600 hover:bg-red-50 hover:text-red-700"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          void handleSuspendStatus(wo);
+                        }}
+                      >
+                        Sospendi
+                      </Button>
+                    )}
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
 

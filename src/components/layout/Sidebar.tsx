@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Box, ClipboardList, Ticket, Users, ShieldCheck, CalendarDays, LogOut, User, FolderOpen, ChevronDown, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, Box, ClipboardList, Ticket, Users, ShieldCheck, CalendarDays, User, FolderOpen, ChevronDown, ChevronRight, ChevronUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
-import { toast } from 'sonner';
 import arenaOsLogo from '@/assets/arenaos-logo-horizontal.svg';
 import { APP_ROLE_LABELS } from '@/lib/constants';
 import { AppRole } from '@/types';
+import { ProfileSheet } from '@/components/profile/ProfileSheet';
 
 type NavItem = { icon: any; label: string; href: string; roles?: AppRole[] };
 type NavGroup = NavItem & { children?: NavItem[] };
 
 const navGroups: NavGroup[] = [
   { icon: LayoutDashboard, label: 'Dashboard', href: '/' },
-  { icon: Box, label: 'Asset MEP', href: '/assets' },
+  { icon: Box, label: 'Asset', href: '/assets' },
   {
     icon: ClipboardList, label: 'Work Orders', href: '/work-orders',
     children: [
@@ -27,10 +27,13 @@ const navGroups: NavGroup[] = [
 ];
 
 export function Sidebar() {
-  const { user, signOut, isAdmin, role } = useAuth();
+  const { user, profile, isAdmin, role } = useAuth();
   const location = useLocation();
-  const initials = user?.email ? user.email.slice(0, 2).toUpperCase() : '??';
-  const emailLabel = user?.email ?? '';
+  const [profileOpen, setProfileOpen] = useState(false);
+
+  const displayName = profile?.full_name?.trim() || user?.email?.split('@')[0] || 'Utente';
+  const initials = (profile?.full_name ?? user?.email ?? '??')
+    .split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
 
   const baseGroups = navGroups.filter((item) => !item.roles || item.roles.includes(role));
   const groups: NavGroup[] = isAdmin
@@ -38,6 +41,7 @@ export function Sidebar() {
     : baseGroups;
 
   const [expanded, setExpanded] = useState<Set<string>>(() => {
+
     const init = new Set<string>();
     if (location.pathname.startsWith('/rapportini')) init.add('/work-orders');
     return init;
@@ -46,15 +50,10 @@ export function Sidebar() {
   const toggle = (href: string) =>
     setExpanded((s) => { const n = new Set(s); n.has(href) ? n.delete(href) : n.add(href); return n; });
 
-  const handleLogout = async () => {
-    await signOut();
-    toast.success('Disconnesso');
-  };
-
   return (
     <aside className="sticky top-0 flex h-screen w-[248px] shrink-0 flex-col overflow-y-auto border-r border-white/5 bg-[#0b1220] text-slate-400">
-      <div className="border-b border-white/[0.06] px-[18px] py-5">
-        <img src={arenaOsLogo} alt="ArenaOS" className="h-10 w-auto max-w-[190px] object-contain brightness-0 invert" />
+      <div className="flex h-15 items-center justify-center border-b border-white/6 px-4">
+        <img src={arenaOsLogo} alt="ArenaOS" className="h-8 w-auto max-w-40 object-contain brightness-0 invert" />
       </div>
 
       <nav className="flex-1 overflow-y-auto px-2 py-4">
@@ -117,24 +116,27 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="mt-auto space-y-2 border-t border-white/[0.06] p-3">
-        <div className="flex items-center gap-3 rounded-xl border border-white/[0.05] bg-white/[0.035] p-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-700 to-cyan-400 text-xs font-bold text-white">
-            {initials}
-          </div>
-          <div className="flex-1 overflow-hidden">
-            <p className="truncate text-xs font-semibold text-white">{emailLabel}</p>
-            <p className="text-[10px] text-slate-500">Pallacanestro Varese - {APP_ROLE_LABELS[role]}</p>
-          </div>
-        </div>
+      <div className="border-t border-white/[0.06] p-3">
         <button
-          onClick={handleLogout}
-          className="flex w-full items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-slate-500 transition-colors hover:bg-red-500/10 hover:text-red-300"
+          onClick={() => setProfileOpen(true)}
+          className="group flex w-full items-center gap-3 rounded-xl border border-white/[0.05] bg-white/[0.035] p-3 transition-all hover:border-cyan-400/20 hover:bg-white/[0.06]"
         >
-          <LogOut size={16} />
-          Disconnetti
+          <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-blue-700 to-cyan-400 text-xs font-bold text-white ring-1 ring-white/10">
+            {profile?.avatar_url ? (
+              <img src={profile.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
+            ) : (
+              initials
+            )}
+          </div>
+          <div className="flex min-w-0 flex-1 flex-col items-start">
+            <p className="truncate text-xs font-semibold text-white">{displayName}</p>
+            <p className="text-[10px] text-slate-500">{APP_ROLE_LABELS[role]}</p>
+          </div>
+          <ChevronUp size={14} className="shrink-0 text-slate-600 transition-colors group-hover:text-slate-400" />
         </button>
       </div>
+
+      <ProfileSheet open={profileOpen} onOpenChange={setProfileOpen} />
     </aside>
   );
 }
