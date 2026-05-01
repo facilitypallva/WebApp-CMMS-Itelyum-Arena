@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ChevronLeft, ChevronRight, AlertTriangle, Clock, CheckCircle2, Wrench, Hammer, MapPin, FolderOpen, CalendarDays, GripVertical, Truck } from 'lucide-react';
+import { ChevronLeft, ChevronRight, AlertTriangle, Clock, CheckCircle2, Wrench, Hammer, MapPin, FolderOpen, CalendarDays, GripVertical, Truck, X } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -14,12 +14,13 @@ import { useTechnicians } from '@/hooks/useTechnicians';
 import { useSuppliers } from '@/hooks/useSuppliers';
 import { PRIORITY_LABELS, TECHNICIAN_EMPLOYMENT_LABELS } from '@/lib/constants';
 import { parseAssetSerial } from '@/lib/assetUtils';
+import { AssetCategoryIcon } from '@/components/assets/AssetCategoryIcon';
 import {
   format, startOfMonth, endOfMonth, startOfWeek, endOfWeek,
   addDays, addMonths, subMonths, isSameMonth, isToday, differenceInDays,
 } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { Asset, Priority, WorkOrder, WorkOrderType } from '@/types';
+import { Asset, AssetStatus, Priority, WorkOrder, WorkOrderType } from '@/types';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 
@@ -76,7 +77,12 @@ const TYPE_LABELS: Record<WorkOrderType, string> = {
 
 const ACTIVE_WORK_ORDER_STATUSES = new Set(['NEW', 'PLANNED', 'ASSIGNED', 'IN_PROGRESS', 'SUSPENDED']);
 const NO_SUPPLIER_VALUE = '__none__';
-const ALL_SUPPLIERS_VALUE = '__all__';
+const STATUS_FILTERS: Array<{ status: AssetStatus; color: string; Icon: typeof AlertTriangle }> = [
+  { status: 'SCADUTO', color: 'bg-red-500', Icon: AlertTriangle },
+  { status: 'IN SCADENZA', color: 'bg-orange-500', Icon: Clock },
+  { status: 'IN LAVORAZIONE', color: 'bg-blue-500', Icon: Hammer },
+  { status: 'IN REGOLA', color: 'bg-emerald-500', Icon: CheckCircle2 },
+];
 
 interface WoFormState {
   description: string;
@@ -118,7 +124,7 @@ export function ScheduleView() {
   const [planningModalOpen, setPlanningModalOpen] = useState(false);
   const [planningTargetDay, setPlanningTargetDay] = useState<string | null>(null);
   const [planningSupplierId, setPlanningSupplierId] = useState('');
-  const [supplierFilter, setSupplierFilter] = useState(ALL_SUPPLIERS_VALUE);
+  const [statusFilter, setStatusFilter] = useState<AssetStatus | null>(null);
   const [editingSupplierWorkOrderId, setEditingSupplierWorkOrderId] = useState<string | null>(null);
   const [editingSupplierValue, setEditingSupplierValue] = useState(NO_SUPPLIER_VALUE);
   const [savingSupplierChange, setSavingSupplierChange] = useState(false);
@@ -225,15 +231,10 @@ export function ScheduleView() {
     'IN REGOLA': assets.filter((a) => a.status === 'IN REGOLA').length,
   }), [assets]);
 
-  const selectedEvents = selectedDay ? (eventsByDay.get(selectedDay) ?? []) : [];
-  const matchesSupplierFilter = (event: CalendarEvent) => {
-    if (supplierFilter === ALL_SUPPLIERS_VALUE) return true;
-    const supplierId = event.workOrderId ? workOrderById.get(event.workOrderId)?.supplier_id ?? null : null;
-    if (supplierFilter === NO_SUPPLIER_VALUE) return !supplierId;
-    return supplierId === supplierFilter;
-  };
-  const selectedPlannedEvents = selectedDay ? (plannedByDay.get(selectedDay) ?? []).filter(matchesSupplierFilter) : [];
-  const selectedInProgressEvents = selectedDay ? (inProgressByDay.get(selectedDay) ?? []).filter(matchesSupplierFilter) : [];
+  const matchesStatusFilter = (event: CalendarEvent) => !statusFilter || event.asset.status === statusFilter;
+  const selectedEvents = selectedDay ? (eventsByDay.get(selectedDay) ?? []).filter(matchesStatusFilter) : [];
+  const selectedPlannedEvents = selectedDay ? (plannedByDay.get(selectedDay) ?? []).filter(matchesStatusFilter) : [];
+  const selectedInProgressEvents = selectedDay ? (inProgressByDay.get(selectedDay) ?? []).filter(matchesStatusFilter) : [];
 
   const getEventSupplierName = (event: CalendarEvent) => {
     if (!event.workOrderId) return null;
@@ -414,79 +415,9 @@ export function ScheduleView() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Stats */}
-      <div className="grid grid-cols-4 gap-4">
-        {([
-          ['SCADUTO', 'bg-red-500', AlertTriangle],
-          ['IN SCADENZA', 'bg-orange-500', Clock],
-          ['IN LAVORAZIONE', 'bg-blue-500', Hammer],
-          ['IN REGOLA', 'bg-emerald-500', CheckCircle2],
-        ] as const).map(([status, color, Icon]) => (
-          <Card key={status} className="arena-card">
-            <CardContent className="p-5 flex items-center gap-4">
-              <div className={cn('w-11 h-11 rounded-lg flex items-center justify-center text-white', color)}>
-                <Icon size={20} />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-slate-800">{counts[status]}</p>
-                <p className="text-xs text-slate-500 font-medium">{status}</p>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      <div className="arena-card px-6 py-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-sm font-bold text-slate-800">Vista planner</p>
-            <p className="mt-1 text-sm text-slate-500">
-              Filtra gli interventi per fornitore e aggiorna rapidamente i WO pianificati.
-            </p>
-          </div>
-          <div className="w-full max-w-sm space-y-1.5">
-            <Label>Filtro fornitore</Label>
-            <Select value={supplierFilter} onValueChange={setSupplierFilter}>
-              <SelectTrigger className="rounded-lg">
-                <span className="truncate text-left">
-                  {supplierFilter === ALL_SUPPLIERS_VALUE
-                    ? 'Tutti i fornitori'
-                    : supplierFilter === NO_SUPPLIER_VALUE
-                      ? 'Senza fornitore'
-                      : suppliers.find((supplier) => supplier.id === supplierFilter)?.name ?? 'Tutti i fornitori'}
-                </span>
-              </SelectTrigger>
-              <SelectContent className="rounded-lg">
-                <SelectItem value={ALL_SUPPLIERS_VALUE}>Tutti i fornitori</SelectItem>
-                <SelectItem value={NO_SUPPLIER_VALUE}>Senza fornitore</SelectItem>
-                {suppliers.map((supplier) => (
-                  <SelectItem key={supplier.id} value={supplier.id}>
-                    {supplier.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        <div className="mt-4 flex flex-wrap gap-2">
-          <span className="inline-flex items-center gap-2 rounded-full bg-orange-50 px-3 py-1 text-xs font-bold text-orange-700">
-            <span className="h-2 w-2 rounded-full bg-orange-500" />
-            Scadenza da pianificare
-          </span>
-          <span className="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-3 py-1 text-xs font-bold text-indigo-700">
-            <span className="h-2 w-2 rounded-full bg-indigo-500" />
-            Pianificato
-          </span>
-          <span className="inline-flex items-center gap-2 rounded-full bg-sky-50 px-3 py-1 text-xs font-bold text-sky-700">
-            <span className="h-2 w-2 rounded-full bg-sky-500" />
-            In lavorazione
-          </span>
-        </div>
-      </div>
-
-      <div className={cn('grid gap-6', selectedDay ? 'xl:grid-cols-[22rem_minmax(0,1fr)]' : 'grid-cols-1')}>
+    <div className="space-y-4">
+      <div className={cn('grid h-[calc(100dvh-10.5rem)] min-h-[32rem] min-w-0 gap-4', selectedDay ? 'xl:grid-cols-[22rem_minmax(0,1fr)]' : 'grid-cols-1')}>
+        {selectedDay && (
         <Card className="arena-card overflow-hidden">
           <CardContent className="p-0">
             <div className="border-b border-slate-100 px-6 py-5">
@@ -572,24 +503,68 @@ export function ScheduleView() {
             </div>
           </CardContent>
         </Card>
+        )}
 
       {/* Calendar */}
-      <div className="arena-card overflow-hidden">
+      <div className="arena-card flex min-h-0 flex-col overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-8 py-5 border-b border-slate-100">
-          <button onClick={prevMonth} className="p-2 rounded-xl hover:bg-slate-100 transition-colors text-slate-500">
+        <div className="flex items-center gap-4 border-b border-slate-100 px-5 py-3 lg:px-6">
+          <button onClick={prevMonth} className="h-10 w-10 rounded-xl text-slate-500 transition-colors hover:bg-slate-100">
             <ChevronLeft size={18} />
           </button>
-          <h2 className="text-lg font-bold text-slate-800 capitalize">
-            {format(currentMonth, 'MMMM yyyy', { locale: it })}
-          </h2>
-          <button onClick={nextMonth} className="p-2 rounded-xl hover:bg-slate-100 transition-colors text-slate-500">
+          <div className="flex min-w-0 flex-1 items-center gap-4">
+            <h2 className="min-w-fit text-lg font-bold capitalize text-slate-800 lg:text-2xl">
+              {format(currentMonth, 'MMMM yyyy', { locale: it })}
+            </h2>
+            <div className="flex min-w-0 items-center gap-2 overflow-x-auto">
+              {STATUS_FILTERS.map(({ status, color, Icon }) => {
+                const isActive = statusFilter === status;
+
+                return (
+                  <button
+                    key={status}
+                    type="button"
+                    aria-label={`Filtra ${status.toLowerCase()}`}
+                    title={status}
+                    onClick={() => setStatusFilter((current) => (current === status ? null : status))}
+                    className={cn(
+                      'flex h-14 w-14 shrink-0 flex-col items-center justify-center gap-1 rounded-xl border text-slate-700 transition-all',
+                      isActive
+                        ? 'border-slate-900 bg-slate-900 text-white shadow-sm'
+                        : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50',
+                    )}
+                  >
+                    <span className={cn('flex h-6 w-6 items-center justify-center rounded-lg text-white', color)}>
+                      <Icon size={14} />
+                    </span>
+                    <span className="text-xs font-bold leading-none">{counts[status]}</span>
+                  </button>
+                );
+              })}
+              <button
+                type="button"
+                aria-label="Rimuovi filtri calendario"
+                title="Rimuovi filtri"
+                onClick={() => setStatusFilter(null)}
+                className={cn(
+                  'flex h-14 w-14 shrink-0 flex-col items-center justify-center gap-1 rounded-xl border transition-all',
+                  statusFilter
+                    ? 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
+                    : 'border-slate-200 bg-slate-50 text-slate-300',
+                )}
+              >
+                <X size={18} />
+                <span className="text-xs font-bold leading-none">{assets.length}</span>
+              </button>
+            </div>
+          </div>
+          <button onClick={nextMonth} className="ml-auto h-10 w-10 rounded-xl text-slate-500 transition-colors hover:bg-slate-100">
             <ChevronRight size={18} />
           </button>
         </div>
 
         {/* Day-of-week headers */}
-        <div className="grid grid-cols-7 border-b border-slate-100">
+        <div className="grid shrink-0 grid-cols-7 border-b border-slate-100">
           {DOW_LABELS.map((label, idx) => (
             <div
               key={label}
@@ -605,21 +580,25 @@ export function ScheduleView() {
 
         {/* Grid */}
         {loading ? (
-          <div className="flex justify-center py-20">
+          <div className="flex flex-1 justify-center py-20">
             <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
-          <div className="grid grid-cols-7 divide-x divide-y divide-slate-50">
+          <div
+            className="grid min-h-0 flex-1 grid-cols-7 divide-x divide-y divide-slate-50"
+            style={{ gridTemplateRows: `repeat(${Math.ceil(calDays.length / 7)}, minmax(0, 1fr))` }}
+          >
             {calDays.map((day) => {
               const key = format(day, 'yyyy-MM-dd');
-              const events = eventsByDay.get(key) ?? [];
-              const plannedEvents = plannedByDay.get(key) ?? [];
-              const inProgressEvents = inProgressByDay.get(key) ?? [];
+              const events = (eventsByDay.get(key) ?? []).filter(matchesStatusFilter);
+              const plannedEvents = (plannedByDay.get(key) ?? []).filter(matchesStatusFilter);
+              const inProgressEvents = (inProgressByDay.get(key) ?? []).filter(matchesStatusFilter);
+              const cellEvents = [...events, ...plannedEvents, ...inProgressEvents];
               const inMonth = isSameMonth(day, currentMonth);
               const isSelected = selectedDay === key;
               const isTodayDay = isToday(day);
               const isWeekend = day.getDay() === 0 || day.getDay() === 6;
-              const hasDetails = events.length > 0 || plannedEvents.length > 0 || inProgressEvents.length > 0;
+              const hasDetails = cellEvents.length > 0;
 
               return (
                 <div
@@ -640,7 +619,7 @@ export function ScheduleView() {
                     void handleDropOnDay(key);
                   }}
                   className={cn(
-                    'min-h-22.5 p-2 transition-colors',
+                    'min-h-0 overflow-hidden p-2 transition-colors',
                     isWeekend && !isSelected && !isTodayDay && 'bg-slate-50',
                     !inMonth && 'opacity-40',
                     isTodayDay && !isSelected && 'bg-primary/5',
@@ -650,7 +629,7 @@ export function ScheduleView() {
                   )}
                 >
                   <div className={cn(
-                    'w-7 h-7 flex items-center justify-center rounded-full text-sm mb-1 mx-auto',
+                    'mx-auto mb-1 flex h-7 w-7 items-center justify-center rounded-full text-sm',
                     isTodayDay
                       ? 'bg-primary text-white font-bold'
                       : isWeekend
@@ -659,21 +638,10 @@ export function ScheduleView() {
                   )}>
                     {format(day, 'd')}
                   </div>
-                  <div className="space-y-0.5">
-                    {events.slice(0, 3).map((ev) => (
+                  <div className="flex flex-wrap justify-center gap-1 overflow-hidden">
+                    {cellEvents.slice(0, 8).map((ev, index) => (
                       <div
-                        key={ev.asset.id}
-                        className={cn(
-                          'text-[10px] font-semibold rounded px-1.5 py-0.5 truncate leading-tight',
-                          eventColor(ev.daysFromToday),
-                        )}
-                      >
-                        {ev.asset.name}
-                      </div>
-                    ))}
-                    {plannedEvents.filter(matchesSupplierFilter).slice(0, 2).map((ev) => (
-                      <div
-                        key={`planned-${ev.workOrderId ?? ev.asset.id}`}
+                        key={`${ev.visualStatus ?? 'due'}-${ev.workOrderId ?? ev.asset.id}-${index}`}
                         draggable={Boolean(ev.workOrderId)}
                         onDragStart={(event) => {
                           event.stopPropagation();
@@ -684,26 +652,22 @@ export function ScheduleView() {
                           setDragOverDay(null);
                         }}
                         className={cn(
-                          'truncate rounded border border-indigo-200 bg-indigo-50 px-1.5 py-0.5 text-[10px] font-semibold leading-tight text-indigo-700 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.35)]',
-                          ev.workOrderId && 'cursor-grab active:cursor-grabbing'
+                          'flex h-6 w-6 items-center justify-center rounded-md border bg-white shadow-sm',
+                          ev.visualStatus === 'PLANNED' && 'border-indigo-200 bg-indigo-50',
+                          ev.visualStatus === 'IN_PROGRESS' && 'border-sky-200 bg-sky-50',
+                          ev.visualStatus === 'DUE' && ev.daysFromToday < 0 && 'border-red-200 bg-red-50',
+                          ev.visualStatus === 'DUE' && ev.daysFromToday >= 0 && ev.daysFromToday <= 30 && 'border-orange-200 bg-orange-50',
+                          ev.visualStatus === 'DUE' && ev.daysFromToday > 30 && 'border-emerald-200 bg-emerald-50',
+                          ev.workOrderId && 'cursor-grab active:cursor-grabbing',
                         )}
+                        title={ev.asset.name}
                       >
-                        {ev.workOrderCode ?? 'WO pianificato'} · {ev.asset.name}
+                        <AssetCategoryIcon category={ev.asset.category} size={14} />
                       </div>
                     ))}
-                    {events.length > 3 && (
-                      <div className="text-[10px] text-slate-400 font-medium px-1">
-                        +{events.length - 3} altri
-                      </div>
-                    )}
-                    {plannedEvents.filter(matchesSupplierFilter).length > 2 && (
-                      <div className="px-1 text-[10px] font-medium text-indigo-500">
-                        +{plannedEvents.filter(matchesSupplierFilter).length - 2} pianificati
-                      </div>
-                    )}
-                    {inProgressEvents.filter(matchesSupplierFilter).length > 0 && (
-                      <div className="rounded px-1 text-[10px] font-semibold leading-tight text-sky-600">
-                        {inProgressEvents.filter(matchesSupplierFilter).length} in lavorazione
+                    {cellEvents.length > 8 && (
+                      <div className="flex h-6 min-w-6 items-center justify-center rounded-md bg-slate-100 px-1.5 text-[10px] font-bold text-slate-500">
+                        +{cellEvents.length - 8}
                       </div>
                     )}
                   </div>
