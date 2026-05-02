@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Filter, Plus, MoreHorizontal, Eye, Edit, Trash2, MapPin, QrCode, Search } from 'lucide-react';
+import { Filter, Plus, MoreHorizontal, Eye, Edit, Trash2, MapPin, QrCode, Search, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AnimatedSaveButton } from '@/components/ui/animated-save-button';
 import { Input } from '@/components/ui/input';
@@ -16,6 +16,7 @@ import { useLocations } from '@/hooks/useLocations';
 import { AssetCategoryIcon } from '@/components/assets/AssetCategoryIcon';
 import { toast } from 'sonner';
 import { getNextVerificationDate, parseAssetSerial } from '@/lib/assetUtils';
+import { waitForSaveFeedback, waitForSaveSuccessFeedback } from '@/lib/saveFeedback';
 import { differenceInDays, format } from 'date-fns';
 import { it } from 'date-fns/locale';
 
@@ -137,6 +138,23 @@ function normalizeOptionalText(value: string) {
 
 function normalizeOptionalDate(value: string) {
   return value ? value : null;
+}
+
+function formatExportDate(value: string | null | undefined, withTime = false) {
+  if (!value) return '';
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+
+  return format(date, withTime ? 'dd/MM/yyyy HH:mm' : 'dd/MM/yyyy', { locale: it });
+}
+
+function escapeExcelCell(value: unknown) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 export function AssetsTable({
@@ -283,6 +301,7 @@ export function AssetsTable({
     }
 
     setSaving(true);
+    const saveStartedAt = Date.now();
 
     try {
       const frequencyDays = Number(form.verification_frequency_days);
@@ -314,6 +333,9 @@ export function AssetsTable({
       }
 
       toast.success(editing ? 'Asset aggiornato' : 'Asset creato');
+      await waitForSaveFeedback(saveStartedAt);
+      setSaving(false);
+      await waitForSaveSuccessFeedback();
       setModalOpen(false);
       setEditing(null);
       setForm(EMPTY_FORM);
@@ -329,6 +351,105 @@ export function AssetsTable({
     else toast.success('Asset eliminato');
   };
 
+  const handleExportAssets = () => {
+    if (filtered.length === 0) {
+      toast.info('Nessun asset da esportare');
+      return;
+    }
+
+    const headers = [
+      'ID',
+      'Nome',
+      'Categoria',
+      'Marca',
+      'Modello',
+      'Numero seriale',
+      'Sigla apparato',
+      'Codice ubicazione seriale',
+      'Progressivo seriale',
+      'Ubicazione',
+      'Codice ubicazione',
+      'ID ubicazione',
+      'Stato',
+      'Stato forzato',
+      'Data installazione',
+      'Ultima verifica',
+      'Prossima verifica',
+      'Scadenza',
+      'Frequenza codice',
+      'Frequenza giorni',
+      'Frequenza mesi',
+      'Documenti',
+      'Creato il',
+      'Aggiornato il',
+    ];
+
+    const rows = filtered.map((asset) => {
+      const parsedAssetSerial = parseAssetSerial(asset.serial_number);
+      const rawLocationName =
+        locationsById.get(asset.location_id)?.name ??
+        (asset as { location?: { name?: string | null } }).location?.name ??
+        parsedAssetSerial?.locationCode ??
+        '';
+      const locationCode = rawLocationName.replace(/^00_/, '').toUpperCase();
+      const nextDate = getNextVerificationDate(asset.last_verification, asset.verification_frequency_days);
+
+      return [
+        asset.id,
+        asset.name,
+        asset.category,
+        asset.brand ?? '',
+        asset.model ?? '',
+        asset.serial_number ?? '',
+        parsedAssetSerial?.equipmentCode ?? '',
+        parsedAssetSerial?.locationCode ?? '',
+        parsedAssetSerial?.progressiveCode ?? '',
+        formatLocationDisplayName(rawLocationName),
+        locationCode,
+        asset.location_id ?? '',
+        asset.status,
+        asset.status_override ?? '',
+        formatExportDate(asset.installation_date),
+        formatExportDate(asset.last_verification),
+        nextDate ? format(nextDate, 'dd/MM/yyyy', { locale: it }) : '',
+        formatDueLabel(nextDate),
+        asset.verification_frequency_code ?? '',
+        asset.verification_frequency_days,
+        asset.verification_frequency_months,
+        (asset.documents ?? []).join(' | '),
+        formatExportDate(asset.created_at, true),
+        formatExportDate(asset.updated_at, true),
+      ];
+    });
+
+    const tableRows = [headers, ...rows]
+      .map((row) => `<tr>${row.map((cell) => `<td>${escapeExcelCell(cell)}</td>`).join('')}</tr>`)
+      .join('');
+    const html = `<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      table { border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12px; }
+      th, td { border: 1px solid #d6dce5; padding: 6px 8px; vertical-align: top; }
+      tr:first-child td { background: #eef2f7; font-weight: 700; }
+    </style>
+  </head>
+  <body>
+    <table>${tableRows}</table>
+  </body>
+</html>`;
+
+    const blob = new Blob(['\ufeff', html], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `asset-${format(new Date(), 'yyyy-MM-dd')}.xls`;
+    link.click();
+    URL.revokeObjectURL(url);
+    toast.success(`${filtered.length.toLocaleString('it-IT')} asset esportati`);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
@@ -337,6 +458,15 @@ export function AssetsTable({
           <h2 className="arena-heading mt-1 text-4xl">Asset</h2>
         </div>
         <div className="flex flex-wrap gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            className="h-11 rounded-lg border-slate-200 bg-white px-5 font-semibold text-slate-700 hover:bg-slate-50"
+            onClick={handleExportAssets}
+          >
+            <Download size={17} />
+            Esporta Excel
+          </Button>
           <Button
             type="button"
             variant="outline"
