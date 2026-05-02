@@ -188,6 +188,14 @@ export function ScheduleView() {
     () => new Map(workOrders.map((workOrder) => [workOrder.id, workOrder])),
     [workOrders]
   );
+  const activeWorkOrderByAssetId = useMemo(
+    () => new Map(
+      workOrders
+        .filter((workOrder) => ACTIVE_WORK_ORDER_STATUSES.has(workOrder.status))
+        .map((workOrder) => [workOrder.asset_id, workOrder] as const)
+    ),
+    [workOrders]
+  );
 
   // Auto-fill supplier from external technician
   useEffect(() => {
@@ -220,6 +228,38 @@ export function ScheduleView() {
   const selectedEvents = selectedDay ? (eventsByDay.get(selectedDay) ?? []).filter(matchesStatusFilter) : [];
   const selectedPlannedEvents = selectedDay ? (plannedByDay.get(selectedDay) ?? []).filter(matchesStatusFilter) : [];
   const selectedInProgressEvents = selectedDay ? (inProgressByDay.get(selectedDay) ?? []).filter(matchesStatusFilter) : [];
+  const selectedPlannedFromBacklog = useMemo(() => {
+    if (!selectedDay) return [];
+    const selectedDate = new Date(`${selectedDay}T12:00:00`);
+
+    return assets
+      .flatMap((asset) => {
+        if (!asset.last_verification || !asset.verification_frequency_days) return [];
+        if (statusFilter && asset.status !== statusFilter) return [];
+
+        const activeWorkOrder = activeWorkOrderByAssetId.get(asset.id);
+        if (!activeWorkOrder?.planned_date || activeWorkOrder.status === 'IN_PROGRESS') return [];
+
+        const isDueOnSelectedDay = getOccurrencesInRange(
+          asset.last_verification,
+          asset.verification_frequency_days,
+          selectedDate,
+          selectedDate,
+        ).some((date) => format(date, 'yyyy-MM-dd') === selectedDay);
+
+        if (!isDueOnSelectedDay) return [];
+
+        return [{
+          asset,
+          workOrder: activeWorkOrder,
+          plannedKey: activeWorkOrder.planned_date.slice(0, 10),
+        }];
+      })
+      .sort((a, b) => {
+        const dateCompare = a.plannedKey.localeCompare(b.plannedKey);
+        return dateCompare || a.asset.name.localeCompare(b.asset.name, 'it');
+      });
+  }, [activeWorkOrderByAssetId, assets, selectedDay, statusFilter]);
 
   const getEventSupplierName = (event: CalendarEvent) => {
     if (!event.workOrderId) return null;
@@ -249,8 +289,14 @@ export function ScheduleView() {
     toast.success('Fornitore aggiornato');
   };
 
-  const prevMonth = () => { setCurrentMonth((m) => subMonths(m, 1)); setSelectedDay(null); };
-  const nextMonth = () => { setCurrentMonth((m) => addMonths(m, 1)); setSelectedDay(null); };
+  const prevMonth = () => {
+    setCurrentMonth((m) => subMonths(m, 1));
+    closeDayDrawer();
+  };
+  const nextMonth = () => {
+    setCurrentMonth((m) => addMonths(m, 1));
+    closeDayDrawer();
+  };
   const openRelatedWorkOrder = (asset: Asset, workOrderId?: string | null) => {
     navigate('/work-orders', {
       state: {
@@ -283,6 +329,21 @@ export function ScheduleView() {
     setPlanningViaDrag(false);
   };
 
+  const selectDay = (dayKey: string) => {
+    const targetDate = new Date(`${dayKey}T12:00:00`);
+    setSelectedDay(dayKey);
+    setCurrentMonth(startOfMonth(targetDate));
+  };
+
+  const closeDayDrawer = () => {
+    setSelectedDay(null);
+    setPlanningAsset(null);
+    setPlanningRightMode(null);
+    setPlanningCalendarMonth(startOfMonth(new Date()));
+    setPlanningModalOpen(false);
+    resetPlanningDragState();
+  };
+
   const handleEventDragStart = (event: CalendarEvent) => {
     setDraggedEvent(event);
   };
@@ -307,7 +368,6 @@ export function ScheduleView() {
         return;
       }
 
-      setSelectedDay(targetDay);
       resetPlanningDragState();
       toast.success(`WO ripianificato per il ${format(new Date(`${targetDay}T12:00:00`), 'd MMM', { locale: it })}`);
       return;
@@ -354,7 +414,6 @@ export function ScheduleView() {
         return;
       }
 
-      setSelectedDay(planningTargetDay);
       setPlanningModalOpen(false);
       resetPlanningDragState();
       toast.success(`Intervento pianificato per il ${format(new Date(`${planningTargetDay}T12:00:00`), 'd MMM', { locale: it })}`);
@@ -498,7 +557,14 @@ export function ScheduleView() {
               return (
                 <div
                   key={key}
-                  onClick={() => hasDetails && setSelectedDay(isSelected ? null : key)}
+                  onClick={() => {
+                    if (!hasDetails) return;
+                    if (isSelected) {
+                      closeDayDrawer();
+                      return;
+                    }
+                    selectDay(key);
+                  }}
                   onDragOver={(event) => {
                     if (!draggedEvent) return;
                     event.preventDefault();
@@ -578,9 +644,7 @@ export function ScheduleView() {
         open={selectedDay !== null}
         onOpenChange={(open) => {
           if (!open) {
-            setSelectedDay(null);
-            setPlanningAsset(null);
-            setPlanningRightMode(null);
+            closeDayDrawer();
           }
         }}
       >
@@ -603,9 +667,7 @@ export function ScheduleView() {
                 variant="ghost"
                 size="icon-sm"
                 onClick={() => {
-                  setSelectedDay(null);
-                  setPlanningAsset(null);
-                  setPlanningRightMode(null);
+                  closeDayDrawer();
                 }}
               >
                 <X size={16} />
@@ -627,11 +689,16 @@ export function ScheduleView() {
                         <div
                           key={`bl-${ev.asset.id}`}
                           draggable
-                          onDragStart={() => handleEventDragStart(ev)}
+                          onDragStart={() => {
+                            setPlanningAsset(ev.asset);
+                            handleEventDragStart(ev);
+                          }}
                           onDragEnd={() => { setDraggedEvent(null); setDragOverDay(null); }}
                           className={cn(
                             'flex items-center gap-2 rounded-xl border px-3 py-3 transition-all',
-                            draggedEvent?.asset.id === ev.asset.id
+                            planningAsset?.id === ev.asset.id
+                              ? 'border-primary/40 bg-primary/5 shadow-sm'
+                              : draggedEvent?.asset.id === ev.asset.id
                               ? 'border-primary/40 bg-primary/5 opacity-70'
                               : 'border-slate-200 bg-white hover:border-primary/30 hover:bg-slate-50',
                           )}
@@ -673,6 +740,54 @@ export function ScheduleView() {
                 </div>
               )}
 
+              {selectedPlannedFromBacklog.length > 0 && (
+                <div className="mb-2">
+                  <p className="px-5 pb-1 pt-2 text-[10px] font-bold uppercase tracking-wider text-emerald-600">
+                    Riepilogo pianificati
+                  </p>
+                  <div className="space-y-1 px-3">
+                    {selectedPlannedFromBacklog.map(({ asset, workOrder, plannedKey }) => {
+                      const supplierName = workOrder.supplier?.name ?? null;
+
+                      return (
+                        <div
+                          key={`planned-summary-${workOrder.id}`}
+                          className="flex items-center gap-2 rounded-xl border border-emerald-100 bg-emerald-50/60 px-3 py-3"
+                        >
+                          <CheckCircle2 size={15} className="shrink-0 text-emerald-500" />
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-bold text-slate-800">{asset.name}</p>
+                            <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+                              {workOrder.code && (
+                                <span className="rounded-md bg-slate-900 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                                  {workOrder.code}
+                                </span>
+                              )}
+                              <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+                                {format(new Date(`${plannedKey}T12:00:00`), 'd MMM', { locale: it })}
+                              </span>
+                              {supplierName && (
+                                <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-slate-500">
+                                  {supplierName}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => openRelatedWorkOrder(asset, workOrder.id)}
+                            className="shrink-0 rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-white hover:text-slate-600"
+                            title="Apri WO"
+                          >
+                            <FolderOpen size={14} />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {selectedPlannedEvents.length > 0 && (
                 <div className="mb-2">
                   <p className="px-5 pb-1 pt-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
@@ -687,7 +802,10 @@ export function ScheduleView() {
                         <div
                           key={`pl-${ev.asset.id}`}
                           draggable={Boolean(ev.workOrderId)}
-                          onDragStart={() => handleEventDragStart(ev)}
+                          onDragStart={() => {
+                            setPlanningAsset(ev.asset);
+                            handleEventDragStart(ev);
+                          }}
                           onDragEnd={() => { setDraggedEvent(null); setDragOverDay(null); }}
                           className={cn(
                             'flex items-center gap-2 rounded-xl border px-3 py-3 transition-all',
@@ -721,6 +839,19 @@ export function ScheduleView() {
                             </div>
                           </div>
                           <div className="flex shrink-0 items-center gap-1">
+                            {ev.workOrderId && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setPlanningAsset(ev.asset);
+                                  setPlanningRightMode('months');
+                                }}
+                                className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-primary"
+                                title="Ripianifica"
+                              >
+                                <CalendarDays size={14} />
+                              </button>
+                            )}
                             {ev.workOrderId && (
                               <button
                                 type="button"
@@ -794,7 +925,7 @@ export function ScheduleView() {
                 </div>
               )}
 
-              {selectedEvents.length === 0 && selectedPlannedEvents.length === 0 && selectedInProgressEvents.length === 0 && (
+              {selectedEvents.length === 0 && selectedPlannedFromBacklog.length === 0 && selectedPlannedEvents.length === 0 && selectedInProgressEvents.length === 0 && (
                 <div className="px-5 py-8 text-center text-sm text-slate-400">
                   Nessuna scadenza per questo giorno.
                 </div>
@@ -905,8 +1036,7 @@ export function ScheduleView() {
                             <div
                               key={key}
                               onClick={() => {
-                                setSelectedDay(key);
-                                if (!isSameMonth(day, currentMonth)) setCurrentMonth(startOfMonth(day));
+                                selectDay(key);
                               }}
                               onDragOver={(e) => {
                                 if (!draggedEvent) return;
