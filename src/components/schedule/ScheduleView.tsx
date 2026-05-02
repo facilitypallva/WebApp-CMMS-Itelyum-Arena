@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type PointerEvent as ReactPointerEvent } from 'react';
-import { ChevronLeft, ChevronRight, AlertTriangle, Clock, CheckCircle2, Wrench, Hammer, MapPin, FolderOpen, CalendarDays, GripVertical, Truck, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CheckCircle2, Wrench, MapPin, FolderOpen, CalendarDays, GripVertical, Truck, X, Layers } from 'lucide-react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { AnimatedSaveButton } from '@/components/ui/animated-save-button';
@@ -18,12 +18,13 @@ import { PRIORITY_LABELS, TECHNICIAN_EMPLOYMENT_LABELS } from '@/lib/constants';
 import { parseAssetSerial } from '@/lib/assetUtils';
 import { AssetCategoryIcon } from '@/components/assets/AssetCategoryIcon';
 import { BulkSelectionStack, DragFollowerPreview, DraggableAssetCard, DropCalendarCell } from './DragDropMotion';
+import { waitForSaveFeedback, waitForSaveSuccessFeedback } from '@/lib/saveFeedback';
 import {
   format, startOfMonth, endOfMonth, startOfWeek, endOfWeek,
   addDays, addMonths, subMonths, isSameMonth, isToday, differenceInDays,
 } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { Asset, AssetStatus, Priority, WorkOrder, WorkOrderType } from '@/types';
+import { Asset, AssetCategory, Priority, WorkOrder, WorkOrderType } from '@/types';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 
@@ -80,12 +81,7 @@ const TYPE_LABELS: Record<WorkOrderType, string> = {
 
 const ACTIVE_WORK_ORDER_STATUSES = new Set(['NEW', 'PLANNED', 'ASSIGNED', 'IN_PROGRESS', 'SUSPENDED']);
 const NO_SUPPLIER_VALUE = '__none__';
-const STATUS_FILTERS: Array<{ status: AssetStatus; color: string; Icon: typeof AlertTriangle }> = [
-  { status: 'SCADUTO', color: 'bg-red-500', Icon: AlertTriangle },
-  { status: 'IN SCADENZA', color: 'bg-orange-500', Icon: Clock },
-  { status: 'IN LAVORAZIONE', color: 'bg-blue-500', Icon: Hammer },
-  { status: 'IN REGOLA', color: 'bg-emerald-500', Icon: CheckCircle2 },
-];
+const CATEGORY_FILTERS: AssetCategory[] = ['Rivelazione incendi', 'Antincendio', 'Meccanico', 'Elettrico', 'TVCC'];
 
 interface WoFormState {
   description: string;
@@ -180,7 +176,7 @@ export function ScheduleView() {
   const [planningModalOpen, setPlanningModalOpen] = useState(false);
   const [planningTargetDay, setPlanningTargetDay] = useState<string | null>(null);
   const [planningSupplierId, setPlanningSupplierId] = useState('');
-  const [statusFilter, setStatusFilter] = useState<AssetStatus | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState<AssetCategory | null>(null);
   const [editingSupplierWorkOrderId, setEditingSupplierWorkOrderId] = useState<string | null>(null);
   const [editingSupplierValue, setEditingSupplierValue] = useState(NO_SUPPLIER_VALUE);
   const [savingSupplierChange, setSavingSupplierChange] = useState(false);
@@ -226,17 +222,20 @@ export function ScheduleView() {
     [assets, workOrders, planningCalendarMonth],
   );
 
-  const counts = useMemo(() => ({
-    SCADUTO: assets.filter((a) => a.status === 'SCADUTO').length,
-    'IN SCADENZA': assets.filter((a) => a.status === 'IN SCADENZA').length,
-    'IN LAVORAZIONE': assets.filter((a) => a.status === 'IN LAVORAZIONE').length,
-    'IN REGOLA': assets.filter((a) => a.status === 'IN REGOLA').length,
-  }), [assets]);
+  const counts = useMemo(
+    () => Object.fromEntries(
+      CATEGORY_FILTERS.map((category) => [
+        category,
+        assets.filter((asset) => asset.category === category).length,
+      ])
+    ) as Record<AssetCategory, number>,
+    [assets]
+  );
 
-  const matchesStatusFilter = (event: CalendarEvent) => !statusFilter || event.asset.status === statusFilter;
-  const selectedEvents = selectedDay ? (eventsByDay.get(selectedDay) ?? []).filter(matchesStatusFilter) : [];
-  const selectedPlannedEvents = selectedDay ? (plannedByDay.get(selectedDay) ?? []).filter(matchesStatusFilter) : [];
-  const selectedInProgressEvents = selectedDay ? (inProgressByDay.get(selectedDay) ?? []).filter(matchesStatusFilter) : [];
+  const matchesCategoryFilter = (event: CalendarEvent) => !categoryFilter || event.asset.category === categoryFilter;
+  const selectedEvents = selectedDay ? (eventsByDay.get(selectedDay) ?? []).filter(matchesCategoryFilter) : [];
+  const selectedPlannedEvents = selectedDay ? (plannedByDay.get(selectedDay) ?? []).filter(matchesCategoryFilter) : [];
+  const selectedInProgressEvents = selectedDay ? (inProgressByDay.get(selectedDay) ?? []).filter(matchesCategoryFilter) : [];
   const planningPreviewEvents = planningEvents.length > 0 ? planningEvents : planningEvent ? [planningEvent] : [];
   const selectedBacklogEvents = useMemo(
     () => selectedEvents.filter((event) => selectedBacklogAssetIds.includes(event.asset.id)),
@@ -263,7 +262,7 @@ export function ScheduleView() {
     return assets
       .flatMap((asset) => {
         if (!asset.last_verification || !asset.verification_frequency_days) return [];
-        if (statusFilter && asset.status !== statusFilter) return [];
+        if (categoryFilter && asset.category !== categoryFilter) return [];
 
         const activeWorkOrder = activeWorkOrderByAssetId.get(asset.id);
         if (!activeWorkOrder?.planned_date || activeWorkOrder.status === 'IN_PROGRESS') return [];
@@ -287,7 +286,7 @@ export function ScheduleView() {
         const dateCompare = a.plannedKey.localeCompare(b.plannedKey);
         return dateCompare || a.asset.name.localeCompare(b.asset.name, 'it');
       });
-  }, [activeWorkOrderByAssetId, assets, selectedDay, statusFilter]);
+  }, [activeWorkOrderByAssetId, assets, selectedDay, categoryFilter]);
 
   useEffect(() => {
     setSelectedBacklogAssetIds((current) => {
@@ -333,15 +332,19 @@ export function ScheduleView() {
   const saveSupplierChange = async () => {
     if (!editingSupplierWorkOrderId) return;
     setSavingSupplierChange(true);
+    const saveStartedAt = Date.now();
     const nextSupplierId = editingSupplierValue === NO_SUPPLIER_VALUE ? null : editingSupplierValue;
     const { error } = await updateWorkOrder(editingSupplierWorkOrderId, { supplier_id: nextSupplierId });
-    setSavingSupplierChange(false);
 
     if (error) {
+      setSavingSupplierChange(false);
       toast.error(error.message ?? 'Errore durante l\'aggiornamento del fornitore');
       return;
     }
 
+    await waitForSaveFeedback(saveStartedAt);
+    setSavingSupplierChange(false);
+    await waitForSaveSuccessFeedback();
     setEditingSupplierWorkOrderId(null);
     toast.success('Fornitore aggiornato');
   };
@@ -545,6 +548,7 @@ export function ScheduleView() {
     }
 
     setPlanningViaDrag(true);
+    const saveStartedAt = Date.now();
 
     try {
       for (const event of eventsToCreate) {
@@ -580,6 +584,9 @@ export function ScheduleView() {
         setDropSuccessAssetIds((current) => current.filter((id) => !plannedAssetIds.has(id)));
       }, 500);
       setSelectedBacklogAssetIds((current) => current.filter((id) => !plannedAssetIds.has(id)));
+      await waitForSaveFeedback(saveStartedAt);
+      setPlanningViaDrag(false);
+      await waitForSaveSuccessFeedback();
       setPlanningModalOpen(false);
       resetPlanningDragState();
       toast.success(
@@ -599,6 +606,7 @@ export function ScheduleView() {
       return;
     }
     setWoSaving(true);
+    const saveStartedAt = Date.now();
     const { error } = await createWorkOrder({
       asset_id: woAsset.id,
       type: woForm.type,
@@ -617,14 +625,17 @@ export function ScheduleView() {
       report_delivered: false,
       report_files: [],
     });
-    setWoSaving(false);
     if (error) {
+      setWoSaving(false);
       toast.error(error.message ?? 'Errore nella creazione del work order');
       return;
     }
     const { error: assetErr } = await updateAsset(woAsset.id, { status_override: 'IN LAVORAZIONE' });
     if (assetErr) console.error('Failed to set asset status_override:', assetErr);
     toast.success('Work Order creato');
+    await waitForSaveFeedback(saveStartedAt);
+    setWoSaving(false);
+    await waitForSaveSuccessFeedback();
     setWoModalOpen(false);
   };
 
@@ -636,51 +647,68 @@ export function ScheduleView() {
           <button onClick={prevMonth} className="h-10 w-10 rounded-xl text-slate-500 transition-colors hover:bg-slate-100">
             <ChevronLeft size={18} />
           </button>
-          <div className="flex min-w-0 flex-1 items-center gap-4">
-            <h2 className="min-w-fit text-lg font-bold capitalize text-slate-800 lg:text-2xl">
+          <div className="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4">
+            <h2 className="min-w-0 truncate text-lg font-bold capitalize text-slate-800 lg:text-2xl">
               {format(currentMonth, 'MMMM yyyy', { locale: it })}
             </h2>
-            <div className="flex min-w-0 items-center gap-2 overflow-x-auto">
-              {STATUS_FILTERS.map(({ status, color, Icon }) => {
-                const isActive = statusFilter === status;
+            <div className="flex min-w-0 items-center gap-1.5 overflow-x-auto rounded-2xl border border-slate-200 bg-slate-50/80 p-1.5 shadow-inner">
+              <button
+                type="button"
+                aria-label="Mostra tutte le categorie"
+                title="Tutte le categorie"
+                onClick={() => setCategoryFilter(null)}
+                className={cn(
+                  'relative flex h-12 w-14 shrink-0 items-center justify-center rounded-xl transition-all',
+                  categoryFilter
+                    ? 'text-slate-400 hover:bg-white hover:text-slate-700 hover:shadow-sm'
+                    : 'bg-slate-950 text-white shadow-md shadow-slate-200',
+                )}
+              >
+                <Layers size={23} />
+                <span
+                  className={cn(
+                    'absolute -right-1 -top-1 min-w-6 rounded-md px-1 text-center text-xs font-bold leading-5',
+                    categoryFilter
+                      ? 'bg-white text-slate-500 shadow-sm ring-1 ring-slate-200'
+                      : 'bg-slate-100 text-slate-600',
+                  )}
+                >
+                  {assets.length}
+                </span>
+              </button>
+              {CATEGORY_FILTERS.map((category) => {
+                const isActive = categoryFilter === category;
 
                 return (
                   <button
-                    key={status}
+                    key={category}
                     type="button"
-                    aria-label={`Filtra ${status.toLowerCase()}`}
-                    title={status}
-                    onClick={() => setStatusFilter((current) => (current === status ? null : status))}
+                    aria-label={`Filtra ${category.toLowerCase()}`}
+                    title={category}
+                    onClick={() => setCategoryFilter((current) => (current === category ? null : category))}
                     className={cn(
-                      'flex h-14 w-14 shrink-0 flex-col items-center justify-center gap-1 rounded-xl border text-slate-700 transition-all',
+                      'relative flex h-12 w-14 shrink-0 items-center justify-center rounded-xl transition-all hover:bg-white hover:shadow-sm',
                       isActive
-                        ? 'border-slate-900 bg-slate-900 text-white shadow-sm'
-                        : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50',
+                        ? 'bg-white shadow-sm ring-1 ring-slate-200'
+                        : 'text-slate-500',
                     )}
                   >
-                    <span className={cn('flex h-6 w-6 items-center justify-center rounded-lg text-white', color)}>
-                      <Icon size={14} />
+                    <AssetCategoryIcon category={category} size={25} />
+                    <span
+                      className={cn(
+                        'absolute -right-1 -top-1 min-w-6 rounded-md px-1 text-center text-xs font-bold leading-5 shadow-sm',
+                        isActive
+                          ? 'bg-slate-800 text-white'
+                          : 'bg-white text-slate-500 ring-1 ring-slate-200',
+                      )}
+                    >
+                      {counts[category]}
                     </span>
-                    <span className="text-xs font-bold leading-none">{counts[status]}</span>
                   </button>
                 );
               })}
-              <button
-                type="button"
-                aria-label="Rimuovi filtri calendario"
-                title="Rimuovi filtri"
-                onClick={() => setStatusFilter(null)}
-                className={cn(
-                  'flex h-14 w-14 shrink-0 flex-col items-center justify-center gap-1 rounded-xl border transition-all',
-                  statusFilter
-                    ? 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
-                    : 'border-slate-200 bg-slate-50 text-slate-300',
-                )}
-              >
-                <X size={18} />
-                <span className="text-xs font-bold leading-none">{assets.length}</span>
-              </button>
             </div>
+            <div aria-hidden="true" />
           </div>
           <button onClick={nextMonth} className="ml-auto h-10 w-10 rounded-xl text-slate-500 transition-colors hover:bg-slate-100">
             <ChevronRight size={18} />
@@ -714,9 +742,9 @@ export function ScheduleView() {
           >
             {calDays.map((day) => {
               const key = format(day, 'yyyy-MM-dd');
-              const events = (eventsByDay.get(key) ?? []).filter(matchesStatusFilter);
-              const plannedEvents = (plannedByDay.get(key) ?? []).filter(matchesStatusFilter);
-              const inProgressEvents = (inProgressByDay.get(key) ?? []).filter(matchesStatusFilter);
+              const events = (eventsByDay.get(key) ?? []).filter(matchesCategoryFilter);
+              const plannedEvents = (plannedByDay.get(key) ?? []).filter(matchesCategoryFilter);
+              const inProgressEvents = (inProgressByDay.get(key) ?? []).filter(matchesCategoryFilter);
               const cellEvents = [...events, ...plannedEvents, ...inProgressEvents];
               const inMonth = isSameMonth(day, currentMonth);
               const isSelected = selectedDay === key;
@@ -1228,9 +1256,9 @@ export function ScheduleView() {
                         {planCalDays.map((day) => {
                           const key = format(day, 'yyyy-MM-dd');
                           const planEvents = [
-                            ...(planEventsByDay.get(key) ?? []).filter(matchesStatusFilter),
-                            ...(planPlannedByDay.get(key) ?? []).filter(matchesStatusFilter),
-                            ...(planInProgressByDay.get(key) ?? []).filter(matchesStatusFilter),
+                            ...(planEventsByDay.get(key) ?? []).filter(matchesCategoryFilter),
+                            ...(planPlannedByDay.get(key) ?? []).filter(matchesCategoryFilter),
+                            ...(planInProgressByDay.get(key) ?? []).filter(matchesCategoryFilter),
                           ];
                           const inMonth = isSameMonth(day, planningCalendarMonth);
                           const isTodayDay = isToday(day);
