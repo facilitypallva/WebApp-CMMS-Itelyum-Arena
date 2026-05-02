@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import { ChevronLeft, ChevronRight, AlertTriangle, Clock, CheckCircle2, Wrench, Hammer, MapPin, FolderOpen, CalendarDays, GripVertical, Truck, X } from 'lucide-react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
@@ -15,6 +16,7 @@ import { useSuppliers } from '@/hooks/useSuppliers';
 import { PRIORITY_LABELS, TECHNICIAN_EMPLOYMENT_LABELS } from '@/lib/constants';
 import { parseAssetSerial } from '@/lib/assetUtils';
 import { AssetCategoryIcon } from '@/components/assets/AssetCategoryIcon';
+import { BulkSelectionStack, DragFollowerPreview, DraggableAssetCard, DropCalendarCell } from './DragDropMotion';
 import {
   format, startOfMonth, endOfMonth, startOfWeek, endOfWeek,
   addDays, addMonths, subMonths, isSameMonth, isToday, differenceInDays,
@@ -154,6 +156,12 @@ export function ScheduleView() {
   const [dragOverDay, setDragOverDay] = useState<string | null>(null);
   const [planningViaDrag, setPlanningViaDrag] = useState(false);
   const [planningEvent, setPlanningEvent] = useState<CalendarEvent | null>(null);
+  const [planningEvents, setPlanningEvents] = useState<CalendarEvent[]>([]);
+  const [selectedBacklogAssetIds, setSelectedBacklogAssetIds] = useState<string[]>([]);
+  const [groupingBacklogAssetIds, setGroupingBacklogAssetIds] = useState<string[]>([]);
+  const [hiddenGroupedBacklogAssetIds, setHiddenGroupedBacklogAssetIds] = useState<string[]>([]);
+  const [dropSuccessAssetIds, setDropSuccessAssetIds] = useState<string[]>([]);
+  const [dragPreview, setDragPreview] = useState<{ x: number; y: number; title: string; count: number } | null>(null);
 
   // WO creation modal
   const [woModalOpen, setWoModalOpen] = useState(false);
@@ -228,9 +236,28 @@ export function ScheduleView() {
   const selectedEvents = selectedDay ? (eventsByDay.get(selectedDay) ?? []).filter(matchesStatusFilter) : [];
   const selectedPlannedEvents = selectedDay ? (plannedByDay.get(selectedDay) ?? []).filter(matchesStatusFilter) : [];
   const selectedInProgressEvents = selectedDay ? (inProgressByDay.get(selectedDay) ?? []).filter(matchesStatusFilter) : [];
+  const planningPreviewEvents = planningEvents.length > 0 ? planningEvents : planningEvent ? [planningEvent] : [];
+  const selectedBacklogEvents = useMemo(
+    () => selectedEvents.filter((event) => selectedBacklogAssetIds.includes(event.asset.id)),
+    [selectedBacklogAssetIds, selectedEvents],
+  );
+  const groupingBacklogAssetIdSet = useMemo(
+    () => new Set(groupingBacklogAssetIds),
+    [groupingBacklogAssetIds],
+  );
+  const hiddenGroupedBacklogAssetIdSet = useMemo(
+    () => new Set(selectedBacklogEvents.length > 1 ? hiddenGroupedBacklogAssetIds : []),
+    [hiddenGroupedBacklogAssetIds, selectedBacklogEvents.length],
+  );
+  const visibleBacklogEvents = useMemo(
+    () => selectedEvents.filter((event) => !hiddenGroupedBacklogAssetIdSet.has(event.asset.id)),
+    [hiddenGroupedBacklogAssetIdSet, selectedEvents],
+  );
+  const allBacklogSelected = selectedEvents.length > 0 && selectedBacklogEvents.length === selectedEvents.length;
   const selectedPlannedFromBacklog = useMemo(() => {
     if (!selectedDay) return [];
-    const selectedDate = new Date(`${selectedDay}T12:00:00`);
+    const selectedDateStart = new Date(`${selectedDay}T00:00:00`);
+    const selectedDateEnd = new Date(`${selectedDay}T23:59:59`);
 
     return assets
       .flatMap((asset) => {
@@ -243,8 +270,8 @@ export function ScheduleView() {
         const isDueOnSelectedDay = getOccurrencesInRange(
           asset.last_verification,
           asset.verification_frequency_days,
-          selectedDate,
-          selectedDate,
+          selectedDateStart,
+          selectedDateEnd,
         ).some((date) => format(date, 'yyyy-MM-dd') === selectedDay);
 
         if (!isDueOnSelectedDay) return [];
@@ -260,6 +287,35 @@ export function ScheduleView() {
         return dateCompare || a.asset.name.localeCompare(b.asset.name, 'it');
       });
   }, [activeWorkOrderByAssetId, assets, selectedDay, statusFilter]);
+
+  useEffect(() => {
+    setSelectedBacklogAssetIds((current) => {
+      const validIds = new Set(selectedEvents.map((event) => event.asset.id));
+      const next = current.filter((id) => validIds.has(id));
+      if (next.length === current.length) return current;
+      return next;
+    });
+  }, [selectedEvents]);
+
+  useEffect(() => {
+    if (selectedBacklogAssetIds.length <= 1) {
+      setGroupingBacklogAssetIds([]);
+      setHiddenGroupedBacklogAssetIds([]);
+      return;
+    }
+
+    setHiddenGroupedBacklogAssetIds((current) => (
+      current.filter((id) => selectedBacklogAssetIds.includes(id))
+    ));
+    setGroupingBacklogAssetIds(selectedBacklogAssetIds);
+
+    const timeoutId = window.setTimeout(() => {
+      setHiddenGroupedBacklogAssetIds(selectedBacklogAssetIds);
+      setGroupingBacklogAssetIds([]);
+    }, 430);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [selectedBacklogAssetIds]);
 
   const getEventSupplierName = (event: CalendarEvent) => {
     if (!event.workOrderId) return null;
@@ -323,7 +379,9 @@ export function ScheduleView() {
   const resetPlanningDragState = () => {
     setDraggedEvent(null);
     setDragOverDay(null);
+    setDragPreview(null);
     setPlanningEvent(null);
+    setPlanningEvents([]);
     setPlanningTargetDay(null);
     setPlanningSupplierId('');
     setPlanningViaDrag(false);
@@ -340,11 +398,55 @@ export function ScheduleView() {
     setPlanningAsset(null);
     setPlanningRightMode(null);
     setPlanningCalendarMonth(startOfMonth(new Date()));
+    setSelectedBacklogAssetIds([]);
+    setGroupingBacklogAssetIds([]);
+    setHiddenGroupedBacklogAssetIds([]);
     setPlanningModalOpen(false);
     resetPlanningDragState();
   };
 
-  const handleEventDragStart = (event: CalendarEvent) => {
+  const toggleBacklogSelection = (assetId: string, checked: boolean) => {
+    setSelectedBacklogAssetIds((current) => {
+      if (checked) {
+        return current.includes(assetId) ? current : [...current, assetId];
+      }
+
+      return current.filter((id) => id !== assetId);
+    });
+  };
+
+  const toggleAllBacklogSelection = (checked: boolean) => {
+    setSelectedBacklogAssetIds(checked ? selectedEvents.map((event) => event.asset.id) : []);
+  };
+
+  const updateDragPreviewPosition = (clientX: number, clientY: number) => {
+    if (clientX === 0 && clientY === 0) return;
+    setDragPreview((current) => current
+      ? { ...current, x: clientX, y: clientY }
+      : current);
+  };
+
+  const handleEventDragStart = (event: CalendarEvent, pointerEvent: ReactPointerEvent<HTMLElement>) => {
+    const selectedEventsToDrag = event.visualStatus === 'DUE' && selectedBacklogAssetIds.includes(event.asset.id)
+      ? selectedBacklogEvents.length > 0 ? selectedBacklogEvents : [event]
+      : [event];
+
+    setDragPreview({
+      x: pointerEvent.clientX,
+      y: pointerEvent.clientY,
+      title: event.asset.name,
+      count: selectedEventsToDrag.length,
+    });
+
+    if (event.visualStatus === 'DUE' && selectedBacklogAssetIds.includes(event.asset.id)) {
+      setPlanningAsset(selectedEventsToDrag[0]?.asset ?? event.asset);
+      setPlanningEvents(selectedEventsToDrag);
+      setDraggedEvent(event);
+      return;
+    }
+
+    setPlanningAsset(event.asset);
+    setPlanningEvents([event]);
     setDraggedEvent(event);
   };
 
@@ -368,20 +470,75 @@ export function ScheduleView() {
         return;
       }
 
+      setDropSuccessAssetIds([draggedEvent.asset.id]);
+      window.setTimeout(() => {
+        setDropSuccessAssetIds((current) => current.filter((id) => id !== draggedEvent.asset.id));
+      }, 500);
       resetPlanningDragState();
       toast.success(`WO ripianificato per il ${format(new Date(`${targetDay}T12:00:00`), 'd MMM', { locale: it })}`);
       return;
     }
 
-    setPlanningEvent(draggedEvent);
+    const eventsToPlan = planningEvents.length > 0
+      ? planningEvents.filter((event) => event.visualStatus === 'DUE')
+      : [draggedEvent];
+
+    setPlanningEvent(eventsToPlan[0] ?? draggedEvent);
+    setPlanningEvents(eventsToPlan.length > 0 ? eventsToPlan : [draggedEvent]);
     setPlanningTargetDay(targetDay);
     setPlanningSupplierId('');
     setPlanningModalOpen(true);
     setDragOverDay(null);
   };
 
+  useEffect(() => {
+    if (!draggedEvent) return;
+
+    const findDropDay = (clientX: number, clientY: number) => {
+      const element = document.elementFromPoint(clientX, clientY);
+      return element instanceof HTMLElement
+        ? element.closest<HTMLElement>('[data-schedule-drop-day]')?.dataset.scheduleDropDay ?? null
+        : null;
+    };
+
+    const handlePointerMove = (event: globalThis.PointerEvent) => {
+      updateDragPreviewPosition(event.clientX, event.clientY);
+      setDragOverDay(findDropDay(event.clientX, event.clientY));
+    };
+
+    const handlePointerUp = (event: globalThis.PointerEvent) => {
+      const targetDay = findDropDay(event.clientX, event.clientY);
+      setDragPreview(null);
+
+      if (!targetDay) {
+        setDraggedEvent(null);
+        setDragOverDay(null);
+        return;
+      }
+
+      void handleDropOnDay(targetDay);
+    };
+
+    const handlePointerCancel = () => {
+      setDraggedEvent(null);
+      setDragOverDay(null);
+      setDragPreview(null);
+    };
+
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
+    window.addEventListener('pointercancel', handlePointerCancel);
+
+    return () => {
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
+      window.removeEventListener('pointercancel', handlePointerCancel);
+    };
+  });
+
   const handlePlanningConfirm = async () => {
-    if (!planningEvent || !planningTargetDay) {
+    const eventsToCreate = planningEvents.length > 0 ? planningEvents : planningEvent ? [planningEvent] : [];
+    if (eventsToCreate.length === 0 || !planningTargetDay) {
       toast.error('Asset o giorno di pianificazione non validi');
       return;
     }
@@ -389,34 +546,46 @@ export function ScheduleView() {
     setPlanningViaDrag(true);
 
     try {
-      const { error } = await createWorkOrder({
-        asset_id: planningEvent.asset.id,
-        type: 'PROGRAMMED',
-        status: 'PLANNED',
-        priority: 'MEDIUM',
-        description: `Manutenzione pianificata — ${planningEvent.asset.name}`,
-        technician_id: null,
-        supplier_id: planningSupplierId || null,
-        planned_date: planningTargetDay,
-        executed_at: null,
-        closed_at: null,
-        validation_date: null,
-        photos: [],
-        cost: 0,
-        notes: selectedPlanningSupplier ? `Fornitore pianificato: ${selectedPlanningSupplier.name}` : '',
-        report_delivered: false,
-        report_files: [],
-      });
+      for (const event of eventsToCreate) {
+        const { error } = await createWorkOrder({
+          asset_id: event.asset.id,
+          type: 'PROGRAMMED',
+          status: 'PLANNED',
+          priority: 'MEDIUM',
+          description: `Manutenzione pianificata — ${event.asset.name}`,
+          technician_id: null,
+          supplier_id: planningSupplierId || null,
+          planned_date: planningTargetDay,
+          executed_at: null,
+          closed_at: null,
+          validation_date: null,
+          photos: [],
+          cost: 0,
+          notes: selectedPlanningSupplier ? `Fornitore pianificato: ${selectedPlanningSupplier.name}` : '',
+          report_delivered: false,
+          report_files: [],
+        });
 
-      if (error) {
-        console.error('Schedule planning createWorkOrder failed:', error);
-        toast.error(error.message ?? 'Errore durante la pianificazione visuale');
-        return;
+        if (error) {
+          console.error('Schedule planning createWorkOrder failed:', error);
+          toast.error(error.message ?? 'Errore durante la pianificazione visuale');
+          return;
+        }
       }
 
+      const plannedAssetIds = new Set(eventsToCreate.map((event) => event.asset.id));
+      setDropSuccessAssetIds([...plannedAssetIds]);
+      window.setTimeout(() => {
+        setDropSuccessAssetIds((current) => current.filter((id) => !plannedAssetIds.has(id)));
+      }, 500);
+      setSelectedBacklogAssetIds((current) => current.filter((id) => !plannedAssetIds.has(id)));
       setPlanningModalOpen(false);
       resetPlanningDragState();
-      toast.success(`Intervento pianificato per il ${format(new Date(`${planningTargetDay}T12:00:00`), 'd MMM', { locale: it })}`);
+      toast.success(
+        eventsToCreate.length === 1
+          ? `Intervento pianificato per il ${format(new Date(`${planningTargetDay}T12:00:00`), 'd MMM', { locale: it })}`
+          : `${eventsToCreate.length} interventi pianificati per il ${format(new Date(`${planningTargetDay}T12:00:00`), 'd MMM', { locale: it })}`
+      );
     } finally {
       setPlanningViaDrag(false);
     }
@@ -555,7 +724,7 @@ export function ScheduleView() {
               const hasDetails = cellEvents.length > 0;
 
               return (
-                <div
+                <DropCalendarCell
                   key={key}
                   onClick={() => {
                     if (!hasDetails) return;
@@ -565,6 +734,7 @@ export function ScheduleView() {
                     }
                     selectDay(key);
                   }}
+                  dropDay={key}
                   onDragOver={(event) => {
                     if (!draggedEvent) return;
                     event.preventDefault();
@@ -576,18 +746,20 @@ export function ScheduleView() {
                     }
                   }}
                   onDrop={(event) => {
+                    if (!draggedEvent) return;
                     event.preventDefault();
                     void handleDropOnDay(key);
                   }}
                   className={cn(
-                    'min-h-0 overflow-hidden p-2 transition-colors',
+                    'min-h-0 overflow-hidden p-2 transition-all duration-200',
                     isWeekend && !isSelected && !isTodayDay && 'bg-slate-50',
                     !inMonth && 'opacity-40',
                     isTodayDay && !isSelected && 'bg-primary/5',
                     isSelected && 'bg-blue-50',
-                    dragOverDay === key && 'ring-2 ring-primary/40 ring-inset bg-primary/5',
+                    dragOverDay === key && 'scale-[0.985] bg-primary/5 ring-2 ring-primary/40 ring-inset shadow-inner',
                     hasDetails ? 'cursor-pointer hover:brightness-95' : 'cursor-default',
                   )}
+                  isDragOver={dragOverDay === key}
                 >
                   <div className={cn(
                     'mx-auto mb-1 flex h-7 w-7 items-center justify-center rounded-full text-sm',
@@ -603,15 +775,6 @@ export function ScheduleView() {
                     {cellEvents.slice(0, 8).map((ev, index) => (
                       <div
                         key={`${ev.visualStatus ?? 'due'}-${ev.workOrderId ?? ev.asset.id}-${index}`}
-                        draggable={Boolean(ev.workOrderId)}
-                        onDragStart={(event) => {
-                          event.stopPropagation();
-                          handleEventDragStart(ev);
-                        }}
-                        onDragEnd={() => {
-                          setDraggedEvent(null);
-                          setDragOverDay(null);
-                        }}
                         className={cn(
                           'flex h-6 w-6 items-center justify-center rounded-md border bg-white shadow-sm',
                           ev.visualStatus === 'PLANNED' && 'border-indigo-200 bg-indigo-50',
@@ -619,7 +782,6 @@ export function ScheduleView() {
                           ev.visualStatus === 'DUE' && ev.daysFromToday < 0 && 'border-red-200 bg-red-50',
                           ev.visualStatus === 'DUE' && ev.daysFromToday >= 0 && ev.daysFromToday <= 30 && 'border-orange-200 bg-orange-50',
                           ev.visualStatus === 'DUE' && ev.daysFromToday > 30 && 'border-emerald-200 bg-emerald-50',
-                          ev.workOrderId && 'cursor-grab active:cursor-grabbing',
                         )}
                         title={ev.asset.name}
                       >
@@ -632,7 +794,7 @@ export function ScheduleView() {
                       </div>
                     )}
                   </div>
-                </div>
+                </DropCalendarCell>
               );
             })}
           </div>
@@ -677,33 +839,67 @@ export function ScheduleView() {
             <div className="flex-1 overflow-y-auto py-3">
               {selectedEvents.length > 0 && (
                 <div className="mb-2">
-                  <p className="px-5 pb-1 pt-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                    Backlog scadenze
-                  </p>
+                  <div className="flex items-center justify-between gap-3 px-5 pb-1 pt-2">
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        checked={allBacklogSelected}
+                        onCheckedChange={(value) => toggleAllBacklogSelection(!!value)}
+                      />
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        Backlog scadenze
+                      </p>
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-400">
+                      {selectedBacklogEvents.length > 0
+                        ? `${selectedBacklogEvents.length} selezionati`
+                        : `${selectedEvents.length} asset`}
+                    </span>
+                  </div>
+                  <BulkSelectionStack
+                    count={selectedBacklogEvents.length}
+                    names={selectedBacklogEvents.map((event) => event.asset.name)}
+                    onPointerDragStart={(event) => {
+                      const firstSelectedEvent = selectedBacklogEvents[0];
+                      if (!firstSelectedEvent) return;
+                      setPlanningAsset(firstSelectedEvent.asset);
+                      handleEventDragStart(firstSelectedEvent, event);
+                    }}
+                    onClear={() => setSelectedBacklogAssetIds([])}
+                  />
                   <div className="space-y-1 px-3">
-                    {selectedEvents.map((ev) => {
+                    {visibleBacklogEvents.map((ev) => {
+                      const isBulkSelected = selectedBacklogAssetIds.includes(ev.asset.id);
                       const loc = ev.asset.location?.name?.replace(/^00_/, '').toUpperCase()
                         ?? parseAssetSerial(ev.asset.serial_number)?.locationCode
                         ?? null;
                       return (
-                        <div
+                        <DraggableAssetCard
                           key={`bl-${ev.asset.id}`}
-                          draggable
-                          onDragStart={() => {
+                          onPointerDragStart={(event) => {
                             setPlanningAsset(ev.asset);
-                            handleEventDragStart(ev);
+                            handleEventDragStart(ev, event);
                           }}
-                          onDragEnd={() => { setDraggedEvent(null); setDragOverDay(null); }}
+                          isDragging={draggedEvent?.asset.id === ev.asset.id}
+                          isSelected={isBulkSelected || planningAsset?.id === ev.asset.id}
+                          isGrouped={groupingBacklogAssetIdSet.has(ev.asset.id)}
+                          isDropSuccess={dropSuccessAssetIds.includes(ev.asset.id)}
                           className={cn(
-                            'flex items-center gap-2 rounded-xl border px-3 py-3 transition-all',
-                            planningAsset?.id === ev.asset.id
+                            'flex items-center gap-2 rounded-xl border px-3 py-3 transition-colors duration-200 ease-out',
+                            isBulkSelected
+                              ? 'border-primary/40 bg-primary/5 shadow-sm'
+                              : planningAsset?.id === ev.asset.id
                               ? 'border-primary/40 bg-primary/5 shadow-sm'
                               : draggedEvent?.asset.id === ev.asset.id
-                              ? 'border-primary/40 bg-primary/5 opacity-70'
+                              ? 'border-primary/40 bg-primary/5'
                               : 'border-slate-200 bg-white hover:border-primary/30 hover:bg-slate-50',
                           )}
                         >
-                          <GripVertical size={14} className="shrink-0 text-slate-300" />
+                          <Checkbox
+                            checked={isBulkSelected}
+                            onCheckedChange={(value) => toggleBacklogSelection(ev.asset.id, !!value)}
+                            className="shrink-0"
+                          />
+                          <GripVertical size={14} className="shrink-0 text-slate-300 transition-colors group-hover:text-primary" />
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-sm font-bold text-slate-800">{ev.asset.name}</p>
                             <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
@@ -727,13 +923,18 @@ export function ScheduleView() {
                             onClick={() => {
                               setPlanningAsset(ev.asset);
                               setPlanningRightMode('months');
+                              if (selectedBacklogAssetIds.includes(ev.asset.id)) {
+                                setPlanningEvents(selectedBacklogEvents.length > 0 ? selectedBacklogEvents : [ev]);
+                              } else {
+                                setPlanningEvents([ev]);
+                              }
                             }}
                             className="shrink-0 rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-primary"
                             title="Pianifica"
                           >
                             <CalendarDays size={16} />
                           </button>
-                        </div>
+                        </DraggableAssetCard>
                       );
                     })}
                   </div>
@@ -799,24 +1000,26 @@ export function ScheduleView() {
                         ?? parseAssetSerial(ev.asset.serial_number)?.locationCode
                         ?? null;
                       return (
-                        <div
+                        <DraggableAssetCard
                           key={`pl-${ev.asset.id}`}
                           draggable={Boolean(ev.workOrderId)}
-                          onDragStart={() => {
+                          onPointerDragStart={(event) => {
                             setPlanningAsset(ev.asset);
-                            handleEventDragStart(ev);
+                            handleEventDragStart(ev, event);
                           }}
-                          onDragEnd={() => { setDraggedEvent(null); setDragOverDay(null); }}
+                          isDragging={draggedEvent?.asset.id === ev.asset.id}
+                          isSelected={planningAsset?.id === ev.asset.id}
+                          isDropSuccess={dropSuccessAssetIds.includes(ev.asset.id)}
                           className={cn(
-                            'flex items-center gap-2 rounded-xl border px-3 py-3 transition-all',
+                            'flex items-center gap-2 rounded-xl border px-3 py-3 transition-colors duration-200 ease-out',
                             ev.workOrderId
                               ? draggedEvent?.asset.id === ev.asset.id
-                                ? 'border-indigo-200 bg-indigo-50 opacity-70 cursor-grab'
+                                ? 'border-indigo-200 bg-indigo-50 cursor-grab'
                                 : 'cursor-grab border-indigo-100 bg-indigo-50/50 hover:border-indigo-200'
                               : 'border-slate-200 bg-white',
                           )}
                         >
-                          {ev.workOrderId && <GripVertical size={14} className="shrink-0 text-indigo-300" />}
+                          {ev.workOrderId && <GripVertical size={14} className="shrink-0 text-indigo-300 transition-colors group-hover:text-indigo-500" />}
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-sm font-bold text-slate-800">{ev.asset.name}</p>
                             <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
@@ -871,7 +1074,7 @@ export function ScheduleView() {
                               <FolderOpen size={14} />
                             </button>
                           </div>
-                        </div>
+                        </DraggableAssetCard>
                       );
                     })}
                   </div>
@@ -1033,8 +1236,9 @@ export function ScheduleView() {
                           const isWeekend = day.getDay() === 0 || day.getDay() === 6;
                           const isDragOver = dragOverDay === key;
                           return (
-                            <div
+                            <DropCalendarCell
                               key={key}
+                              dropDay={key}
                               onClick={() => {
                                 selectDay(key);
                               }}
@@ -1044,14 +1248,19 @@ export function ScheduleView() {
                                 setDragOverDay(key);
                               }}
                               onDragLeave={() => { if (dragOverDay === key) setDragOverDay(null); }}
-                              onDrop={(e) => { e.preventDefault(); void handleDropOnDay(key); }}
+                              onDrop={(e) => {
+                                if (!draggedEvent) return;
+                                e.preventDefault();
+                                void handleDropOnDay(key);
+                              }}
                               className={cn(
-                                'cursor-pointer overflow-hidden p-1.5 transition-colors hover:bg-slate-50',
+                                'cursor-pointer overflow-hidden p-1.5 transition-all duration-200 hover:bg-slate-50',
                                 isWeekend && !isTodayDay && 'bg-slate-50/60',
                                 !inMonth && 'opacity-30',
                                 isTodayDay && 'bg-primary/5',
-                                isDragOver && 'bg-primary/5 ring-2 ring-inset ring-primary/40',
+                                isDragOver && 'scale-[0.985] bg-primary/5 ring-2 ring-inset ring-primary/40 shadow-inner',
                               )}
+                              isDragOver={isDragOver}
                             >
                               <div className={cn(
                                 'mx-auto mb-0.5 flex h-6 w-6 items-center justify-center rounded-full text-xs',
@@ -1084,7 +1293,7 @@ export function ScheduleView() {
                                   </div>
                                 )}
                               </div>
-                            </div>
+                            </DropCalendarCell>
                           );
                         })}
                       </div>
@@ -1096,6 +1305,14 @@ export function ScheduleView() {
           </div>
         </SheetContent>
       </Sheet>
+
+      <DragFollowerPreview
+        visible={Boolean(dragPreview)}
+        x={dragPreview?.x ?? 0}
+        y={dragPreview?.y ?? 0}
+        title={dragPreview?.title ?? ''}
+        count={dragPreview?.count ?? 1}
+      />
 
       {/* WO creation dialog */}
       <Dialog open={woModalOpen} onOpenChange={setWoModalOpen}>
@@ -1253,34 +1470,62 @@ export function ScheduleView() {
       >
         <DialogContent className="sm:max-w-lg rounded-xl p-0 overflow-hidden">
           <DialogHeader className="border-b px-8 py-6">
-            <DialogTitle className="text-2xl font-bold">Pianifica intervento</DialogTitle>
-            {planningEvent && planningTargetDay && (
+            <DialogTitle className="text-2xl font-bold">
+              {planningPreviewEvents.length > 1
+                ? `Pianifica ${planningPreviewEvents.length} interventi`
+                : 'Pianifica intervento'}
+            </DialogTitle>
+            {planningPreviewEvents.length > 0 && planningTargetDay && (
               <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-4">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="rounded-full bg-slate-900 px-3 py-1 text-[11px] font-bold text-white">
-                    Asset
+                    {planningPreviewEvents.length > 1 ? `${planningPreviewEvents.length} asset` : 'Asset'}
                   </span>
-                  <span className="text-base font-bold text-slate-800">{planningEvent.asset.name}</span>
-                  {planningEvent.asset.serial_number && (
+                  <span className="text-base font-bold text-slate-800">
+                    {planningPreviewEvents.length > 1
+                      ? 'Pianificazione massiva'
+                      : planningPreviewEvents[0].asset.name}
+                  </span>
+                  {planningPreviewEvents.length === 1 && planningPreviewEvents[0].asset.serial_number && (
                     <span className="rounded-md bg-white px-2 py-0.5 text-[10px] font-bold text-slate-500">
-                      {planningEvent.asset.serial_number}
+                      {planningPreviewEvents[0].asset.serial_number}
                     </span>
                   )}
                 </div>
-                <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-slate-500">
-                  <span>{planningEvent.asset.category}</span>
-                  <span>{planningEvent.asset.brand} {planningEvent.asset.model}</span>
-                  {planningAssetLocation && (
-                    <span className="flex items-center gap-1">
-                      <MapPin size={12} />
-                      {planningAssetLocation}
-                    </span>
-                  )}
-                </div>
+                {planningPreviewEvents.length > 1 ? (
+                  <div className="mt-3 max-h-28 space-y-1 overflow-y-auto">
+                    {planningPreviewEvents.map((event) => (
+                      <div key={event.asset.id} className="flex items-center justify-between gap-3 rounded-lg bg-white px-3 py-2">
+                        <span className="truncate text-sm font-semibold text-slate-700">{event.asset.name}</span>
+                        {event.asset.serial_number && (
+                          <span className="shrink-0 rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500">
+                            {event.asset.serial_number}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-slate-500">
+                    <span>{planningPreviewEvents[0].asset.category}</span>
+                    <span>{planningPreviewEvents[0].asset.brand} {planningPreviewEvents[0].asset.model}</span>
+                    {planningAssetLocation && (
+                      <span className="flex items-center gap-1">
+                        <MapPin size={12} />
+                        {planningAssetLocation}
+                      </span>
+                    )}
+                  </div>
+                )}
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   <span className="rounded-full bg-blue-100 px-3 py-1 text-[11px] font-bold text-blue-700">
-                    Pianificato per il {format(new Date(`${planningTargetDay}T12:00:00`), 'd MMMM yyyy', { locale: it })}
+                    {planningPreviewEvents.length > 1 ? 'Pianificati' : 'Pianificato'} per il {format(new Date(`${planningTargetDay}T12:00:00`), 'd MMMM yyyy', { locale: it })}
                   </span>
+                  {planningPreviewEvents.length > 1 && (
+                    <span className="rounded-full bg-white px-3 py-1 text-[11px] font-bold text-slate-500">
+                      Conferma unica con lo stesso fornitore
+                    </span>
+                  )}
                 </div>
               </div>
             )}
@@ -1323,7 +1568,11 @@ export function ScheduleView() {
               Annulla
             </Button>
             <Button className="rounded-xl" onClick={handlePlanningConfirm} disabled={planningViaDrag}>
-              {planningViaDrag ? 'Pianificazione...' : 'Conferma pianificazione'}
+              {planningViaDrag
+                ? 'Pianificazione...'
+                : planningPreviewEvents.length > 1
+                  ? 'Conferma pianificazione massiva'
+                  : 'Conferma pianificazione'}
             </Button>
           </DialogFooter>
         </DialogContent>
