@@ -54,6 +54,18 @@ const RESULT_META = {
   },
 } as const;
 
+const TITLE_SECTION_LABELS: Record<string, string> = {
+  'Dashboard Generale': 'Panoramica',
+  'Scadenzario Manutenzioni': 'Operatività',
+  'Work Orders': 'Operatività',
+  'Rapportini': 'Operatività',
+  'Ticketing System': 'Operatività',
+  'Gestione Asset': 'Anagrafiche',
+  'Fornitori e Tecnici': 'Anagrafiche',
+  'Gestione Utenti': 'Amministrazione',
+  'Audit Log': 'Amministrazione',
+};
+
 function buildSearchText(parts: Array<string | null | undefined>) {
   return parts.filter(Boolean).join(' ').toLowerCase();
 }
@@ -78,6 +90,7 @@ export function Header({
   const deferredSearch = useDeferredValue(globalSearch.trim().toLowerCase());
   const closeTimeoutRef = useRef<number | null>(null);
   const isDarkMode = resolvedTheme === 'dark';
+  const sectionLabel = TITLE_SECTION_LABELS[title] ?? 'Operations';
 
   const results = useMemo(() => {
     if (!deferredSearch) return [];
@@ -246,7 +259,7 @@ export function Header({
           <Menu size={24} />
         </Button>
         <div className="hidden md:flex items-center gap-2 text-sm">
-          <span className="font-medium text-slate-500">Operations</span>
+          <span className="font-medium text-slate-500">{sectionLabel}</span>
           <span className="text-slate-300">/</span>
           <h1 className="arena-heading text-sm font-semibold text-slate-950">{title}</h1>
         </div>
