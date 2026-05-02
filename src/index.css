@@ -80,9 +80,23 @@
   }
 }
 
+@keyframes arena-save-error-shake {
+  0% { transform: translateX(0); }
+  18% { transform: translateX(-4px); }
+  36% { transform: translateX(4px); }
+  54% { transform: translateX(-3px); }
+  72% { transform: translateX(3px); }
+  100% { transform: translateX(0); }
+}
+
+.animate-shake {
+  animation: arena-save-error-shake 360ms ease;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .login-light-sweep,
-  .login-ambient-glow {
+  .login-ambient-glow,
+  .animate-shake {
     animation: none;
   }
 }

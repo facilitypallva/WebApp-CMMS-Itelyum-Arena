@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Plus, Search, ShieldCheck, UserCog, MoreHorizontal, Pencil, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { AnimatedSaveButton } from '@/components/ui/animated-save-button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
@@ -355,9 +356,7 @@ export function UsersManagement() {
             <Button variant="outline" className="rounded-lg" onClick={() => setModalOpen(false)}>
               Annulla
             </Button>
-            <Button className="rounded-lg" onClick={() => void handleSave()} disabled={saving}>
-              {saving ? 'Salvataggio...' : 'Salva'}
-            </Button>
+            <AnimatedSaveButton className="rounded-lg" onClick={() => void handleSave()} isSaving={saving} idleLabel="Salva" />
           </DialogFooter>
         </DialogContent>
       </Dialog>

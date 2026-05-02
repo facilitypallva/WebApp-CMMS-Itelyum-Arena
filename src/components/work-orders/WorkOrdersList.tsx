@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { Clock, Plus, ChevronRight, Search, FileCheck, Paperclip, Download, Trash2, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { AnimatedSaveButton } from '@/components/ui/animated-save-button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -1057,7 +1058,7 @@ export function WorkOrdersList({
               </Button>
             )}
             <Button variant="outline" className="rounded-xl" onClick={() => setModalOpen(false)}>Annulla</Button>
-            <Button className="rounded-xl bg-primary" onClick={handleSave} disabled={saving}>{saving ? 'Salvataggio...' : 'Salva'}</Button>
+            <AnimatedSaveButton onClick={handleSave} isSaving={saving} idleLabel="Salva" />
           </DialogFooter>
         </DialogContent>
       </Dialog>

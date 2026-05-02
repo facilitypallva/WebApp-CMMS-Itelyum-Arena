@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Filter, Plus, MoreHorizontal, Eye, Edit, Trash2, MapPin, QrCode, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { AnimatedSaveButton } from '@/components/ui/animated-save-button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -616,7 +617,7 @@ export function AssetsTable({
           </div>
           <DialogFooter className="gap-2">
             <Button variant="outline" className="rounded-xl" onClick={() => setModalOpen(false)}>Annulla</Button>
-            <Button className="rounded-xl bg-primary" onClick={handleSave} disabled={saving}>{saving ? 'Salvataggio...' : 'Salva'}</Button>
+            <AnimatedSaveButton onClick={handleSave} isSaving={saving} idleLabel="Salva" />
           </DialogFooter>
         </DialogContent>
       </Dialog>

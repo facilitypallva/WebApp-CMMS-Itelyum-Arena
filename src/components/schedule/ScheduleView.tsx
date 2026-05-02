@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type PointerEvent as ReactPointerEvent } 
 import { ChevronLeft, ChevronRight, AlertTriangle, Clock, CheckCircle2, Wrench, Hammer, MapPin, FolderOpen, CalendarDays, GripVertical, Truck, X } from 'lucide-react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
+import { AnimatedSaveButton } from '@/components/ui/animated-save-button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -1451,10 +1452,13 @@ export function ScheduleView() {
             <Button variant="outline" className="rounded-xl" onClick={() => setWoModalOpen(false)}>
               Annulla
             </Button>
-            <Button className="rounded-xl gap-2" onClick={handleWoSave} disabled={woSaving}>
-              <Wrench size={14} />
-              {woSaving ? 'Creazione...' : 'Crea Work Order'}
-            </Button>
+            <AnimatedSaveButton
+              onClick={handleWoSave}
+              isSaving={woSaving}
+              idleLabel="Crea Work Order"
+              savingLabel="Creazione..."
+              idleIcon={<Wrench size={14} />}
+            />
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1567,13 +1571,12 @@ export function ScheduleView() {
             <Button variant="outline" className="rounded-xl" onClick={() => setPlanningModalOpen(false)}>
               Annulla
             </Button>
-            <Button className="rounded-xl" onClick={handlePlanningConfirm} disabled={planningViaDrag}>
-              {planningViaDrag
-                ? 'Pianificazione...'
-                : planningPreviewEvents.length > 1
-                  ? 'Conferma pianificazione massiva'
-                  : 'Conferma pianificazione'}
-            </Button>
+            <AnimatedSaveButton
+              onClick={handlePlanningConfirm}
+              isSaving={planningViaDrag}
+              idleLabel={planningPreviewEvents.length > 1 ? 'Conferma pianificazione massiva' : 'Conferma pianificazione'}
+              savingLabel="Pianificazione..."
+            />
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1630,9 +1633,11 @@ export function ScheduleView() {
             >
               Annulla
             </Button>
-            <Button className="rounded-xl" onClick={saveSupplierChange} disabled={savingSupplierChange}>
-              {savingSupplierChange ? 'Salvataggio...' : 'Salva fornitore'}
-            </Button>
+            <AnimatedSaveButton
+              onClick={saveSupplierChange}
+              isSaving={savingSupplierChange}
+              idleLabel="Salva fornitore"
+            />
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { AnimatedSaveButton } from '@/components/ui/animated-save-button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
@@ -110,13 +111,12 @@ export function ResetPasswordPage() {
                   </div>
                 </div>
 
-                <Button
+                <AnimatedSaveButton
                   type="submit"
-                  disabled={saving}
+                  isSaving={saving}
+                  idleLabel="Aggiorna password"
                   className="h-11 w-full rounded-xl bg-blue-800 text-sm font-bold text-white shadow-lg shadow-blue-900/15 hover:bg-blue-900"
-                >
-                  {saving ? 'Salvataggio...' : 'Aggiorna password'}
-                </Button>
+                />
               </form>
             ) : (
               <div className="mt-7 rounded-2xl border border-slate-200 bg-white/80 p-4 text-sm leading-6 text-slate-600">

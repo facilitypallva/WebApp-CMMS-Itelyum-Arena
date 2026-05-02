@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
+import { AnimatedSaveButton } from '@/components/ui/animated-save-button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
@@ -163,14 +164,14 @@ export function ProfileSheet({ open, onOpenChange }: ProfileSheetProps) {
           </div>
 
           {/* Salva */}
-          <Button
+          <AnimatedSaveButton
             onClick={handleSave}
             disabled={saving || uploading}
-            className="w-full gap-2 bg-cyan-500 font-semibold text-[#0b1220] hover:bg-cyan-400"
-          >
-            <Save size={15} />
-            {saving ? 'Salvataggio...' : 'Salva modifiche'}
-          </Button>
+            isSaving={saving}
+            idleLabel="Salva modifiche"
+            idleIcon={<Save size={15} />}
+            className="w-full bg-cyan-500 font-semibold text-[#0b1220] shadow-cyan-500/20 hover:bg-cyan-400"
+          />
         </div>
 
         {/* Logout */}

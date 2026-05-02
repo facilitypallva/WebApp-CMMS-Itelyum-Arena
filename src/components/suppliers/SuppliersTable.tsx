@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Plus, MoreHorizontal, Edit, Trash2, Building2, Phone, Mail, Tag, UserRound, BriefcaseBusiness } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { AnimatedSaveButton } from '@/components/ui/animated-save-button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -406,7 +407,7 @@ export function SuppliersTable({
           </div>
           <DialogFooter className="gap-2">
             <Button variant="outline" className="rounded-xl" onClick={() => setSupplierModalOpen(false)}>Annulla</Button>
-            <Button className="rounded-xl bg-primary" onClick={handleSaveSupplier} disabled={savingSupplier}>{savingSupplier ? 'Salvataggio...' : 'Salva'}</Button>
+            <AnimatedSaveButton onClick={handleSaveSupplier} isSaving={savingSupplier} idleLabel="Salva" />
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -470,7 +471,7 @@ export function SuppliersTable({
           </div>
           <DialogFooter className="gap-2">
             <Button variant="outline" className="rounded-xl" onClick={() => setTechnicianModalOpen(false)}>Annulla</Button>
-            <Button className="rounded-xl bg-primary" onClick={handleSaveTechnician} disabled={savingTechnician}>{savingTechnician ? 'Salvataggio...' : 'Salva'}</Button>
+            <AnimatedSaveButton onClick={handleSaveTechnician} isSaving={savingTechnician} idleLabel="Salva" />
           </DialogFooter>
         </DialogContent>
       </Dialog>
