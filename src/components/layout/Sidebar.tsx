@@ -79,15 +79,15 @@ export function Sidebar() {
     setExpanded((s) => { const n = new Set(s); n.has(href) ? n.delete(href) : n.add(href); return n; });
 
   return (
-    <aside className="sticky top-0 flex h-screen w-[248px] shrink-0 flex-col overflow-y-auto border-r border-white/5 bg-sidebar text-slate-400">
-      <div className="flex h-[72px] items-center border-b border-white/6 px-6">
-        <ArenaOsLogo variant="light" className="h-12 w-[196px]" />
+    <aside className="sticky top-0 flex h-screen w-[var(--sidebar-width)] shrink-0 flex-col overflow-y-auto border-r border-[var(--sidebar-border)] bg-[var(--sidebar-bg)] text-[var(--sidebar-text)]">
+      <div className="flex h-11 items-center border-b border-[var(--sidebar-border)] px-4">
+        <ArenaOsLogo variant="light" className="h-[34px] w-[116px]" />
       </div>
 
-      <nav className="flex-1 overflow-y-auto px-2 py-4">
+      <nav className="flex-1 overflow-y-auto px-2 py-3">
         {sections.map((section) => (
-          <div key={section.label} className="mb-5 last:mb-0">
-            <div className="px-5 pb-2 pt-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-600">
+          <div key={section.label} className="mb-3 last:mb-0">
+            <div className="px-3 pb-1.5 pt-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--sidebar-text-muted)]">
               {section.label}
             </div>
             {section.items.map((item) => {
@@ -101,41 +101,41 @@ export function Sidebar() {
                       to={item.href}
                       end={item.href === '/'}
                       className={({ isActive }) => cn(
-                        'group relative my-px flex flex-1 items-center gap-3 rounded-lg border-l-2 px-4 py-2.5 text-[13.5px] transition-all duration-200',
+                        'group relative flex h-[var(--sidebar-item-height)] flex-1 items-center gap-2.5 rounded-[var(--sidebar-radius)] px-3 text-[13px] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#27e58c]/35',
                         isActive
-                          ? 'border-cyan-400 bg-cyan-400/[0.08] text-white'
-                          : 'border-transparent text-slate-400 hover:bg-white/[0.04] hover:text-slate-200'
+                          ? 'bg-[var(--sidebar-item-bg-active)] text-[var(--sidebar-text-active)] [box-shadow:inset_2px_0_0_#27e58c]'
+                          : 'text-[var(--sidebar-text)] hover:bg-[var(--sidebar-item-bg-hover)] hover:text-slate-200'
                       )}
                     >
-                      <item.icon size={18} className="shrink-0 transition-transform duration-200 group-hover:scale-105" />
+                      <item.icon size={16} className="shrink-0" />
                       <span className="font-medium">{item.label}</span>
                     </NavLink>
                     {hasChildren && (
                       <button
                         onClick={() => toggle(item.href)}
-                        className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-white/[0.04] hover:text-slate-200"
+                        className="flex h-8 w-7 shrink-0 items-center justify-center rounded-[var(--sidebar-radius)] text-[var(--sidebar-text-muted)] transition-colors duration-150 hover:bg-[var(--sidebar-item-bg-hover)] hover:text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#27e58c]/35"
                       >
                         {isOpen
-                          ? <ChevronDown size={14} />
-                          : <ChevronRight size={14} />}
+                          ? <ChevronDown size={13} />
+                          : <ChevronRight size={13} />}
                       </button>
                     )}
                   </div>
 
                   {hasChildren && isOpen && (
-                    <div className="ml-4 mt-1 space-y-0.5 border-l border-white/[0.06] pl-2">
+                    <div className="ml-3 mt-1 space-y-1 border-l border-[var(--sidebar-border)] pl-2">
                       {item.children!.map((child) => (
                         <NavLink
                           key={child.href}
                           to={child.href}
                           className={({ isActive }) => cn(
-                            'group flex items-center gap-3 rounded-lg px-4 py-2 text-sm transition-all duration-200',
+                            'group flex h-[var(--sidebar-item-height)] items-center gap-2.5 rounded-[var(--sidebar-radius)] px-3 text-[13px] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#27e58c]/35',
                             isActive
-                              ? 'bg-cyan-400/[0.08] font-semibold text-cyan-200'
-                              : 'text-slate-500 hover:bg-white/[0.04] hover:text-slate-200'
+                              ? 'bg-[var(--sidebar-item-bg-active)] font-medium text-[var(--sidebar-text-active)] [box-shadow:inset_2px_0_0_#27e58c]'
+                              : 'text-[var(--sidebar-text)] hover:bg-[var(--sidebar-item-bg-hover)] hover:text-slate-200'
                           )}
                         >
-                          <child.icon size={16} className="shrink-0 transition-transform duration-200 group-hover:scale-105" />
+                          <child.icon size={16} className="shrink-0" />
                           <span className="font-medium">{child.label}</span>
                         </NavLink>
                       ))}
@@ -148,12 +148,12 @@ export function Sidebar() {
         ))}
       </nav>
 
-      <div className="border-t border-white/[0.06] p-3">
+      <div className="border-t border-[var(--sidebar-border)] p-2">
         <button
           onClick={() => setProfileOpen(true)}
-          className="group flex w-full items-center gap-3 rounded-xl border border-white/[0.05] bg-white/[0.035] p-3 transition-all hover:border-cyan-400/20 hover:bg-white/[0.06]"
+          className="group flex h-12 w-full items-center gap-2 rounded-[var(--sidebar-radius)] px-2 text-left transition-colors duration-150 hover:bg-[var(--sidebar-item-bg-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#27e58c]/35"
         >
-          <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-blue-700 to-cyan-400 text-xs font-bold text-white ring-1 ring-white/10">
+          <div className="relative flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#17181d] text-[10px] font-semibold text-white ring-1 ring-white/10">
             {profile?.avatar_url ? (
               <img src={profile.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
             ) : (
@@ -161,10 +161,10 @@ export function Sidebar() {
             )}
           </div>
           <div className="flex min-w-0 flex-1 flex-col items-start">
-            <p className="truncate text-xs font-semibold text-white">{displayName}</p>
-            <p className="text-[10px] text-slate-500">{APP_ROLE_LABELS[role]}</p>
+            <p className="truncate text-[12px] font-medium leading-4 text-white">{displayName}</p>
+            <p className="text-[10px] leading-3 text-[var(--sidebar-text-muted)]">{APP_ROLE_LABELS[role]}</p>
           </div>
-          <ChevronUp size={14} className="shrink-0 text-slate-600 transition-colors group-hover:text-slate-400" />
+          <ChevronUp size={13} className="shrink-0 text-[var(--sidebar-text-muted)] transition-colors duration-150 group-hover:text-slate-400" />
         </button>
       </div>
 

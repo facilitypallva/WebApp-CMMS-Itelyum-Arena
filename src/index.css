@@ -19,10 +19,10 @@
   --radius-sm: calc(1rem - 4px);
 
   --color-primary: #1e40af;
-  --color-sidebar: #0b1220;
-  --color-sidebar-foreground: #94a3b8;
-  --color-sidebar-primary: #06b6d4;
-  --color-sidebar-accent: rgb(255 255 255 / 0.04);
+  --color-sidebar: #090909;
+  --color-sidebar-foreground: #8a8f98;
+  --color-sidebar-primary: #27e58c;
+  --color-sidebar-accent: #111216;
 }
 
 @layer base {
@@ -190,14 +190,23 @@
     --chart-4: oklch(0.371 0 0);
     --chart-5: oklch(0.269 0 0);
     --radius: 0.625rem;
-    --sidebar: #0b1220;
-    --sidebar-foreground: #94a3b8;
-    --sidebar-primary: #06b6d4;
+    --sidebar-width: 244px;
+    --sidebar-bg: #090909;
+    --sidebar-border: #1c1e21;
+    --sidebar-text: #8a8f98;
+    --sidebar-text-muted: #5f6878;
+    --sidebar-text-active: #ffffff;
+    --sidebar-item-bg-hover: #111216;
+    --sidebar-item-bg-active: #17181d;
+    --sidebar-radius: 6px;
+    --sidebar-item-height: 32px;
+    --sidebar: var(--sidebar-bg);
+    --sidebar-foreground: var(--sidebar-text);
+    --sidebar-primary: #27e58c;
     --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: rgb(255 255 255 / 0.04);
-    --sidebar-accent-foreground: #e2e8f0;
-    --sidebar-border: rgb(255 255 255 / 0.06);
-    --sidebar-ring: #06b6d4;
+    --sidebar-accent: var(--sidebar-item-bg-hover);
+    --sidebar-accent-foreground: var(--sidebar-text-active);
+    --sidebar-ring: #27e58c;
 }
 
 .dark {
@@ -224,14 +233,14 @@
     --chart-3: oklch(0.439 0 0);
     --chart-4: oklch(0.371 0 0);
     --chart-5: oklch(0.269 0 0);
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
+    --sidebar: var(--sidebar-bg);
+    --sidebar-foreground: var(--sidebar-text);
+    --sidebar-primary: #27e58c;
     --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.556 0 0);
+    --sidebar-accent: var(--sidebar-item-bg-hover);
+    --sidebar-accent-foreground: var(--sidebar-text-active);
+    --sidebar-border: #1c1e21;
+    --sidebar-ring: #27e58c;
 }
 
 @layer base {
