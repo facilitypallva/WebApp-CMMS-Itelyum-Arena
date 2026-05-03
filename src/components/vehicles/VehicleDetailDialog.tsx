@@ -482,12 +482,12 @@ export function VehicleDetailDialog({
 
         <Tabs key={`${vehicle.id}-${initialTab}`} defaultValue={initialTab} className="gap-0">
           <div className="border-b border-[var(--arena-border-soft)] px-6 pt-3">
-            <TabsList variant="line" className="h-10 gap-5">
-              <TabsTrigger value="anagrafica" className="px-0">Anagrafica</TabsTrigger>
-              <TabsTrigger value="assegnazione" className="px-0">Assegnazione</TabsTrigger>
-              <TabsTrigger value="scadenze" className="px-0">Scadenze</TabsTrigger>
-              <TabsTrigger value="manutenzione" className="px-0">Manutenzione</TabsTrigger>
-              <TabsTrigger value="storico" className="px-0">Storico</TabsTrigger>
+            <TabsList variant="line" className="h-10 gap-5 text-[var(--arena-text-secondary)]">
+              <TabsTrigger value="anagrafica" className="px-0 text-[var(--arena-text-secondary)] hover:text-[var(--arena-text-primary)] data-active:text-[var(--arena-text-primary)] after:bg-[var(--arena-accent)]">Anagrafica</TabsTrigger>
+              <TabsTrigger value="assegnazione" className="px-0 text-[var(--arena-text-secondary)] hover:text-[var(--arena-text-primary)] data-active:text-[var(--arena-text-primary)] after:bg-[var(--arena-accent)]">Assegnazione</TabsTrigger>
+              <TabsTrigger value="scadenze" className="px-0 text-[var(--arena-text-secondary)] hover:text-[var(--arena-text-primary)] data-active:text-[var(--arena-text-primary)] after:bg-[var(--arena-accent)]">Scadenze</TabsTrigger>
+              <TabsTrigger value="manutenzione" className="px-0 text-[var(--arena-text-secondary)] hover:text-[var(--arena-text-primary)] data-active:text-[var(--arena-text-primary)] after:bg-[var(--arena-accent)]">Manutenzione</TabsTrigger>
+              <TabsTrigger value="storico" className="px-0 text-[var(--arena-text-secondary)] hover:text-[var(--arena-text-primary)] data-active:text-[var(--arena-text-primary)] after:bg-[var(--arena-accent)]">Storico</TabsTrigger>
             </TabsList>
           </div>
 
