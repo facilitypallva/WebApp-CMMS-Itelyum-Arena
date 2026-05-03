@@ -116,6 +116,7 @@ export function VehicleWeekCalendar({ vehicles, bookings }: VehicleWeekCalendarP
             type="button"
             variant="outline"
             size="icon-sm"
+            className="arena-dark-outline-button"
             aria-label="Settimana precedente"
             onClick={() => setWeekStart((current) => addDays(current, -7))}
           >
@@ -125,6 +126,7 @@ export function VehicleWeekCalendar({ vehicles, bookings }: VehicleWeekCalendarP
             type="button"
             variant="outline"
             size="icon-sm"
+            className="arena-dark-outline-button"
             aria-label="Settimana successiva"
             onClick={() => setWeekStart((current) => addDays(current, 7))}
           >

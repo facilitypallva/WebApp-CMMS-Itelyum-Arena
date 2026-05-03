@@ -206,10 +206,10 @@ export function VehicleBookingsSidebar() {
 
                 <div className="mt-3 flex flex-wrap gap-2">
                   <Popover>
-                    <PopoverTrigger render={<Button variant="outline" size="sm" className="rounded-lg" disabled={busyBookingId === booking.id} />}>
+                    <PopoverTrigger render={<Button variant="outline" size="sm" className="arena-dark-outline-button rounded-lg" disabled={busyBookingId === booking.id} />}>
                       Assegna veicolo
                     </PopoverTrigger>
-                    <PopoverContent align="start" className="w-72 p-3">
+                    <PopoverContent align="start" className="arena-dark-popover w-72 p-3">
                       <div className="space-y-3">
                         <div>
                         <p className="text-sm font-semibold text-[var(--arena-text-primary)]">Veicolo sharing</p>
@@ -220,10 +220,10 @@ export function VehicleBookingsSidebar() {
                           onValueChange={(value) => setSelectedVehicleByBooking((current) => ({ ...current, [booking.id]: value }))}
                           disabled={availableVehicles.length === 0}
                         >
-                          <SelectTrigger className="h-9 w-full">
+                          <SelectTrigger className="arena-dark-control h-9 w-full">
                             <SelectValue placeholder={availableVehicles.length === 0 ? 'Nessun mezzo disponibile' : 'Seleziona mezzo'} />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="arena-dark-select-content">
                             {availableVehicles.map((vehicle) => (
                               <SelectItem key={vehicle.id} value={vehicle.id}>
                                 {vehicle.brand} {vehicle.model} · {vehicle.plate}
@@ -245,7 +245,7 @@ export function VehicleBookingsSidebar() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="rounded-[var(--arena-radius-sm)] border-[var(--arena-danger)]/25 text-[var(--arena-danger)] hover:bg-[var(--arena-danger-soft)] hover:text-[var(--arena-danger)]"
+                    className="rounded-[var(--arena-radius-sm)] border-[var(--arena-danger)]/25 bg-[var(--arena-surface-subtle)] text-[var(--arena-danger)] hover:bg-[var(--arena-danger-soft)] hover:text-[var(--arena-danger)]"
                     disabled={busyBookingId === booking.id}
                     onClick={() => handleReject(booking.id)}
                   >
@@ -276,10 +276,10 @@ export function VehicleBookingsSidebar() {
                     setLinkSlugDraft(nextVehicle?.sharing_link_slug ?? normalizeSlug(nextVehicle?.plate ?? ''));
                   }}
                 >
-                  <SelectTrigger className="h-8 w-full rounded-lg">
+                  <SelectTrigger className="arena-dark-control h-8 w-full rounded-lg">
                     <SelectValue placeholder="Seleziona mezzo sharing" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="arena-dark-select-content">
                     {sharingVehicles.map((vehicle) => (
                       <SelectItem key={vehicle.id} value={vehicle.id}>
                         {vehicle.brand} {vehicle.model} · {vehicle.plate}
@@ -291,10 +291,10 @@ export function VehicleBookingsSidebar() {
                   <Input
                     value={linkSlugDraft}
                     placeholder="es. varese"
-                    className="h-8 rounded-lg text-xs"
+                    className="arena-dark-control h-8 rounded-lg text-xs"
                     onChange={(event) => setLinkSlugDraft(normalizeSlug(event.target.value))}
                   />
-                  <Button className="h-8 shrink-0 gap-1 rounded-lg bg-primary px-3" disabled={savingLink} onClick={handleSaveLink}>
+                  <Button className="arena-dark-accent-button h-8 shrink-0 gap-1 rounded-lg px-3" disabled={savingLink} onClick={handleSaveLink}>
                     <Save size={13} /> Salva
                   </Button>
                 </div>
@@ -306,10 +306,10 @@ export function VehicleBookingsSidebar() {
               </p>
             </div>
             <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" className="h-8 gap-2 rounded-lg" onClick={copyLink}>
+              <Button variant="outline" className="arena-dark-outline-button h-8 gap-2 rounded-lg" onClick={copyLink}>
                 <Copy size={13} /> Copia
               </Button>
-              <Button variant="outline" className="h-8 gap-2 rounded-lg" onClick={openPublicLink}>
+              <Button variant="outline" className="arena-dark-outline-button h-8 gap-2 rounded-lg" onClick={openPublicLink}>
                 <ExternalLink size={13} /> Apri
               </Button>
             </div>

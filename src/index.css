@@ -288,6 +288,135 @@
     font-family: var(--font-heading);
     letter-spacing: -0.02em;
   }
+
+  .arena-dark-dialog {
+    border: 1px solid var(--arena-border-soft) !important;
+    background: var(--arena-surface) !important;
+    color: var(--arena-text-primary) !important;
+    box-shadow: none !important;
+  }
+
+  .arena-dark-dialog label {
+    color: var(--arena-text-secondary);
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .arena-dark-dialog input,
+  .arena-dark-dialog textarea,
+  .arena-dark-dialog [data-slot="select-trigger"],
+  .arena-dark-control {
+    border-color: var(--arena-border-soft) !important;
+    background: var(--arena-surface-subtle) !important;
+    color: var(--arena-text-primary) !important;
+  }
+
+  .arena-dark-dialog input::placeholder,
+  .arena-dark-dialog textarea::placeholder,
+  .arena-dark-control::placeholder {
+    color: var(--arena-text-muted) !important;
+  }
+
+  .arena-dark-dialog input:disabled,
+  .arena-dark-dialog textarea:disabled,
+  .arena-dark-dialog [data-slot="select-trigger"][data-disabled] {
+    opacity: 0.62;
+  }
+
+  .arena-dark-dialog [data-slot="tabs-trigger"] {
+    color: var(--arena-text-secondary);
+  }
+
+  .arena-dark-dialog [data-slot="tabs-trigger"]:hover,
+  .arena-dark-dialog [data-slot="tabs-trigger"][data-active] {
+    color: var(--arena-text-primary);
+  }
+
+  .arena-dark-dialog [data-slot="dialog-close"] {
+    color: var(--arena-text-secondary);
+  }
+
+  .arena-dark-dialog [data-slot="dialog-close"]:hover {
+    background: var(--arena-surface-elevated);
+    color: var(--arena-text-primary);
+  }
+
+  .arena-dark-dialog [data-slot="button"]:not(.bg-primary) {
+    border-color: var(--arena-border-soft);
+    background: var(--arena-surface-subtle);
+    color: var(--arena-text-primary);
+  }
+
+  .arena-dark-dialog [data-slot="button"]:not(.bg-primary):hover {
+    background: var(--arena-surface-elevated);
+    color: var(--arena-text-primary);
+  }
+
+  .arena-dark-dialog :where(.text-slate-950, .text-slate-900, .text-slate-800, .text-slate-700) {
+    color: var(--arena-text-primary) !important;
+  }
+
+  .arena-dark-dialog :where(.text-slate-600, .text-slate-500, .text-slate-400) {
+    color: var(--arena-text-muted) !important;
+  }
+
+  .arena-dark-dialog :where(.border-slate-100, .border-slate-200, .border-slate-300) {
+    border-color: var(--arena-border-soft) !important;
+  }
+
+  .arena-dark-dialog :where(.bg-white, .bg-slate-50, .bg-slate-50\/70) {
+    background: var(--arena-surface-subtle) !important;
+  }
+
+  .arena-dark-dialog :where(.text-primary) {
+    color: var(--arena-accent) !important;
+  }
+
+  .arena-dark-dialog :where(.bg-primary) {
+    background: var(--arena-accent) !important;
+    color: #07110c !important;
+  }
+
+  .arena-dark-select-content {
+    border: 1px solid var(--arena-border-soft) !important;
+    background: var(--arena-surface-elevated) !important;
+    color: var(--arena-text-primary) !important;
+    box-shadow: 0 16px 40px rgb(0 0 0 / 0.35) !important;
+  }
+
+  .arena-dark-select-content [data-slot="select-item"]:focus,
+  .arena-dark-select-content [data-slot="select-item"][data-highlighted] {
+    background: var(--arena-surface-subtle) !important;
+    color: var(--arena-text-primary) !important;
+  }
+
+  .arena-dark-popover {
+    border: 1px solid var(--arena-border-soft) !important;
+    background: var(--arena-surface-elevated) !important;
+    color: var(--arena-text-primary) !important;
+    box-shadow: 0 16px 40px rgb(0 0 0 / 0.35) !important;
+  }
+
+  .arena-dark-outline-button {
+    border-color: var(--arena-border-soft) !important;
+    background: var(--arena-surface-subtle) !important;
+    color: var(--arena-text-primary) !important;
+  }
+
+  .arena-dark-outline-button:hover {
+    background: var(--arena-surface-elevated) !important;
+    color: var(--arena-text-primary) !important;
+  }
+
+  .arena-dark-accent-button {
+    background: var(--arena-accent) !important;
+    color: #07110c !important;
+  }
+
+  .arena-dark-accent-button:hover {
+    background: #2ecc71 !important;
+    color: #07110c !important;
+  }
 }
 
 @layer utilities {

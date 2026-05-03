@@ -139,9 +139,9 @@ export function VehicleCreateDialog({ open, onOpenChange, createVehicle }: Vehic
       }
       onOpenChange(nextOpen);
     }}>
-      <DialogContent className="bg-white sm:max-w-2xl">
+      <DialogContent className="arena-dark-dialog sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle className="arena-heading text-xl font-bold text-slate-950">Nuovo veicolo</DialogTitle>
+          <DialogTitle className="arena-heading text-xl font-semibold text-[var(--arena-text-primary)]">Nuovo veicolo</DialogTitle>
         </DialogHeader>
 
         <form className="space-y-5" onSubmit={handleSubmit}>
@@ -182,7 +182,7 @@ export function VehicleCreateDialog({ open, onOpenChange, createVehicle }: Vehic
               <Label>Tipo veicolo</Label>
               <Select value={form.vehicle_type || 'none'} onValueChange={(value) => updateForm('vehicle_type', value === 'none' ? '' : value)}>
                 <SelectTrigger className="h-8 w-full"><SelectValue /></SelectTrigger>
-                <SelectContent>
+                <SelectContent className="arena-dark-select-content">
                   <SelectItem value="none">Non impostato</SelectItem>
                   {VEHICLE_TYPES.map((item) => <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>)}
                 </SelectContent>
@@ -192,7 +192,7 @@ export function VehicleCreateDialog({ open, onOpenChange, createVehicle }: Vehic
               <Label>Alimentazione</Label>
               <Select value={form.fuel_type || 'none'} onValueChange={(value) => updateForm('fuel_type', value === 'none' ? '' : value)}>
                 <SelectTrigger className="h-8 w-full"><SelectValue /></SelectTrigger>
-                <SelectContent>
+                <SelectContent className="arena-dark-select-content">
                   <SelectItem value="none">Non impostata</SelectItem>
                   {FUEL_TYPES.map((item) => <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>)}
                 </SelectContent>
@@ -206,7 +206,7 @@ export function VehicleCreateDialog({ open, onOpenChange, createVehicle }: Vehic
               <Label>Destinazione</Label>
               <Select value={form.assignment_type} onValueChange={(value) => updateForm('assignment_type', value)}>
                 <SelectTrigger className="h-8 w-full"><SelectValue /></SelectTrigger>
-                <SelectContent>
+                <SelectContent className="arena-dark-select-content">
                   <SelectItem value="staff">Staff</SelectItem>
                   <SelectItem value="giocatore">Giocatore</SelectItem>
                   <SelectItem value="sharing">Sharing</SelectItem>
@@ -226,7 +226,7 @@ export function VehicleCreateDialog({ open, onOpenChange, createVehicle }: Vehic
             )}
           </div>
 
-          <div className="flex justify-end gap-2 border-t border-slate-100 pt-4">
+          <div className="flex justify-end gap-2 border-t border-[var(--arena-border-soft)] pt-4">
             <Button type="button" variant="outline" className="rounded-lg" onClick={closeAndReset}>
               Annulla
             </Button>

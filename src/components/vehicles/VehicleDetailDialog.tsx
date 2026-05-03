@@ -136,11 +136,11 @@ function daysUntil(dateKey: string) {
 }
 
 function getDeadlineClass(deadline: VehicleDeadline | { expiry_date: string | null }) {
-  if (!deadline.expiry_date) return 'border-slate-200 bg-slate-50 text-slate-500';
+  if (!deadline.expiry_date) return 'border-[var(--arena-border-soft)] bg-[var(--arena-surface-subtle)] text-[var(--arena-text-secondary)]';
   const days = daysUntil(deadline.expiry_date);
-  if (days < 30) return 'border-red-200 bg-red-50 text-red-700';
-  if (days <= 60) return 'border-amber-200 bg-amber-50 text-amber-700';
-  return 'border-emerald-200 bg-emerald-50 text-emerald-700';
+  if (days < 30) return 'border-[var(--arena-danger)]/25 bg-[var(--arena-danger-soft)] text-[var(--arena-danger)]';
+  if (days <= 60) return 'border-[var(--arena-warning)]/25 bg-[var(--arena-warning-soft)] text-[var(--arena-warning)]';
+  return 'border-[var(--arena-accent)]/25 bg-[var(--arena-accent-soft)] text-[var(--arena-accent)]';
 }
 
 function getDeadlineLabel(deadline: VehicleDeadline) {
@@ -460,20 +460,20 @@ export function VehicleDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[92vh] overflow-y-auto bg-white p-0 sm:max-w-5xl">
-        <DialogHeader className="border-b border-slate-100 px-6 py-5">
+      <DialogContent className="arena-dark-dialog max-h-[92vh] overflow-y-auto p-0 sm:max-w-5xl">
+        <DialogHeader className="border-b border-[var(--arena-border-soft)] px-6 py-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <DialogTitle className="arena-heading text-xl font-bold text-slate-950">
+              <DialogTitle className="arena-heading text-xl font-semibold text-[var(--arena-text-primary)]">
                 {vehicle.brand} {vehicle.model}
               </DialogTitle>
-              <p className="mt-1 font-mono text-xs font-bold tracking-[0.16em] text-primary">{vehicle.plate}</p>
+              <p className="mt-1 font-mono text-xs font-bold tracking-[0.16em] text-[var(--arena-accent)]">{vehicle.plate}</p>
             </div>
             <div className="flex flex-wrap gap-2 pr-8">
-              <Badge className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-600">
+              <Badge className="rounded-full border border-[var(--arena-border-soft)] bg-[var(--arena-surface-subtle)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--arena-text-secondary)]">
                 {ASSIGNMENT_LABELS[vehicle.assignment_type]}
               </Badge>
-              <Badge className="rounded-full border-none bg-slate-900 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white">
+              <Badge className="rounded-full border border-[var(--arena-border-soft)] bg-[var(--arena-surface-elevated)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--arena-text-primary)]">
                 {STATUS_LABELS[vehicle.status]}
               </Badge>
             </div>
@@ -481,7 +481,7 @@ export function VehicleDetailDialog({
         </DialogHeader>
 
         <Tabs key={`${vehicle.id}-${initialTab}`} defaultValue={initialTab} className="gap-0">
-          <div className="border-b border-slate-100 px-6 pt-3">
+          <div className="border-b border-[var(--arena-border-soft)] px-6 pt-3">
             <TabsList variant="line" className="h-10 gap-5">
               <TabsTrigger value="anagrafica" className="px-0">Anagrafica</TabsTrigger>
               <TabsTrigger value="assegnazione" className="px-0">Assegnazione</TabsTrigger>
@@ -494,7 +494,7 @@ export function VehicleDetailDialog({
           <div className="p-6">
             <TabsContent value="anagrafica" className="mt-0 space-y-6">
               <div className="flex items-center justify-between gap-3">
-                <h3 className="arena-heading text-base font-semibold text-slate-950">Dati veicolo</h3>
+                <h3 className="arena-heading text-base font-semibold text-[var(--arena-text-primary)]">Dati veicolo</h3>
                 {canManage && (
                   <div className="flex gap-2">
                     {editingVehicle ? (
@@ -560,7 +560,7 @@ export function VehicleDetailDialog({
                   <Label>Tipo veicolo</Label>
                   <Select value={vehicleForm.vehicle_type || 'none'} onValueChange={(value) => setVehicleForm({ ...vehicleForm, vehicle_type: value === 'none' ? '' : value })} disabled={!editingVehicle}>
                     <SelectTrigger className="h-8 w-full"><SelectValue /></SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="arena-dark-select-content">
                       <SelectItem value="none">Non impostato</SelectItem>
                       {VEHICLE_TYPES.map((item) => <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>)}
                     </SelectContent>
@@ -570,7 +570,7 @@ export function VehicleDetailDialog({
                   <Label>Alimentazione</Label>
                   <Select value={vehicleForm.fuel_type || 'none'} onValueChange={(value) => setVehicleForm({ ...vehicleForm, fuel_type: value === 'none' ? '' : value })} disabled={!editingVehicle}>
                     <SelectTrigger className="h-8 w-full"><SelectValue /></SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="arena-dark-select-content">
                       <SelectItem value="none">Non impostata</SelectItem>
                       {FUEL_TYPES.map((item) => <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>)}
                     </SelectContent>
@@ -583,27 +583,27 @@ export function VehicleDetailDialog({
               </div>
 
               <section className="space-y-3">
-                <h3 className="arena-heading text-base font-semibold text-slate-950">Documenti</h3>
+                <h3 className="arena-heading text-base font-semibold text-[var(--arena-text-primary)]">Documenti</h3>
                 <div className="grid gap-2">
                   {vehicle.deadlines.length === 0 ? (
-                    <div className="rounded-lg border border-dashed border-slate-200 p-4 text-sm text-slate-400">Nessun documento caricato</div>
+                    <div className="rounded-lg border border-dashed border-[var(--arena-border-soft)] bg-[var(--arena-surface-subtle)] p-4 text-sm text-[var(--arena-text-muted)]">Nessun documento caricato</div>
                   ) : vehicle.deadlines.map((deadline) => (
-                    <div key={deadline.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-100 bg-slate-50 px-4 py-3">
+                    <div key={deadline.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[var(--arena-border-soft)] bg-[var(--arena-surface-subtle)] px-4 py-3">
                       <div>
-                        <p className="text-sm font-bold capitalize text-slate-800">{deadline.deadline_type}</p>
-                        <p className="text-xs text-slate-500">{formatDate(deadline.expiry_date)}</p>
+                        <p className="text-sm font-semibold capitalize text-[var(--arena-text-primary)]">{deadline.deadline_type}</p>
+                        <p className="text-xs text-[var(--arena-text-muted)]">{formatDate(deadline.expiry_date)}</p>
                       </div>
                       {deadline.document_url ? (
                         <a
                           href={deadline.document_url}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex h-8 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-800 transition-colors hover:bg-slate-50"
+                          className="inline-flex h-8 items-center justify-center gap-2 rounded-lg border border-[var(--arena-border-soft)] bg-[var(--arena-surface-subtle)] px-3 text-sm font-medium text-[var(--arena-text-primary)] transition-colors hover:bg-[var(--arena-surface-elevated)]"
                         >
                           <FileText size={14} /> Visualizza PDF <ExternalLink size={13} />
                         </a>
                       ) : (
-                        <span className="text-xs font-medium text-slate-400">PDF non disponibile</span>
+                        <span className="text-xs font-medium text-[var(--arena-text-muted)]">PDF non disponibile</span>
                       )}
                     </div>
                   ))}
@@ -614,12 +614,12 @@ export function VehicleDetailDialog({
             <TabsContent value="assegnazione" className="mt-0 space-y-6">
               {vehicle.assignment_type === 'sharing' ? (
                 <div className="space-y-4">
-                  <div className="rounded-xl border border-teal-200 bg-teal-50 p-5">
-                    <p className="text-sm font-bold text-teal-800">Sharing — prenotabile</p>
-                    <p className="mt-1 text-sm text-teal-700">{publicBookingLink ?? 'Slug pubblico non configurato'}</p>
+                  <div className="rounded-[var(--arena-radius-lg)] border border-[var(--arena-accent)]/25 bg-[var(--arena-accent-soft)] p-5">
+                    <p className="text-sm font-semibold text-[var(--arena-text-primary)]">Sharing — prenotabile</p>
+                    <p className="mt-1 text-sm text-[var(--arena-accent)]">{publicBookingLink ?? 'Slug pubblico non configurato'}</p>
                   </div>
                   {canManage && (
-                    <div className="grid grid-cols-1 gap-3 rounded-xl border border-slate-100 p-4 md:grid-cols-[1fr_auto]">
+                    <div className="grid grid-cols-1 gap-3 rounded-[var(--arena-radius-lg)] border border-[var(--arena-border-soft)] bg-[var(--arena-surface-subtle)] p-4 md:grid-cols-[1fr_auto]">
                       <div className="space-y-2">
                         <Label>Slug link pubblico</Label>
                         <Input
@@ -643,13 +643,13 @@ export function VehicleDetailDialog({
                 </div>
               ) : (
                 <div className="space-y-5">
-                  <div className="flex items-center gap-4 rounded-xl border border-slate-100 bg-slate-50 p-5">
+                  <div className="flex items-center gap-4 rounded-[var(--arena-radius-lg)] border border-[var(--arena-border-soft)] bg-[var(--arena-surface-subtle)] p-5">
                     <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">
                       {getInitials(assignmentForm.assigned_to_name)}
                     </div>
                     <div className="min-w-0">
-                      <p className="font-bold text-slate-900">{assignmentForm.assigned_to_name || 'Nessuna assegnazione'}</p>
-                      <p className="text-sm text-slate-500">{assignmentForm.assigned_to_role || 'Ruolo non indicato'}</p>
+                      <p className="font-semibold text-[var(--arena-text-primary)]">{assignmentForm.assigned_to_name || 'Nessuna assegnazione'}</p>
+                      <p className="text-sm text-[var(--arena-text-muted)]">{assignmentForm.assigned_to_role || 'Ruolo non indicato'}</p>
                     </div>
                   </div>
 
@@ -666,7 +666,7 @@ export function VehicleDetailDialog({
                       <Label>Tipo</Label>
                       <Select value={assignmentForm.assignment_category} onValueChange={(value) => setAssignmentForm({ ...assignmentForm, assignment_category: value as 'staff' | 'giocatore' })} disabled={!canManage}>
                         <SelectTrigger className="h-8 w-full"><SelectValue /></SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="arena-dark-select-content">
                           <SelectItem value="staff">Staff</SelectItem>
                           <SelectItem value="giocatore">Giocatore</SelectItem>
                         </SelectContent>
@@ -680,7 +680,7 @@ export function VehicleDetailDialog({
                       <Label>Veicolo sostitutivo</Label>
                       <Select value={assignmentForm.substitute_vehicle_id} onValueChange={(value) => setAssignmentForm({ ...assignmentForm, substitute_vehicle_id: value })} disabled={!canManage}>
                         <SelectTrigger className="h-8 w-full"><SelectValue /></SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="arena-dark-select-content">
                           <SelectItem value="none">Nessun sostitutivo</SelectItem>
                           {substituteOptions.map((item) => (
                             <SelectItem key={item.id} value={item.id}>{getVehicleName(item)} · {item.plate}</SelectItem>
@@ -707,16 +707,16 @@ export function VehicleDetailDialog({
                   const isEditing = editingDeadlineType === deadlineType;
 
                   return (
-                    <div key={deadlineType} className="rounded-xl border border-slate-100 p-4">
+                    <div key={deadlineType} className="rounded-[var(--arena-radius-lg)] border border-[var(--arena-border-soft)] bg-[var(--arena-surface-subtle)] p-4">
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
-                          <p className="font-bold capitalize text-slate-900">{deadlineType}</p>
+                          <p className="font-semibold capitalize text-[var(--arena-text-primary)]">{deadlineType}</p>
                           <div className="mt-1 flex flex-wrap gap-2">
                             <Badge className={cn('rounded-full border px-2.5 py-1 text-[10px] font-bold', getDeadlineClass(existing ?? { expiry_date: null }))}>
                               {existing ? getDeadlineLabel(existing) : 'Non impostata'}
                             </Badge>
                             {existing?.next_km && (
-                              <Badge className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-bold text-slate-600">
+                              <Badge className="rounded-full border border-[var(--arena-border-soft)] bg-[var(--arena-surface-elevated)] px-2.5 py-1 text-[10px] font-semibold text-[var(--arena-text-secondary)]">
                                 {existing.next_km.toLocaleString('it-IT')} km
                               </Badge>
                             )}
@@ -760,15 +760,15 @@ export function VehicleDetailDialog({
               </div>
 
               <section className="space-y-3">
-                <h3 className="arena-heading text-base font-semibold text-slate-950">Calendario settimanale</h3>
+                <h3 className="arena-heading text-base font-semibold text-[var(--arena-text-primary)]">Calendario settimanale</h3>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-7">
                   {weekDays.map((day) => {
                     const status = day.activeMaintenance ? 'Manutenzione' : day.activeBooking ? 'In uso' : 'Libero';
                     const cls = day.activeMaintenance
-                      ? 'border-amber-200 bg-amber-50 text-amber-800'
+                      ? 'border-[var(--arena-warning)]/25 bg-[var(--arena-warning-soft)] text-[var(--arena-warning)]'
                       : day.activeBooking
-                        ? 'border-blue-200 bg-blue-50 text-blue-800'
-                        : 'border-emerald-200 bg-emerald-50 text-emerald-800';
+                        ? 'border-[var(--arena-info)]/25 bg-[var(--arena-info-soft)] text-[var(--arena-info)]'
+                        : 'border-[var(--arena-accent)]/25 bg-[var(--arena-accent-soft)] text-[var(--arena-accent)]';
 
                     return (
                       <div key={day.key} className={cn('rounded-lg border p-3 text-center', cls)}>
@@ -783,14 +783,14 @@ export function VehicleDetailDialog({
             </TabsContent>
 
             <TabsContent value="manutenzione" className="mt-0 space-y-6">
-              <div className="rounded-xl border border-slate-100 p-5">
-                <h3 className="arena-heading mb-4 text-base font-semibold text-slate-950">Nuova manutenzione</h3>
+              <div className="rounded-[var(--arena-radius-lg)] border border-[var(--arena-border-soft)] bg-[var(--arena-surface-subtle)] p-5">
+                <h3 className="arena-heading mb-4 text-base font-semibold text-[var(--arena-text-primary)]">Nuova manutenzione</h3>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label>Tipo intervento</Label>
                     <Select value={maintenanceForm.maintenance_type} onValueChange={(value) => setMaintenanceForm({ ...maintenanceForm, maintenance_type: value })}>
                       <SelectTrigger className="h-8 w-full"><SelectValue /></SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="arena-dark-select-content">
                         {MAINTENANCE_TYPES.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}
                       </SelectContent>
                     </Select>
@@ -808,7 +808,7 @@ export function VehicleDetailDialog({
                     <Textarea value={maintenanceForm.notes} onChange={(event) => setMaintenanceForm({ ...maintenanceForm, notes: event.target.value })} />
                   </div>
                 </div>
-                <p className="mt-4 rounded-lg bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
+                <p className="mt-4 rounded-lg border border-[var(--arena-warning)]/20 bg-[var(--arena-warning-soft)] px-4 py-3 text-sm font-medium text-[var(--arena-warning)]">
                   Il veicolo sarà automaticamente bloccato nelle date indicate. Il sostitutivo {substituteVehicle ? getVehicleName(substituteVehicle) : 'non configurato'} verrà attivato.
                 </p>
                 <Button className="mt-4 gap-2 rounded-lg bg-primary" disabled={saving} onClick={handleMaintenanceSave}>
@@ -817,22 +817,22 @@ export function VehicleDetailDialog({
               </div>
 
               <section className="space-y-3">
-                <h3 className="arena-heading text-base font-semibold text-slate-950">Storico manutenzioni</h3>
+                <h3 className="arena-heading text-base font-semibold text-[var(--arena-text-primary)]">Storico manutenzioni</h3>
                 <div className="space-y-2">
                   {[...vehicle.maintenances].sort((a, b) => b.start_date.localeCompare(a.start_date)).map((maintenance) => (
-                    <div key={maintenance.id} className="rounded-lg border border-slate-100 bg-slate-50 px-4 py-3">
+                    <div key={maintenance.id} className="rounded-lg border border-[var(--arena-border-soft)] bg-[var(--arena-surface-subtle)] px-4 py-3">
                       <div className="flex flex-wrap items-center justify-between gap-2">
-                        <p className="font-bold text-slate-900">{maintenance.maintenance_type}</p>
-                        <Badge className={cn('rounded-full px-2.5 py-1 text-[10px] font-bold', maintenance.completed ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700')}>
+                        <p className="font-semibold text-[var(--arena-text-primary)]">{maintenance.maintenance_type}</p>
+                        <Badge className={cn('rounded-full px-2.5 py-1 text-[10px] font-semibold', maintenance.completed ? 'bg-[var(--arena-accent-soft)] text-[var(--arena-accent)]' : 'bg-[var(--arena-warning-soft)] text-[var(--arena-warning)]')}>
                           {maintenance.completed ? 'Completata' : 'Programmata'}
                         </Badge>
                       </div>
-                      <p className="mt-1 text-sm text-slate-500">{formatDate(maintenance.start_date)} → {formatDate(maintenance.end_date)}</p>
-                      {maintenance.notes && <p className="mt-2 text-sm text-slate-600">{maintenance.notes}</p>}
+                      <p className="mt-1 text-sm text-[var(--arena-text-muted)]">{formatDate(maintenance.start_date)} → {formatDate(maintenance.end_date)}</p>
+                      {maintenance.notes && <p className="mt-2 text-sm text-[var(--arena-text-secondary)]">{maintenance.notes}</p>}
                     </div>
                   ))}
                   {vehicle.maintenances.length === 0 && (
-                    <div className="rounded-lg border border-dashed border-slate-200 p-4 text-sm text-slate-400">Nessuna manutenzione registrata</div>
+                    <div className="rounded-lg border border-dashed border-[var(--arena-border-soft)] bg-[var(--arena-surface-subtle)] p-4 text-sm text-[var(--arena-text-muted)]">Nessuna manutenzione registrata</div>
                   )}
                 </div>
               </section>
@@ -841,35 +841,35 @@ export function VehicleDetailDialog({
             <TabsContent value="storico" className="mt-0">
               <div className="space-y-3">
                 {vehicleHistory.length === 0 ? (
-                  <div className="rounded-lg border border-dashed border-slate-200 p-6 text-center text-sm text-slate-400">Nessuno storico disponibile</div>
+                  <div className="rounded-lg border border-dashed border-[var(--arena-border-soft)] bg-[var(--arena-surface-subtle)] p-6 text-center text-sm text-[var(--arena-text-muted)]">Nessuno storico disponibile</div>
                 ) : vehicleHistory.map((item) => {
                   if (item.kind === 'maintenance') {
                     const maintenance = item.maintenance as VehicleMaintenance;
                     return (
-                      <div key={item.id} className="flex gap-3 rounded-xl border border-slate-100 p-4">
-                        <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-amber-500" />
+                      <div key={item.id} className="flex gap-3 rounded-[var(--arena-radius-lg)] border border-[var(--arena-border-soft)] bg-[var(--arena-surface-subtle)] p-4">
+                        <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-[var(--arena-warning)]" />
                         <div>
-                          <p className="font-bold text-slate-900">{maintenance.maintenance_type}</p>
-                          <p className="text-sm text-slate-500">{formatDate(maintenance.start_date)} → {formatDate(maintenance.end_date)}</p>
-                          {maintenance.notes && <p className="mt-1 text-sm text-slate-600">{maintenance.notes}</p>}
+                          <p className="font-semibold text-[var(--arena-text-primary)]">{maintenance.maintenance_type}</p>
+                          <p className="text-sm text-[var(--arena-text-muted)]">{formatDate(maintenance.start_date)} → {formatDate(maintenance.end_date)}</p>
+                          {maintenance.notes && <p className="mt-1 text-sm text-[var(--arena-text-secondary)]">{maintenance.notes}</p>}
                         </div>
                       </div>
                     );
                   }
 
                   const booking = item.booking as VehicleBooking;
-                  const dotClass = booking.status === 'approved' ? 'bg-emerald-500' : 'bg-red-500';
+                  const dotClass = booking.status === 'approved' ? 'bg-[var(--arena-accent)]' : 'bg-[var(--arena-danger)]';
                   return (
-                    <div key={item.id} className="flex gap-3 rounded-xl border border-slate-100 p-4">
+                    <div key={item.id} className="flex gap-3 rounded-[var(--arena-radius-lg)] border border-[var(--arena-border-soft)] bg-[var(--arena-surface-subtle)] p-4">
                       <span className={cn('mt-1 h-2.5 w-2.5 shrink-0 rounded-full', dotClass)} />
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center justify-between gap-2">
-                          <p className="font-bold text-slate-900">{booking.requester_name} {booking.requester_surname}</p>
-                          <span className="font-mono text-xs font-bold tracking-[0.12em] text-primary">{booking.booking_code ?? 'PV-...'}</span>
+                          <p className="font-semibold text-[var(--arena-text-primary)]">{booking.requester_name} {booking.requester_surname}</p>
+                          <span className="font-mono text-xs font-bold tracking-[0.12em] text-[var(--arena-accent)]">{booking.booking_code ?? 'PV-...'}</span>
                         </div>
-                        <p className="mt-1 text-sm text-slate-600">{booking.departure} → {booking.destination}</p>
-                        <p className="mt-1 text-xs font-medium text-slate-500">{formatDate(booking.trip_date)} · {formatTime(booking.departure_time)}{booking.return_time ? `-${formatTime(booking.return_time)}` : ''}</p>
-                        <p className="mt-2 text-sm text-slate-600">{booking.reason}</p>
+                        <p className="mt-1 text-sm text-[var(--arena-text-secondary)]">{booking.departure} → {booking.destination}</p>
+                        <p className="mt-1 text-xs font-medium text-[var(--arena-text-muted)]">{formatDate(booking.trip_date)} · {formatTime(booking.departure_time)}{booking.return_time ? `-${formatTime(booking.return_time)}` : ''}</p>
+                        <p className="mt-2 text-sm text-[var(--arena-text-secondary)]">{booking.reason}</p>
                       </div>
                     </div>
                   );
