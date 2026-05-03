@@ -11,6 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { APP_ROLE_LABELS } from '@/lib/constants';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { waitForSaveFeedback, waitForSaveSuccessFeedback } from '@/lib/saveFeedback';
 
 interface ProfileSheetProps {
   open: boolean;
@@ -75,6 +76,7 @@ export function ProfileSheet({ open, onOpenChange }: ProfileSheetProps) {
   const handleSave = async () => {
     if (!profile) return;
     setSaving(true);
+    const saveStartedAt = Date.now();
     try {
       const { error } = await supabase
         .from('profiles')
@@ -85,6 +87,9 @@ export function ProfileSheet({ open, onOpenChange }: ProfileSheetProps) {
 
       await refreshProfile();
       toast.success('Profilo aggiornato');
+      await waitForSaveFeedback(saveStartedAt);
+      setSaving(false);
+      await waitForSaveSuccessFeedback();
       onOpenChange(false);
     } catch {
       toast.error('Errore nel salvataggio');

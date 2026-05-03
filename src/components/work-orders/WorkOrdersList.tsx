@@ -24,6 +24,7 @@ import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { supabase } from '@/lib/supabase';
 import { runResilientRequest, withRequestTimeout } from '@/lib/resilientRequest';
+import { waitForSaveFeedback, waitForSaveSuccessFeedback } from '@/lib/saveFeedback';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 type TicketDraftState = {
@@ -477,6 +478,7 @@ export function WorkOrdersList({
       return;
     }
     setSaving(true);
+    const saveStartedAt = Date.now();
     try {
       const payload = buildWorkOrderPayload(form);
       const result = editing
@@ -514,6 +516,9 @@ export function WorkOrdersList({
 
       toast.success(editing ? 'Ordine di lavoro aggiornato' : 'Ordine di lavoro creato');
       setTicketDraft(null);
+      await waitForSaveFeedback(saveStartedAt);
+      setSaving(false);
+      await waitForSaveSuccessFeedback();
       setModalOpen(false);
     } catch (error) {
       console.error('Work order save failed', error);

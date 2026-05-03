@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import arenaOsLogo from '@/assets/arenaos-logo-horizontal.svg';
+import { waitForSaveFeedback, waitForSaveSuccessFeedback } from '@/lib/saveFeedback';
 
 export function ResetPasswordPage() {
   const navigate = useNavigate();
@@ -30,6 +31,7 @@ export function ResetPasswordPage() {
     }
 
     setSaving(true);
+    const saveStartedAt = Date.now();
     const { error } = await updatePassword(password);
 
     if (error) {
@@ -38,6 +40,9 @@ export function ResetPasswordPage() {
       return;
     }
 
+    await waitForSaveFeedback(saveStartedAt);
+    setSaving(false);
+    await waitForSaveSuccessFeedback();
     await signOut();
     toast.success('Password aggiornata. Ora puoi accedere.');
     navigate('/login', { replace: true });

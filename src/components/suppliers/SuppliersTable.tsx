@@ -16,6 +16,7 @@ import { Technician, TechnicianEmploymentType, Supplier } from '@/types';
 import { TECHNICIAN_EMPLOYMENT_LABELS } from '@/lib/constants';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { waitForSaveFeedback, waitForSaveSuccessFeedback } from '@/lib/saveFeedback';
 
 const EMPTY_SUPPLIER = { name: '', category: '', phone: '', email: '' };
 const EMPTY_TECHNICIAN = {
@@ -156,6 +157,7 @@ export function SuppliersTable({
     if (savingSupplier) return;
     if (!supplierForm.name.trim()) { toast.error('Il nome è obbligatorio'); return; }
     setSavingSupplier(true);
+    const saveStartedAt = Date.now();
     const payload = {
       name: supplierForm.name.trim(),
       category: supplierForm.category.trim() || null,
@@ -172,6 +174,9 @@ export function SuppliersTable({
         return;
       }
       toast.success(editingSupplier ? 'Fornitore aggiornato' : 'Fornitore creato');
+      await waitForSaveFeedback(saveStartedAt);
+      setSavingSupplier(false);
+      await waitForSaveSuccessFeedback();
       setSupplierModalOpen(false);
       setEditingSupplier(null);
       setSupplierForm(EMPTY_SUPPLIER);
@@ -201,6 +206,7 @@ export function SuppliersTable({
     }
 
     setSavingTechnician(true);
+    const saveStartedAt = Date.now();
     const payload = {
       name: technicianForm.name.trim(),
       email: technicianForm.email.trim().toLowerCase(),
@@ -218,6 +224,9 @@ export function SuppliersTable({
         return;
       }
       toast.success(editingTechnician ? 'Tecnico aggiornato' : 'Tecnico creato');
+      await waitForSaveFeedback(saveStartedAt);
+      setSavingTechnician(false);
+      await waitForSaveSuccessFeedback();
       setTechnicianModalOpen(false);
       setEditingTechnician(null);
       setTechnicianForm(EMPTY_TECHNICIAN);

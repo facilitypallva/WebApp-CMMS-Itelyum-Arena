@@ -15,12 +15,14 @@ const ResetPasswordPage = lazy(() => import('@/components/auth/ResetPasswordPage
 const AssetsTable = lazy(() => import('@/components/assets/AssetsTable').then((module) => ({ default: module.AssetsTable })));
 const WorkOrdersList = lazy(() => import('@/components/work-orders/WorkOrdersList').then((module) => ({ default: module.WorkOrdersList })));
 const PublicTicketForm = lazy(() => import('@/components/ticketing/PublicTicketForm').then((module) => ({ default: module.PublicTicketForm })));
+const PublicBookingForm = React.lazy(() => import('./components/vehicles/PublicBookingForm'));
 const TicketsQueue = lazy(() => import('@/components/ticketing/TicketsQueue').then((module) => ({ default: module.TicketsQueue })));
 const ScheduleView = lazy(() => import('@/components/schedule/ScheduleView').then((module) => ({ default: module.ScheduleView })));
 const SuppliersTable = lazy(() => import('@/components/suppliers/SuppliersTable').then((module) => ({ default: module.SuppliersTable })));
 const AuditLogView = lazy(() => import('@/components/audit/AuditLogView').then((module) => ({ default: module.AuditLogView })));
 const UsersManagement = lazy(() => import('@/components/users/UsersManagement').then((module) => ({ default: module.UsersManagement })));
 const RapportiniView = lazy(() => import('@/components/rapportini/RapportiniView').then((module) => ({ default: module.RapportiniView })));
+const VehiclesPage = React.lazy(() => import('./components/vehicles/VehiclesPage'));
 
 function RouteLoader() {
   return (
@@ -57,6 +59,7 @@ export default function App() {
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
                 <Route path="/report-issue" element={<PublicTicketForm />} />
+                <Route path="/booking/:slug" element={<PublicBookingForm />} />
 
                 {/* Protected */}
                 <Route path="/" element={<ProtectedRoute><LayoutRoute title="Dashboard Generale"><Dashboard /></LayoutRoute></ProtectedRoute>} />
@@ -66,6 +69,7 @@ export default function App() {
                 <Route path="/rapportini" element={<ProtectedRoute><LayoutRoute title="Rapportini"><RapportiniView /></LayoutRoute></ProtectedRoute>} />
                 <Route path="/tickets" element={<ProtectedRoute><LayoutRoute title="Ticketing System"><TicketsQueue /></LayoutRoute></ProtectedRoute>} />
                 <Route path="/schedule" element={<ProtectedRoute><LayoutRoute title="Scadenzario Manutenzioni"><ScheduleView /></LayoutRoute></ProtectedRoute>} />
+                <Route path="/vehicles" element={<ProtectedRoute><LayoutRoute title="Gestione Mezzi"><VehiclesPage /></LayoutRoute></ProtectedRoute>} />
                 <Route path="/suppliers" element={<ProtectedRoute><LayoutRoute title="Fornitori e Tecnici"><SuppliersTable /></LayoutRoute></ProtectedRoute>} />
                 <Route path="/audit" element={<ProtectedRoute allowedRoles={['ADMIN', 'RESPONSABILE']}><LayoutRoute title="Audit Log"><AuditLogView /></LayoutRoute></ProtectedRoute>} />
                 <Route path="/users" element={<ProtectedRoute adminOnly><LayoutRoute title="Gestione Utenti"><UsersManagement /></LayoutRoute></ProtectedRoute>} />

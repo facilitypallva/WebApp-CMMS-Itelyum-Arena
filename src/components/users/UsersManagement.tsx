@@ -13,6 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useProfiles } from '@/hooks/useProfiles';
 import { useAuth } from '@/contexts/AuthContext';
 import { APP_ROLE_LABELS } from '@/lib/constants';
+import { waitForSaveFeedback, waitForSaveSuccessFeedback } from '@/lib/saveFeedback';
 import { AppRole, UserProfile } from '@/types';
 
 type UserFormState = {
@@ -110,6 +111,7 @@ export function UsersManagement() {
     }
 
     setSaving(true);
+    const saveStartedAt = Date.now();
     const payload = {
       full_name: form.full_name.trim(),
       email: form.email.trim().toLowerCase(),
@@ -122,9 +124,8 @@ export function UsersManagement() {
       ? await updateUser(editingUser.id, payload)
       : await createUser({ ...payload, password: form.password.trim() });
 
-    setSaving(false);
-
     if (error) {
+      setSaving(false);
       console.error('User save error', error);
       toast.error(error.message || 'Errore nel salvataggio utente');
       return;
@@ -135,6 +136,9 @@ export function UsersManagement() {
     }
 
     toast.success(editingUser ? 'Utente aggiornato' : 'Utente creato');
+    await waitForSaveFeedback(saveStartedAt);
+    setSaving(false);
+    await waitForSaveSuccessFeedback();
     setModalOpen(false);
     setEditingUser(null);
     setForm(EMPTY_FORM);
