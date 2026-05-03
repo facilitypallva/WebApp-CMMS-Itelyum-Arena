@@ -59,15 +59,15 @@ function getOccurrencesInRange(
 }
 
 function eventColor(daysFromToday: number): string {
-  if (daysFromToday < 0) return 'bg-red-100 text-red-700';
-  if (daysFromToday <= 30) return 'bg-orange-100 text-orange-700';
-  return 'bg-emerald-100 text-emerald-700';
+  if (daysFromToday < 0) return 'bg-[var(--arena-danger-soft)] text-[var(--arena-danger)]';
+  if (daysFromToday <= 30) return 'bg-[var(--arena-warning-soft)] text-[var(--arena-warning)]';
+  return 'bg-[var(--arena-accent-soft)] text-[var(--arena-accent)]';
 }
 
 function dotColor(daysFromToday: number): string {
-  if (daysFromToday < 0) return 'bg-red-400';
-  if (daysFromToday <= 30) return 'bg-orange-400';
-  return 'bg-emerald-400';
+  if (daysFromToday < 0) return 'bg-[var(--arena-danger)]';
+  if (daysFromToday <= 30) return 'bg-[var(--arena-warning)]';
+  return 'bg-[var(--arena-accent)]';
 }
 
 const DOW_LABELS = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
@@ -641,36 +641,36 @@ export function ScheduleView() {
 
   return (
     <div>
-      <div className="arena-card flex h-[calc(100dvh-10.5rem)] min-h-[32rem] flex-col overflow-hidden">
+      <div className="flex h-[calc(100dvh-10.5rem)] min-h-[32rem] flex-col overflow-hidden rounded-[var(--arena-radius-lg)] border border-[var(--arena-border-soft)] bg-[var(--arena-surface)] shadow-none">
         {/* Header */}
-        <div className="flex items-center gap-4 border-b border-slate-100 px-5 py-3 lg:px-6">
-          <button onClick={prevMonth} className="h-10 w-10 rounded-xl text-slate-500 transition-colors hover:bg-slate-100">
+        <div className="flex items-center gap-4 border-b border-[var(--arena-border-soft)] px-5 py-3 lg:px-6">
+          <button onClick={prevMonth} className="flex h-8 w-8 items-center justify-center rounded-[var(--arena-radius-sm)] text-[var(--arena-text-secondary)] transition-colors duration-150 hover:bg-[var(--arena-surface-elevated)] hover:text-[var(--arena-text-primary)]">
             <ChevronLeft size={18} />
           </button>
           <div className="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4">
-            <h2 className="min-w-0 truncate text-lg font-bold capitalize text-slate-800 lg:text-2xl">
+            <h2 className="min-w-0 truncate text-lg font-semibold capitalize text-[var(--arena-text-primary)] lg:text-2xl">
               {format(currentMonth, 'MMMM yyyy', { locale: it })}
             </h2>
-            <div className="flex min-w-0 items-center gap-1.5 overflow-x-auto rounded-2xl border border-slate-200 bg-slate-50/80 p-1.5 shadow-inner">
+            <div className="flex min-w-0 items-center gap-1.5 overflow-x-auto rounded-[var(--arena-radius-lg)] border border-[var(--arena-border-soft)] bg-[var(--arena-surface-subtle)] p-1.5 shadow-none">
               <button
                 type="button"
                 aria-label="Mostra tutte le categorie"
                 title="Tutte le categorie"
                 onClick={() => setCategoryFilter(null)}
                 className={cn(
-                  'relative flex h-12 w-14 shrink-0 items-center justify-center rounded-xl transition-all',
+                  'relative flex h-11 w-13 shrink-0 items-center justify-center rounded-[var(--arena-radius-md)] transition-colors duration-150',
                   categoryFilter
-                    ? 'text-slate-400 hover:bg-white hover:text-slate-700 hover:shadow-sm'
-                    : 'bg-slate-950 text-white shadow-md shadow-slate-200',
+                    ? 'text-[var(--arena-text-secondary)] hover:bg-[var(--arena-surface-elevated)] hover:text-[var(--arena-text-primary)]'
+                    : 'bg-[var(--arena-surface-elevated)] text-white ring-1 ring-[var(--arena-border-soft)]',
                 )}
               >
                 <Layers size={23} />
                 <span
                   className={cn(
-                    'absolute -right-1 -top-1 min-w-6 rounded-md px-1 text-center text-xs font-bold leading-5',
+                    'absolute -right-1 -top-1 min-w-6 rounded-[var(--arena-radius-sm)] px-1 text-center text-xs font-semibold leading-5',
                     categoryFilter
-                      ? 'bg-white text-slate-500 shadow-sm ring-1 ring-slate-200'
-                      : 'bg-slate-100 text-slate-600',
+                      ? 'bg-[var(--arena-surface-elevated)] text-[var(--arena-text-secondary)] ring-1 ring-[var(--arena-border-soft)]'
+                      : 'bg-[var(--arena-accent-soft)] text-[var(--arena-accent)]',
                   )}
                 >
                   {assets.length}
@@ -687,19 +687,19 @@ export function ScheduleView() {
                     title={category}
                     onClick={() => setCategoryFilter((current) => (current === category ? null : category))}
                     className={cn(
-                      'relative flex h-12 w-14 shrink-0 items-center justify-center rounded-xl transition-all hover:bg-white hover:shadow-sm',
+                      'relative flex h-11 w-13 shrink-0 items-center justify-center rounded-[var(--arena-radius-md)] transition-colors duration-150 hover:bg-[var(--arena-surface-elevated)]',
                       isActive
-                        ? 'bg-white shadow-sm ring-1 ring-slate-200'
-                        : 'text-slate-500',
+                        ? 'bg-[var(--arena-surface-elevated)] ring-1 ring-[var(--arena-border-soft)]'
+                        : 'text-[var(--arena-text-secondary)]',
                     )}
                   >
                     <AssetCategoryIcon category={category} size={25} />
                     <span
                       className={cn(
-                        'absolute -right-1 -top-1 min-w-6 rounded-md px-1 text-center text-xs font-bold leading-5 shadow-sm',
+                        'absolute -right-1 -top-1 min-w-6 rounded-[var(--arena-radius-sm)] px-1 text-center text-xs font-semibold leading-5',
                         isActive
-                          ? 'bg-slate-800 text-white'
-                          : 'bg-white text-slate-500 ring-1 ring-slate-200',
+                          ? 'bg-[var(--arena-accent-soft)] text-[var(--arena-accent)]'
+                          : 'bg-[var(--arena-surface-elevated)] text-[var(--arena-text-secondary)] ring-1 ring-[var(--arena-border-soft)]',
                       )}
                     >
                       {counts[category]}
@@ -710,19 +710,19 @@ export function ScheduleView() {
             </div>
             <div aria-hidden="true" />
           </div>
-          <button onClick={nextMonth} className="ml-auto h-10 w-10 rounded-xl text-slate-500 transition-colors hover:bg-slate-100">
+          <button onClick={nextMonth} className="ml-auto flex h-8 w-8 items-center justify-center rounded-[var(--arena-radius-sm)] text-[var(--arena-text-secondary)] transition-colors duration-150 hover:bg-[var(--arena-surface-elevated)] hover:text-[var(--arena-text-primary)]">
             <ChevronRight size={18} />
           </button>
         </div>
 
         {/* Day-of-week headers */}
-        <div className="grid shrink-0 grid-cols-7 border-b border-slate-100">
+        <div className="grid shrink-0 grid-cols-7 border-b border-[var(--arena-border-soft)] bg-[var(--arena-surface)]">
           {DOW_LABELS.map((label, idx) => (
             <div
               key={label}
               className={cn(
                 'text-center text-[11px] font-bold py-3 uppercase tracking-wider',
-                idx >= 5 ? 'text-slate-300' : 'text-slate-400',
+                idx >= 5 ? 'text-[var(--arena-text-muted)]/70' : 'text-[var(--arena-text-muted)]',
               )}
             >
               {label}
@@ -733,11 +733,11 @@ export function ScheduleView() {
         {/* Grid */}
         {loading ? (
           <div className="flex flex-1 justify-center py-20">
-            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-[var(--arena-border)] border-t-[var(--arena-accent)]" />
           </div>
         ) : (
           <div
-            className="grid min-h-0 flex-1 grid-cols-7 divide-x divide-y divide-slate-50"
+            className="grid min-h-0 flex-1 grid-cols-7 divide-x divide-y divide-[var(--arena-border-soft)]"
             style={{ gridTemplateRows: `repeat(${Math.ceil(calDays.length / 7)}, minmax(0, 1fr))` }}
           >
             {calDays.map((day) => {
@@ -780,23 +780,23 @@ export function ScheduleView() {
                     void handleDropOnDay(key);
                   }}
                   className={cn(
-                    'min-h-0 overflow-hidden p-2 transition-all duration-200',
-                    isWeekend && !isSelected && !isTodayDay && 'bg-slate-50',
+                    'min-h-0 overflow-hidden bg-[var(--arena-surface)] p-2 transition-colors duration-150',
+                    isWeekend && !isSelected && !isTodayDay && 'bg-[var(--arena-surface-subtle)]',
                     !inMonth && 'opacity-40',
-                    isTodayDay && !isSelected && 'bg-primary/5',
-                    isSelected && 'bg-blue-50',
-                    dragOverDay === key && 'scale-[0.985] bg-primary/5 ring-2 ring-primary/40 ring-inset shadow-inner',
-                    hasDetails ? 'cursor-pointer hover:brightness-95' : 'cursor-default',
+                    isTodayDay && !isSelected && 'bg-[var(--arena-accent-soft)]/50',
+                    isSelected && 'bg-[var(--arena-surface-elevated)]',
+                    dragOverDay === key && 'scale-[0.985] bg-[var(--arena-accent-soft)] ring-2 ring-[var(--arena-accent)]/35 ring-inset',
+                    hasDetails ? 'cursor-pointer hover:bg-[var(--arena-surface-elevated)]' : 'cursor-default',
                   )}
                   isDragOver={dragOverDay === key}
                 >
                   <div className={cn(
                     'mx-auto mb-1 flex h-7 w-7 items-center justify-center rounded-full text-sm',
                     isTodayDay
-                      ? 'bg-primary text-white font-bold'
+                      ? 'bg-[var(--arena-accent)] text-[#07110c] font-bold'
                       : isWeekend
-                      ? inMonth ? 'text-slate-400 font-medium' : 'text-slate-300'
-                      : inMonth ? 'text-slate-700 font-medium' : 'text-slate-300',
+                      ? inMonth ? 'text-[var(--arena-text-secondary)] font-medium' : 'text-[var(--arena-text-muted)]'
+                      : inMonth ? 'text-[var(--arena-text-primary)] font-medium' : 'text-[var(--arena-text-muted)]',
                   )}>
                     {format(day, 'd')}
                   </div>
@@ -805,12 +805,12 @@ export function ScheduleView() {
                       <div
                         key={`${ev.visualStatus ?? 'due'}-${ev.workOrderId ?? ev.asset.id}-${index}`}
                         className={cn(
-                          'flex h-6 w-6 items-center justify-center rounded-md border bg-white shadow-sm',
-                          ev.visualStatus === 'PLANNED' && 'border-indigo-200 bg-indigo-50',
-                          ev.visualStatus === 'IN_PROGRESS' && 'border-sky-200 bg-sky-50',
-                          ev.visualStatus === 'DUE' && ev.daysFromToday < 0 && 'border-red-200 bg-red-50',
-                          ev.visualStatus === 'DUE' && ev.daysFromToday >= 0 && ev.daysFromToday <= 30 && 'border-orange-200 bg-orange-50',
-                          ev.visualStatus === 'DUE' && ev.daysFromToday > 30 && 'border-emerald-200 bg-emerald-50',
+                          'flex h-6 w-6 items-center justify-center rounded-[var(--arena-radius-sm)] border bg-[var(--arena-surface-subtle)] shadow-none',
+                          ev.visualStatus === 'PLANNED' && 'border-[#6b7cff]/25 bg-[var(--arena-info-soft)]',
+                          ev.visualStatus === 'IN_PROGRESS' && 'border-[#5fb9d6]/25 bg-[rgba(95,185,214,0.12)]',
+                          ev.visualStatus === 'DUE' && ev.daysFromToday < 0 && 'border-[var(--arena-danger)]/25 bg-[var(--arena-danger-soft)]',
+                          ev.visualStatus === 'DUE' && ev.daysFromToday >= 0 && ev.daysFromToday <= 30 && 'border-[var(--arena-warning)]/25 bg-[var(--arena-warning-soft)]',
+                          ev.visualStatus === 'DUE' && ev.daysFromToday > 30 && 'border-[var(--arena-accent)]/25 bg-[var(--arena-accent-soft)]',
                         )}
                         title={ev.asset.name}
                       >
@@ -818,7 +818,7 @@ export function ScheduleView() {
                       </div>
                     ))}
                     {cellEvents.length > 8 && (
-                      <div className="flex h-6 min-w-6 items-center justify-center rounded-md bg-slate-100 px-1.5 text-[10px] font-bold text-slate-500">
+                      <div className="flex h-6 min-w-6 items-center justify-center rounded-[var(--arena-radius-sm)] bg-[var(--arena-surface-elevated)] px-1.5 text-[10px] font-semibold text-[var(--arena-text-secondary)]">
                         +{cellEvents.length - 8}
                       </div>
                     )}
@@ -843,16 +843,16 @@ export function ScheduleView() {
           side="left"
           showCloseButton={false}
           style={{ width: 'auto', maxWidth: 'none' }}
-          className="flex flex-row gap-0 p-0 data-[side=left]:w-auto data-[side=left]:sm:max-w-none"
+          className="flex flex-row gap-0 border-[var(--arena-border)] bg-[var(--arena-surface)] p-0 text-[var(--arena-text-primary)] data-[side=left]:w-auto data-[side=left]:sm:max-w-none"
         >
           {/* Left panel */}
           <div className="flex w-[370px] shrink-0 flex-col">
-            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+            <div className="flex items-center justify-between border-b border-[var(--arena-border-soft)] px-5 py-4">
               <div>
-                <h3 className="font-bold text-slate-800">
+                <h3 className="font-semibold text-[var(--arena-text-primary)]">
                   {selectedDay ? format(new Date(`${selectedDay}T12:00:00`), 'd MMMM yyyy', { locale: it }) : ''}
                 </h3>
-                <p className="mt-0.5 text-xs text-slate-400">Scadenze del giorno</p>
+                <p className="mt-0.5 text-xs text-[var(--arena-text-muted)]">Scadenze del giorno</p>
               </div>
               <Button
                 variant="ghost"
@@ -874,11 +874,11 @@ export function ScheduleView() {
                         checked={allBacklogSelected}
                         onCheckedChange={(value) => toggleAllBacklogSelection(!!value)}
                       />
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--arena-text-muted)]">
                         Backlog scadenze
                       </p>
                     </div>
-                    <span className="text-[10px] font-bold text-slate-400">
+                    <span className="text-[10px] font-bold text-[var(--arena-text-muted)]">
                       {selectedBacklogEvents.length > 0
                         ? `${selectedBacklogEvents.length} selezionati`
                         : `${selectedEvents.length} asset`}
@@ -913,14 +913,14 @@ export function ScheduleView() {
                           isGrouped={groupingBacklogAssetIdSet.has(ev.asset.id)}
                           isDropSuccess={dropSuccessAssetIds.includes(ev.asset.id)}
                           className={cn(
-                            'flex items-center gap-2 rounded-xl border px-3 py-3 transition-colors duration-200 ease-out',
+                            'flex items-center gap-2 rounded-[var(--arena-radius-lg)] border px-3 py-3 transition-colors duration-200 ease-out',
                             isBulkSelected
-                              ? 'border-primary/40 bg-primary/5 shadow-sm'
+                              ? 'border-[var(--arena-accent)]/35 bg-[var(--arena-accent-soft)]'
                               : planningAsset?.id === ev.asset.id
-                              ? 'border-primary/40 bg-primary/5 shadow-sm'
+                              ? 'border-[var(--arena-accent)]/35 bg-[var(--arena-accent-soft)]'
                               : draggedEvent?.asset.id === ev.asset.id
-                              ? 'border-primary/40 bg-primary/5'
-                              : 'border-slate-200 bg-white hover:border-primary/30 hover:bg-slate-50',
+                              ? 'border-[var(--arena-accent)]/35 bg-[var(--arena-accent-soft)]'
+                              : 'border-[var(--arena-border-soft)] bg-[var(--arena-surface-subtle)] hover:border-[var(--arena-accent)]/30 hover:bg-[var(--arena-surface-elevated)]',
                           )}
                         >
                           <Checkbox
@@ -928,9 +928,9 @@ export function ScheduleView() {
                             onCheckedChange={(value) => toggleBacklogSelection(ev.asset.id, !!value)}
                             className="shrink-0"
                           />
-                          <GripVertical size={14} className="shrink-0 text-slate-300 transition-colors group-hover:text-primary" />
+                          <GripVertical size={14} className="shrink-0 text-[var(--arena-text-muted)] transition-colors group-hover:text-[var(--arena-accent)]" />
                           <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-bold text-slate-800">{ev.asset.name}</p>
+                            <p className="truncate text-sm font-semibold text-[var(--arena-text-primary)]">{ev.asset.name}</p>
                             <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
                               <span className={cn('rounded-full px-2 py-0.5 text-[10px] font-bold', eventColor(ev.daysFromToday))}>
                                 {ev.daysFromToday < 0
@@ -940,7 +940,7 @@ export function ScheduleView() {
                                     : `Tra ${ev.daysFromToday}g`}
                               </span>
                               {loc && (
-                                <span className="flex items-center gap-1 text-[11px] text-slate-400">
+                                <span className="flex items-center gap-1 text-[11px] text-[var(--arena-text-muted)]">
                                   <MapPin size={9} />
                                   {loc}
                                 </span>
@@ -958,7 +958,7 @@ export function ScheduleView() {
                                 setPlanningEvents([ev]);
                               }
                             }}
-                            className="shrink-0 rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-primary"
+                            className="shrink-0 rounded-[var(--arena-radius-sm)] p-1.5 text-[var(--arena-text-muted)] transition-colors hover:bg-[var(--arena-surface-elevated)] hover:text-[var(--arena-accent)]"
                             title="Pianifica"
                           >
                             <CalendarDays size={16} />
@@ -972,7 +972,7 @@ export function ScheduleView() {
 
               {selectedPlannedFromBacklog.length > 0 && (
                 <div className="mb-2">
-                  <p className="px-5 pb-1 pt-2 text-[10px] font-bold uppercase tracking-wider text-emerald-600">
+                  <p className="px-5 pb-1 pt-2 text-[10px] font-bold uppercase tracking-wider text-[var(--arena-accent)]">
                     Riepilogo pianificati
                   </p>
                   <div className="space-y-1 px-3">
@@ -982,22 +982,22 @@ export function ScheduleView() {
                       return (
                         <div
                           key={`planned-summary-${workOrder.id}`}
-                          className="flex items-center gap-2 rounded-xl border border-emerald-100 bg-emerald-50/60 px-3 py-3"
+                          className="flex items-center gap-2 rounded-[var(--arena-radius-lg)] border border-[var(--arena-accent)]/20 bg-[var(--arena-accent-soft)] px-3 py-3"
                         >
-                          <CheckCircle2 size={15} className="shrink-0 text-emerald-500" />
+                          <CheckCircle2 size={15} className="shrink-0 text-[var(--arena-accent)]" />
                           <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-bold text-slate-800">{asset.name}</p>
+                            <p className="truncate text-sm font-semibold text-[var(--arena-text-primary)]">{asset.name}</p>
                             <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
                               {workOrder.code && (
-                                <span className="rounded-md bg-slate-900 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                                <span className="rounded-[var(--arena-radius-sm)] bg-[var(--arena-surface-subtle)] px-1.5 py-0.5 text-[10px] font-semibold text-[var(--arena-text-primary)]">
                                   {workOrder.code}
                                 </span>
                               )}
-                              <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+                              <span className="rounded-full bg-[var(--arena-accent-soft)] px-2 py-0.5 text-[10px] font-semibold text-[var(--arena-accent)]">
                                 {format(new Date(`${plannedKey}T12:00:00`), 'd MMM', { locale: it })}
                               </span>
                               {supplierName && (
-                                <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-slate-500">
+                                <span className="rounded-full bg-[var(--arena-surface)] px-2 py-0.5 text-[10px] font-semibold text-[var(--arena-text-secondary)]">
                                   {supplierName}
                                 </span>
                               )}
@@ -1006,7 +1006,7 @@ export function ScheduleView() {
                           <button
                             type="button"
                             onClick={() => openRelatedWorkOrder(asset, workOrder.id)}
-                            className="shrink-0 rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-white hover:text-slate-600"
+                            className="shrink-0 rounded-[var(--arena-radius-sm)] p-1.5 text-[var(--arena-text-muted)] transition-colors hover:bg-[var(--arena-surface)] hover:text-[var(--arena-text-primary)]"
                             title="Apri WO"
                           >
                             <FolderOpen size={14} />
@@ -1020,7 +1020,7 @@ export function ScheduleView() {
 
               {selectedPlannedEvents.length > 0 && (
                 <div className="mb-2">
-                  <p className="px-5 pb-1 pt-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  <p className="px-5 pb-1 pt-2 text-[10px] font-bold uppercase tracking-wider text-[var(--arena-text-muted)]">
                     Pianificati
                   </p>
                   <div className="space-y-1 px-3">
@@ -1040,30 +1040,30 @@ export function ScheduleView() {
                           isSelected={planningAsset?.id === ev.asset.id}
                           isDropSuccess={dropSuccessAssetIds.includes(ev.asset.id)}
                           className={cn(
-                            'flex items-center gap-2 rounded-xl border px-3 py-3 transition-colors duration-200 ease-out',
+                            'flex items-center gap-2 rounded-[var(--arena-radius-lg)] border px-3 py-3 transition-colors duration-200 ease-out',
                             ev.workOrderId
                               ? draggedEvent?.asset.id === ev.asset.id
-                                ? 'border-indigo-200 bg-indigo-50 cursor-grab'
-                                : 'cursor-grab border-indigo-100 bg-indigo-50/50 hover:border-indigo-200'
-                              : 'border-slate-200 bg-white',
+                                ? 'cursor-grab border-[#6b7cff]/35 bg-[var(--arena-info-soft)]'
+                                : 'cursor-grab border-[#6b7cff]/20 bg-[var(--arena-info-soft)]/60 hover:border-[#6b7cff]/35'
+                              : 'border-[var(--arena-border-soft)] bg-[var(--arena-surface-subtle)]',
                           )}
                         >
-                          {ev.workOrderId && <GripVertical size={14} className="shrink-0 text-indigo-300 transition-colors group-hover:text-indigo-500" />}
+                          {ev.workOrderId && <GripVertical size={14} className="shrink-0 text-[#6b7cff]/70 transition-colors group-hover:text-[#6b7cff]" />}
                           <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-bold text-slate-800">{ev.asset.name}</p>
+                            <p className="truncate text-sm font-semibold text-[var(--arena-text-primary)]">{ev.asset.name}</p>
                             <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
                               {ev.workOrderCode && (
-                                <span className="rounded-md bg-slate-900 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                                <span className="rounded-[var(--arena-radius-sm)] bg-[var(--arena-surface-subtle)] px-1.5 py-0.5 text-[10px] font-semibold text-[var(--arena-text-primary)]">
                                   {ev.workOrderCode}
                                 </span>
                               )}
                               {getEventSupplierName(ev) && (
-                                <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-bold text-indigo-700">
+                                <span className="rounded-full bg-[var(--arena-info-soft)] px-2 py-0.5 text-[10px] font-semibold text-[var(--arena-info)]">
                                   {getEventSupplierName(ev)}
                                 </span>
                               )}
                               {loc && (
-                                <span className="flex items-center gap-1 text-[11px] text-slate-400">
+                                <span className="flex items-center gap-1 text-[11px] text-[var(--arena-text-muted)]">
                                   <MapPin size={9} />
                                   {loc}
                                 </span>
@@ -1078,7 +1078,7 @@ export function ScheduleView() {
                                   setPlanningAsset(ev.asset);
                                   setPlanningRightMode('months');
                                 }}
-                                className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-primary"
+                                className="rounded-[var(--arena-radius-sm)] p-1.5 text-[var(--arena-text-muted)] transition-colors hover:bg-[var(--arena-surface-elevated)] hover:text-[var(--arena-accent)]"
                                 title="Ripianifica"
                               >
                                 <CalendarDays size={14} />
@@ -1088,7 +1088,7 @@ export function ScheduleView() {
                               <button
                                 type="button"
                                 onClick={() => openSupplierEditor(ev)}
-                                className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+                                className="rounded-[var(--arena-radius-sm)] p-1.5 text-[var(--arena-text-muted)] transition-colors hover:bg-[var(--arena-surface-elevated)] hover:text-[var(--arena-text-primary)]"
                                 title="Fornitore"
                               >
                                 <Truck size={14} />
@@ -1097,7 +1097,7 @@ export function ScheduleView() {
                             <button
                               type="button"
                               onClick={() => openRelatedWorkOrder(ev.asset, ev.workOrderId)}
-                              className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+                              className="rounded-[var(--arena-radius-sm)] p-1.5 text-[var(--arena-text-muted)] transition-colors hover:bg-[var(--arena-surface-elevated)] hover:text-[var(--arena-text-primary)]"
                               title="Apri WO"
                             >
                               <FolderOpen size={14} />
@@ -1112,7 +1112,7 @@ export function ScheduleView() {
 
               {selectedInProgressEvents.length > 0 && (
                 <div className="mb-2">
-                  <p className="px-5 pb-1 pt-2 text-[10px] font-bold uppercase tracking-wider text-sky-500">
+                  <p className="px-5 pb-1 pt-2 text-[10px] font-bold uppercase tracking-wider text-[#5fb9d6]">
                     In lavorazione
                   </p>
                   <div className="space-y-1 px-3">
@@ -1123,19 +1123,19 @@ export function ScheduleView() {
                       return (
                         <div
                           key={`ip-${ev.asset.id}`}
-                          className="flex items-center gap-2 rounded-xl border border-sky-100 bg-sky-50/50 px-3 py-3"
+                          className="flex items-center gap-2 rounded-[var(--arena-radius-lg)] border border-[#5fb9d6]/20 bg-[rgba(95,185,214,0.12)] px-3 py-3"
                         >
-                          <div className="h-2 w-2 shrink-0 rounded-full bg-sky-400" />
+                          <div className="h-2 w-2 shrink-0 rounded-full bg-[#5fb9d6]" />
                           <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-bold text-slate-800">{ev.asset.name}</p>
+                            <p className="truncate text-sm font-semibold text-[var(--arena-text-primary)]">{ev.asset.name}</p>
                             <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
                               {ev.workOrderCode && (
-                                <span className="rounded-md bg-slate-900 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                                <span className="rounded-[var(--arena-radius-sm)] bg-[var(--arena-surface-subtle)] px-1.5 py-0.5 text-[10px] font-semibold text-[var(--arena-text-primary)]">
                                   {ev.workOrderCode}
                                 </span>
                               )}
                               {loc && (
-                                <span className="flex items-center gap-1 text-[11px] text-slate-400">
+                                <span className="flex items-center gap-1 text-[11px] text-[var(--arena-text-muted)]">
                                   <MapPin size={9} />
                                   {loc}
                                 </span>
@@ -1145,7 +1145,7 @@ export function ScheduleView() {
                           <button
                             type="button"
                             onClick={() => openRelatedWorkOrder(ev.asset, ev.workOrderId)}
-                            className="shrink-0 rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+                            className="shrink-0 rounded-[var(--arena-radius-sm)] p-1.5 text-[var(--arena-text-muted)] transition-colors hover:bg-[var(--arena-surface-elevated)] hover:text-[var(--arena-text-primary)]"
                             title="Apri WO"
                           >
                             <FolderOpen size={14} />
@@ -1158,7 +1158,7 @@ export function ScheduleView() {
               )}
 
               {selectedEvents.length === 0 && selectedPlannedFromBacklog.length === 0 && selectedPlannedEvents.length === 0 && selectedInProgressEvents.length === 0 && (
-                <div className="px-5 py-8 text-center text-sm text-slate-400">
+                <div className="px-5 py-8 text-center text-sm text-[var(--arena-text-muted)]">
                   Nessuna scadenza per questo giorno.
                 </div>
               )}
@@ -1168,21 +1168,21 @@ export function ScheduleView() {
           {/* Right panel */}
           <div
             className={cn(
-              'flex flex-col overflow-hidden border-l border-slate-100 transition-[width] duration-300',
+              'flex flex-col overflow-hidden border-l border-[var(--arena-border-soft)] bg-[var(--arena-surface)] transition-[width] duration-300',
               planningRightMode ? 'w-[620px]' : 'w-0',
             )}
           >
             {planningAsset && (
               <>
-                <div className="flex items-center gap-3 border-b border-slate-100 px-5 py-4">
+                <div className="flex items-center gap-3 border-b border-[var(--arena-border-soft)] px-5 py-4">
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Pianifica</p>
-                    <p className="truncate font-bold text-slate-800">{planningAsset.name}</p>
+                    <p className="text-xs font-bold uppercase tracking-wider text-[var(--arena-text-muted)]">Pianifica</p>
+                    <p className="truncate font-semibold text-[var(--arena-text-primary)]">{planningAsset.name}</p>
                   </div>
                   <button
                     type="button"
                     onClick={() => { setPlanningAsset(null); setPlanningRightMode(null); }}
-                    className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100"
+                    className="rounded-[var(--arena-radius-sm)] p-1.5 text-[var(--arena-text-muted)] transition-colors hover:bg-[var(--arena-surface-elevated)]"
                   >
                     <X size={16} />
                   </button>
@@ -1190,7 +1190,7 @@ export function ScheduleView() {
 
                 {planningRightMode === 'months' && (
                   <div className="flex-1 overflow-y-auto p-5">
-                    <p className="mb-4 text-sm font-bold text-slate-700">Seleziona un mese</p>
+                    <p className="mb-4 text-sm font-semibold text-[var(--arena-text-secondary)]">Seleziona un mese</p>
                     <div className="grid grid-cols-3 gap-3">
                       {PLANNING_MONTHS.map((month) => (
                         <button
@@ -1200,12 +1200,12 @@ export function ScheduleView() {
                             setPlanningCalendarMonth(month);
                             setPlanningRightMode('calendar');
                           }}
-                          className="rounded-xl border border-slate-200 bg-white px-3 py-4 text-center transition-all hover:border-primary/40 hover:bg-primary/5"
+                          className="rounded-[var(--arena-radius-lg)] border border-[var(--arena-border-soft)] bg-[var(--arena-surface-subtle)] px-3 py-4 text-center transition-colors hover:border-[var(--arena-accent)]/35 hover:bg-[var(--arena-surface-elevated)]"
                         >
-                          <p className="text-sm font-bold capitalize text-slate-800">
+                          <p className="text-sm font-semibold capitalize text-[var(--arena-text-primary)]">
                             {format(month, 'MMMM', { locale: it })}
                           </p>
-                          <p className="text-xs text-slate-400">{format(month, 'yyyy')}</p>
+                          <p className="text-xs text-[var(--arena-text-muted)]">{format(month, 'yyyy')}</p>
                         </button>
                       ))}
                     </div>
@@ -1214,17 +1214,17 @@ export function ScheduleView() {
 
                 {planningRightMode === 'calendar' && (
                   <div className="flex min-h-0 flex-1 flex-col">
-                    <div className="flex items-center gap-1 overflow-x-auto border-b border-slate-100 px-4 py-2">
+                    <div className="flex items-center gap-1 overflow-x-auto border-b border-[var(--arena-border-soft)] px-4 py-2">
                       {PLANNING_MONTHS.map((month) => (
                         <button
                           key={month.toISOString()}
                           type="button"
                           onClick={() => setPlanningCalendarMonth(month)}
                           className={cn(
-                            'shrink-0 rounded-lg px-3 py-1.5 text-xs font-bold capitalize transition-colors',
+                            'shrink-0 rounded-[var(--arena-radius-sm)] px-3 py-1.5 text-xs font-semibold capitalize transition-colors',
                             isSameMonth(month, planningCalendarMonth)
-                              ? 'bg-slate-900 text-white'
-                              : 'text-slate-500 hover:bg-slate-100',
+                              ? 'bg-[var(--arena-surface-elevated)] text-[var(--arena-text-primary)]'
+                              : 'text-[var(--arena-text-secondary)] hover:bg-[var(--arena-surface-elevated)]',
                           )}
                         >
                           {format(month, 'MMM', { locale: it })}
@@ -1233,16 +1233,16 @@ export function ScheduleView() {
                     </div>
 
                     <div className="flex min-h-0 flex-1 flex-col p-4">
-                      <p className="mb-3 text-sm font-bold capitalize text-slate-700">
+                      <p className="mb-3 text-sm font-semibold capitalize text-[var(--arena-text-secondary)]">
                         {format(planningCalendarMonth, 'MMMM yyyy', { locale: it })}
                       </p>
-                      <div className="mb-1 grid grid-cols-7 border-b border-slate-100 pb-1">
+                      <div className="mb-1 grid grid-cols-7 border-b border-[var(--arena-border-soft)] pb-1">
                         {DOW_LABELS.map((label, idx) => (
                           <div
                             key={label}
                             className={cn(
                               'py-1 text-center text-[10px] font-bold uppercase tracking-wider',
-                              idx >= 5 ? 'text-slate-300' : 'text-slate-400',
+                              idx >= 5 ? 'text-[var(--arena-text-muted)]/70' : 'text-[var(--arena-text-muted)]',
                             )}
                           >
                             {label}
@@ -1250,7 +1250,7 @@ export function ScheduleView() {
                         ))}
                       </div>
                       <div
-                        className="grid min-h-0 flex-1 grid-cols-7 divide-x divide-y divide-slate-50 overflow-hidden rounded-xl border border-slate-100"
+                        className="grid min-h-0 flex-1 grid-cols-7 divide-x divide-y divide-[var(--arena-border-soft)] overflow-hidden rounded-[var(--arena-radius-lg)] border border-[var(--arena-border-soft)]"
                         style={{ gridTemplateRows: `repeat(${Math.ceil(planCalDays.length / 7)}, minmax(0, 1fr))` }}
                       >
                         {planCalDays.map((day) => {
@@ -1283,21 +1283,21 @@ export function ScheduleView() {
                                 void handleDropOnDay(key);
                               }}
                               className={cn(
-                                'cursor-pointer overflow-hidden p-1.5 transition-all duration-200 hover:bg-slate-50',
-                                isWeekend && !isTodayDay && 'bg-slate-50/60',
+                                'cursor-pointer overflow-hidden bg-[var(--arena-surface)] p-1.5 transition-colors duration-150 hover:bg-[var(--arena-surface-elevated)]',
+                                isWeekend && !isTodayDay && 'bg-[var(--arena-surface-subtle)]',
                                 !inMonth && 'opacity-30',
-                                isTodayDay && 'bg-primary/5',
-                                isDragOver && 'scale-[0.985] bg-primary/5 ring-2 ring-inset ring-primary/40 shadow-inner',
+                                isTodayDay && 'bg-[var(--arena-accent-soft)]/50',
+                                isDragOver && 'scale-[0.985] bg-[var(--arena-accent-soft)] ring-2 ring-inset ring-[var(--arena-accent)]/35',
                               )}
                               isDragOver={isDragOver}
                             >
                               <div className={cn(
                                 'mx-auto mb-0.5 flex h-6 w-6 items-center justify-center rounded-full text-xs',
                                 isTodayDay
-                                  ? 'bg-primary font-bold text-white'
+                                  ? 'bg-[var(--arena-accent)] font-bold text-[#07110c]'
                                   : isWeekend
-                                    ? inMonth ? 'font-medium text-slate-400' : 'text-slate-300'
-                                    : inMonth ? 'font-medium text-slate-700' : 'text-slate-300',
+                                    ? inMonth ? 'font-medium text-[var(--arena-text-secondary)]' : 'text-[var(--arena-text-muted)]'
+                                    : inMonth ? 'font-medium text-[var(--arena-text-primary)]' : 'text-[var(--arena-text-muted)]',
                               )}>
                                 {format(day, 'd')}
                               </div>
@@ -1306,18 +1306,18 @@ export function ScheduleView() {
                                   <div
                                     key={`pe-${ev.visualStatus ?? 'due'}-${ev.workOrderId ?? ev.asset.id}-${index}`}
                                     className={cn(
-                                      'h-4 w-4 rounded-sm border bg-white',
-                                      ev.visualStatus === 'PLANNED' && 'border-indigo-200 bg-indigo-50',
-                                      ev.visualStatus === 'IN_PROGRESS' && 'border-sky-200 bg-sky-50',
-                                      ev.visualStatus === 'DUE' && ev.daysFromToday < 0 && 'border-red-200 bg-red-50',
-                                      ev.visualStatus === 'DUE' && ev.daysFromToday >= 0 && ev.daysFromToday <= 30 && 'border-orange-200 bg-orange-50',
-                                      ev.visualStatus === 'DUE' && ev.daysFromToday > 30 && 'border-emerald-200 bg-emerald-50',
+                                      'h-4 w-4 rounded-[3px] border bg-[var(--arena-surface-subtle)]',
+                                      ev.visualStatus === 'PLANNED' && 'border-[#6b7cff]/25 bg-[var(--arena-info-soft)]',
+                                      ev.visualStatus === 'IN_PROGRESS' && 'border-[#5fb9d6]/25 bg-[rgba(95,185,214,0.12)]',
+                                      ev.visualStatus === 'DUE' && ev.daysFromToday < 0 && 'border-[var(--arena-danger)]/25 bg-[var(--arena-danger-soft)]',
+                                      ev.visualStatus === 'DUE' && ev.daysFromToday >= 0 && ev.daysFromToday <= 30 && 'border-[var(--arena-warning)]/25 bg-[var(--arena-warning-soft)]',
+                                      ev.visualStatus === 'DUE' && ev.daysFromToday > 30 && 'border-[var(--arena-accent)]/25 bg-[var(--arena-accent-soft)]',
                                     )}
                                     title={ev.asset.name}
                                   />
                                 ))}
                                 {planEvents.length > 4 && (
-                                  <div className="flex h-4 min-w-4 items-center justify-center rounded-sm bg-slate-100 px-0.5 text-[9px] font-bold text-slate-500">
+                                  <div className="flex h-4 min-w-4 items-center justify-center rounded-sm bg-[var(--arena-surface-elevated)] px-0.5 text-[9px] font-semibold text-[var(--arena-text-secondary)]">
                                     +{planEvents.length - 4}
                                   </div>
                                 )}
@@ -1500,26 +1500,26 @@ export function ScheduleView() {
           }
         }}
       >
-        <DialogContent className="sm:max-w-lg rounded-xl p-0 overflow-hidden">
-          <DialogHeader className="border-b px-8 py-6">
+        <DialogContent className="overflow-hidden rounded-[var(--arena-radius-lg)] border-[var(--arena-border-soft)] bg-[var(--arena-surface)] p-0 text-[var(--arena-text-primary)] sm:max-w-lg">
+          <DialogHeader className="border-b border-[var(--arena-border-soft)] px-8 py-6">
             <DialogTitle className="text-2xl font-bold">
               {planningPreviewEvents.length > 1
                 ? `Pianifica ${planningPreviewEvents.length} interventi`
                 : 'Pianifica intervento'}
             </DialogTitle>
             {planningPreviewEvents.length > 0 && planningTargetDay && (
-              <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-4">
+              <div className="mt-4 rounded-[var(--arena-radius-lg)] border border-[var(--arena-border-soft)] bg-[var(--arena-surface-subtle)] px-4 py-4">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-full bg-slate-900 px-3 py-1 text-[11px] font-bold text-white">
+                  <span className="rounded-full bg-[var(--arena-accent-soft)] px-3 py-1 text-[11px] font-semibold text-[var(--arena-accent)]">
                     {planningPreviewEvents.length > 1 ? `${planningPreviewEvents.length} asset` : 'Asset'}
                   </span>
-                  <span className="text-base font-bold text-slate-800">
+                  <span className="text-base font-semibold text-[var(--arena-text-primary)]">
                     {planningPreviewEvents.length > 1
                       ? 'Pianificazione massiva'
                       : planningPreviewEvents[0].asset.name}
                   </span>
                   {planningPreviewEvents.length === 1 && planningPreviewEvents[0].asset.serial_number && (
-                    <span className="rounded-md bg-white px-2 py-0.5 text-[10px] font-bold text-slate-500">
+                    <span className="rounded-[var(--arena-radius-sm)] bg-[var(--arena-surface)] px-2 py-0.5 text-[10px] font-semibold text-[var(--arena-text-secondary)]">
                       {planningPreviewEvents[0].asset.serial_number}
                     </span>
                   )}
@@ -1527,10 +1527,10 @@ export function ScheduleView() {
                 {planningPreviewEvents.length > 1 ? (
                   <div className="mt-3 max-h-28 space-y-1 overflow-y-auto">
                     {planningPreviewEvents.map((event) => (
-                      <div key={event.asset.id} className="flex items-center justify-between gap-3 rounded-lg bg-white px-3 py-2">
-                        <span className="truncate text-sm font-semibold text-slate-700">{event.asset.name}</span>
+                      <div key={event.asset.id} className="flex items-center justify-between gap-3 rounded-[var(--arena-radius-md)] bg-[var(--arena-surface)] px-3 py-2">
+                        <span className="truncate text-sm font-semibold text-[var(--arena-text-primary)]">{event.asset.name}</span>
                         {event.asset.serial_number && (
-                          <span className="shrink-0 rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500">
+                          <span className="shrink-0 rounded-[var(--arena-radius-sm)] bg-[var(--arena-surface-elevated)] px-2 py-0.5 text-[10px] font-semibold text-[var(--arena-text-secondary)]">
                             {event.asset.serial_number}
                           </span>
                         )}
@@ -1538,7 +1538,7 @@ export function ScheduleView() {
                     ))}
                   </div>
                 ) : (
-                  <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-slate-500">
+                  <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-[var(--arena-text-secondary)]">
                     <span>{planningPreviewEvents[0].asset.category}</span>
                     <span>{planningPreviewEvents[0].asset.brand} {planningPreviewEvents[0].asset.model}</span>
                     {planningAssetLocation && (
@@ -1550,11 +1550,11 @@ export function ScheduleView() {
                   </div>
                 )}
                 <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <span className="rounded-full bg-blue-100 px-3 py-1 text-[11px] font-bold text-blue-700">
+                  <span className="rounded-full bg-[var(--arena-info-soft)] px-3 py-1 text-[11px] font-semibold text-[var(--arena-info)]">
                     {planningPreviewEvents.length > 1 ? 'Pianificati' : 'Pianificato'} per il {format(new Date(`${planningTargetDay}T12:00:00`), 'd MMMM yyyy', { locale: it })}
                   </span>
                   {planningPreviewEvents.length > 1 && (
-                    <span className="rounded-full bg-white px-3 py-1 text-[11px] font-bold text-slate-500">
+                    <span className="rounded-full bg-[var(--arena-surface)] px-3 py-1 text-[11px] font-semibold text-[var(--arena-text-secondary)]">
                       Conferma unica con lo stesso fornitore
                     </span>
                   )}
