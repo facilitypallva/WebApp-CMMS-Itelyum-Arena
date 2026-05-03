@@ -81,14 +81,7 @@ export function Sidebar() {
   return (
     <aside className="sticky top-0 flex h-screen w-[248px] shrink-0 flex-col overflow-y-auto border-r border-white/5 bg-sidebar text-slate-400">
       <div className="flex h-[72px] items-center border-b border-white/6 px-6">
-        <button
-          type="button"
-          className="flex min-w-0 items-center gap-2 rounded-lg text-left text-white transition-colors hover:bg-white/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/40"
-          aria-label="ArenaOS"
-        >
-          <img src={arenaOsLogoWhite} alt="ArenaOS" className="h-8 w-auto max-w-[142px] object-contain" />
-          <ChevronDown size={18} className="shrink-0 text-slate-500" />
-        </button>
+        <img src={arenaOsLogoWhite} alt="ArenaOS" className="h-10 w-[178px] object-contain object-left" />
       </div>
 
       <nav className="flex-1 overflow-y-auto px-2 py-4">
