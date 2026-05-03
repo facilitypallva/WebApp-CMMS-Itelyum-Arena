@@ -499,7 +499,7 @@ export function VehicleDetailDialog({
                   <div className="flex gap-2">
                     {editingVehicle ? (
                       <>
-                        <Button variant="outline" className="h-8 rounded-lg" onClick={() => {
+                        <Button variant="outline" className="arena-dark-outline-button h-8 rounded-lg" onClick={() => {
                           setVehicleForm(makeVehicleForm(vehicle));
                           setVehiclePhotoFile(null);
                           setVehiclePhotoPreview(null);
@@ -508,12 +508,12 @@ export function VehicleDetailDialog({
                         }}>
                           Annulla
                         </Button>
-                        <Button className="h-8 gap-2 rounded-lg bg-primary" disabled={saving} onClick={handleVehicleSave}>
+                        <Button className="arena-dark-accent-button h-8 gap-2 rounded-lg" disabled={saving} onClick={handleVehicleSave}>
                           <Save size={14} /> Salva
                         </Button>
                       </>
                     ) : (
-                      <Button variant="outline" className="h-8 gap-2 rounded-lg" onClick={() => setEditingVehicle(true)}>
+                      <Button variant="outline" className="arena-dark-outline-button h-8 gap-2 rounded-lg" onClick={() => setEditingVehicle(true)}>
                         <Edit3 size={14} /> Modifica
                       </Button>
                     )}
@@ -629,14 +629,14 @@ export function VehicleDetailDialog({
                         />
                       </div>
                       <div className="flex items-end">
-                        <Button className="h-9 gap-2 rounded-lg bg-primary" disabled={saving} onClick={handleSharingSlugSave}>
+                        <Button className="arena-dark-accent-button h-9 gap-2 rounded-lg" disabled={saving} onClick={handleSharingSlugSave}>
                           <Save size={14} /> Salva link
                         </Button>
                       </div>
                     </div>
                   )}
                   {publicBookingLink && (
-                    <Button variant="outline" className="gap-2 rounded-lg" onClick={copyPublicLink}>
+                    <Button variant="outline" className="arena-dark-outline-button gap-2 rounded-lg" onClick={copyPublicLink}>
                       <Copy size={14} /> Copia link pubblico
                     </Button>
                   )}
@@ -691,7 +691,7 @@ export function VehicleDetailDialog({
                   </div>
 
                   {canManage && (
-                    <Button className="gap-2 rounded-lg bg-primary" disabled={saving} onClick={handleAssignmentSave}>
+                    <Button className="arena-dark-accent-button gap-2 rounded-lg" disabled={saving} onClick={handleAssignmentSave}>
                       <Save size={14} /> Salva assegnazione
                     </Button>
                   )}
@@ -723,7 +723,7 @@ export function VehicleDetailDialog({
                           </div>
                         </div>
                         {canManage && (
-                          <Button variant="outline" className="h-8 gap-2 rounded-lg" onClick={() => setEditingDeadlineType(isEditing ? null : deadlineType)}>
+                          <Button variant="outline" className="arena-dark-outline-button h-8 gap-2 rounded-lg" onClick={() => setEditingDeadlineType(isEditing ? null : deadlineType)}>
                             <Edit3 size={14} /> {isEditing ? 'Chiudi' : 'Modifica'}
                           </Button>
                         )}
@@ -748,7 +748,7 @@ export function VehicleDetailDialog({
                             <Textarea value={draft.notes} onChange={(event) => setDeadlineDrafts({ ...deadlineDrafts, [deadlineType]: { ...draft, notes: event.target.value } })} />
                           </div>
                           <div className="md:col-span-2">
-                            <Button className="h-8 gap-2 rounded-lg bg-primary" disabled={saving} onClick={() => handleDeadlineSave(deadlineType)}>
+                            <Button className="arena-dark-accent-button h-8 gap-2 rounded-lg" disabled={saving} onClick={() => handleDeadlineSave(deadlineType)}>
                               <Save size={14} /> Salva scadenza
                             </Button>
                           </div>
@@ -811,7 +811,7 @@ export function VehicleDetailDialog({
                 <p className="mt-4 rounded-lg border border-[var(--arena-warning)]/20 bg-[var(--arena-warning-soft)] px-4 py-3 text-sm font-medium text-[var(--arena-warning)]">
                   Il veicolo sarà automaticamente bloccato nelle date indicate. Il sostitutivo {substituteVehicle ? getVehicleName(substituteVehicle) : 'non configurato'} verrà attivato.
                 </p>
-                <Button className="mt-4 gap-2 rounded-lg bg-primary" disabled={saving} onClick={handleMaintenanceSave}>
+                <Button className="arena-dark-accent-button mt-4 gap-2 rounded-lg" disabled={saving} onClick={handleMaintenanceSave}>
                   <Wrench size={14} /> Programma manutenzione
                 </Button>
               </div>
