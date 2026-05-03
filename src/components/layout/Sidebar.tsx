@@ -81,7 +81,7 @@ export function Sidebar() {
   return (
     <aside className="sticky top-0 flex h-screen w-[248px] shrink-0 flex-col overflow-y-auto border-r border-white/5 bg-sidebar text-slate-400">
       <div className="flex h-[72px] items-center border-b border-white/6 px-6">
-        <img src={arenaOsLogoWhite} alt="ArenaOS" className="h-10 w-[178px] object-contain object-left" />
+        <img src={arenaOsLogoWhite} alt="ArenaOS" className="h-12 w-[196px] object-contain object-left" />
       </div>
 
       <nav className="flex-1 overflow-y-auto px-2 py-4">
