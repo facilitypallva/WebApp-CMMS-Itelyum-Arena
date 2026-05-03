@@ -48,7 +48,7 @@ export function AppLayout({ children, title }: LayoutProps) {
   }, [children, globalSearch]);
 
   return (
-    <div className="flex min-h-screen bg-[#f8fafc] text-slate-950">
+    <div className="flex min-h-screen bg-[var(--arena-bg)] text-[var(--arena-text-primary)]">
       <Sidebar />
       <div className="flex min-w-0 flex-1 flex-col">
         <Header
@@ -57,7 +57,7 @@ export function AppLayout({ children, title }: LayoutProps) {
           onGlobalSearchChange={handleGlobalSearchChange}
           onGlobalSearchApply={handleGlobalSearchApply}
         />
-        <main className="flex-1 overflow-y-auto p-6 lg:p-7">
+        <main className="flex-1 overflow-y-auto bg-[var(--arena-bg)] p-6 lg:p-7">
           {content}
         </main>
       </div>

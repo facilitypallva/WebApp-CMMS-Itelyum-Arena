@@ -253,15 +253,15 @@ export function Header({
   };
 
   return (
-    <header className="sticky top-0 z-40 flex h-[60px] items-center justify-between border-b border-slate-200 bg-white px-6">
+    <header className="sticky top-0 z-40 flex h-[60px] items-center justify-between border-b border-[var(--arena-border)] bg-[var(--arena-bg)] px-6">
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" className="md:hidden">
           <Menu size={24} />
         </Button>
-        <div className="hidden md:flex items-center gap-2 text-sm">
-          <span className="font-medium text-slate-500">{sectionLabel}</span>
-          <span className="text-slate-300">/</span>
-          <h1 className="arena-heading text-sm font-semibold text-slate-950">{title}</h1>
+        <div className="hidden items-center gap-2 text-sm md:flex">
+          <span className="font-medium text-[var(--arena-text-muted)]">{sectionLabel}</span>
+          <span className="text-[var(--arena-text-muted)]/60">/</span>
+          <h1 className="arena-heading text-sm font-semibold text-[var(--arena-text-primary)]">{title}</h1>
         </div>
       </div>
 
@@ -271,24 +271,24 @@ export function Header({
           onFocus={openSearchPanel}
           onBlur={closeSearchPanel}
         >
-          <Search className="absolute left-3 text-slate-400" size={18} />
+          <Search className="absolute left-3 text-[var(--arena-text-muted)]" size={16} />
           <Input 
             placeholder="Cerca asset, ticket o WO..." 
-            className="h-9 rounded-lg border-slate-200 bg-slate-50 pl-10 text-sm focus-visible:border-blue-800 focus-visible:ring-blue-800/15"
+            className="h-9 rounded-[var(--arena-radius-md)] border-[var(--arena-border-soft)] bg-[var(--arena-surface-subtle)] pl-10 text-sm text-[var(--arena-text-primary)] placeholder:text-[var(--arena-text-muted)] focus-visible:border-[var(--arena-accent)] focus-visible:ring-[var(--arena-accent-soft)]"
             value={globalSearch}
             onChange={(event) => onGlobalSearchChange?.(event.target.value)}
           />
           {shouldShowSearchPanel && (
-            <div className="absolute left-0 top-[calc(100%+0.75rem)] z-30 flex max-h-[30rem] w-[30rem] flex-col overflow-hidden rounded-xl border border-slate-200 bg-white p-2 shadow-2xl">
+            <div className="absolute left-0 top-[calc(100%+0.75rem)] z-30 flex max-h-[30rem] w-[30rem] flex-col overflow-hidden rounded-[var(--arena-radius-lg)] border border-[var(--arena-border-soft)] bg-[var(--arena-surface-elevated)] p-2 shadow-2xl shadow-black/30">
               <div className="flex items-center justify-between px-3 py-2">
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Ricerca Globale</p>
-                <Badge variant="outline" className="rounded-full border-slate-200 text-[10px] font-bold text-slate-500">
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--arena-text-muted)]">Ricerca Globale</p>
+                <Badge variant="outline" className="rounded-full border-[var(--arena-border-soft)] text-[10px] font-bold text-[var(--arena-text-secondary)]">
                   {results.length} risultati
                 </Badge>
               </div>
 
               {!hasSearchResults ? (
-                <div className="px-3 py-6 text-center text-sm text-slate-400">
+                <div className="px-3 py-6 text-center text-sm text-[var(--arena-text-muted)]">
                   Nessun risultato per "{globalSearch}"
                 </div>
               ) : (
@@ -303,7 +303,7 @@ export function Header({
 
                       return (
                         <div key={groupKey} className="space-y-1">
-                          <div className="flex items-center gap-2 px-2 py-1 text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
+                          <div className="flex items-center gap-2 px-2 py-1 text-xs font-bold uppercase tracking-[0.18em] text-[var(--arena-text-muted)]">
                             <Icon size={12} />
                             <span>{label}</span>
                           </div>
@@ -314,18 +314,18 @@ export function Header({
                               <button
                                 key={`${item.kind}-${item.id}`}
                                 type="button"
-                                className="flex w-full items-start gap-3 rounded-xl px-3 py-2 text-left transition-colors hover:bg-slate-50"
+                                className="flex w-full items-start gap-3 rounded-[var(--arena-radius-md)] px-3 py-2 text-left transition-colors hover:bg-[var(--arena-surface)]"
                                 onMouseDown={(event) => event.preventDefault()}
                                 onClick={() => handleSelectResult(item)}
                               >
-                                <div className="mt-0.5 rounded-lg bg-slate-100 p-2 text-slate-500">
+                                <div className="mt-0.5 rounded-[var(--arena-radius-sm)] bg-[var(--arena-surface-subtle)] p-2 text-[var(--arena-text-secondary)]">
                                   <ItemIcon size={14} />
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                  <p className="truncate text-sm font-semibold text-slate-800">{item.title}</p>
-                                  <p className="line-clamp-2 text-xs text-slate-500">{item.subtitle}</p>
+                                  <p className="truncate text-sm font-semibold text-[var(--arena-text-primary)]">{item.title}</p>
+                                  <p className="line-clamp-2 text-xs text-[var(--arena-text-secondary)]">{item.subtitle}</p>
                                 </div>
-                                <div className="pt-1 text-slate-300">
+                                <div className="pt-1 text-[var(--arena-text-muted)]">
                                   <MapPin size={14} />
                                 </div>
                               </button>
@@ -346,7 +346,7 @@ export function Header({
           <Button
             variant="ghost"
             size="icon"
-            className="h-9 w-9 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-blue-800"
+            className="h-8 w-8 rounded-[var(--arena-radius-sm)] border border-[var(--arena-border-soft)] text-[var(--arena-text-secondary)] hover:bg-[var(--arena-surface)] hover:text-[var(--arena-text-primary)]"
             onClick={handleThemeToggle}
             aria-label={isDarkMode ? 'Attiva modalita chiara' : 'Attiva modalita scura'}
             title={isDarkMode ? 'Modalita chiara' : 'Modalita scura'}
@@ -357,28 +357,28 @@ export function Header({
             <Button
               variant="ghost"
               size="icon"
-              className="relative h-9 w-9 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-blue-800"
+              className="relative h-8 w-8 rounded-[var(--arena-radius-sm)] border border-[var(--arena-border-soft)] text-[var(--arena-text-secondary)] hover:bg-[var(--arena-surface)] hover:text-[var(--arena-text-primary)]"
               onClick={() => setIsNotificationsOpen((current) => !current)}
             >
               <Bell size={20} />
               {unreadCount > 0 && (
-                <span className="absolute right-1.5 top-1.5 flex min-h-4 min-w-4 items-center justify-center rounded-full border-2 border-white bg-red-500 px-1 text-[9px] font-bold text-white">
+                <span className="absolute right-1 top-1 flex min-h-4 min-w-4 items-center justify-center rounded-full border-2 border-[var(--arena-bg)] bg-[var(--arena-danger)] px-1 text-[9px] font-bold text-white">
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
             </Button>
 
             {isNotificationsOpen && (
-              <div className="absolute right-0 top-[calc(100%+0.75rem)] z-20 flex max-h-[30rem] w-[24rem] flex-col overflow-hidden rounded-xl border border-slate-200 bg-white p-2 shadow-2xl">
+              <div className="absolute right-0 top-[calc(100%+0.75rem)] z-20 flex max-h-[30rem] w-[24rem] flex-col overflow-hidden rounded-[var(--arena-radius-lg)] border border-[var(--arena-border-soft)] bg-[var(--arena-surface-elevated)] p-2 shadow-2xl shadow-black/30">
                 <div className="flex items-center justify-between px-3 py-2">
-                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Notifiche</p>
-                  <Badge variant="outline" className="rounded-full border-slate-200 text-[10px] font-bold text-slate-500">
+                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--arena-text-muted)]">Notifiche</p>
+                  <Badge variant="outline" className="rounded-full border-[var(--arena-border-soft)] text-[10px] font-bold text-[var(--arena-text-secondary)]">
                     {unreadCount} non lette
                   </Badge>
                 </div>
 
                 {notifications.length === 0 ? (
-                  <div className="px-3 py-6 text-center text-sm text-slate-400">
+                  <div className="px-3 py-6 text-center text-sm text-[var(--arena-text-muted)]">
                     Nessuna notifica disponibile
                   </div>
                 ) : (
@@ -389,17 +389,17 @@ export function Header({
                         <button
                           key={notification.id}
                           type="button"
-                          className="flex w-full flex-col items-start gap-1 rounded-xl px-3 py-3 text-left transition-colors hover:bg-slate-50"
+                          className="flex w-full flex-col items-start gap-1 rounded-[var(--arena-radius-md)] px-3 py-3 text-left transition-colors hover:bg-[var(--arena-surface)]"
                           onClick={() => handleNotificationClick(notification.id, notification.entity_type, notification.entity_id)}
                         >
                           <div className="flex w-full items-start justify-between gap-3">
-                            <p className="text-sm font-semibold text-slate-800">{notification.title}</p>
+                            <p className="text-sm font-semibold text-[var(--arena-text-primary)]">{notification.title}</p>
                             {!notification.read_at && (
-                              <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-red-500" />
+                              <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-[var(--arena-danger)]" />
                             )}
                           </div>
-                          <p className="text-xs text-slate-500">{notification.message}</p>
-                          <p className="text-[11px] font-medium text-slate-400">
+                          <p className="text-xs text-[var(--arena-text-secondary)]">{notification.message}</p>
+                          <p className="text-[11px] font-medium text-[var(--arena-text-muted)]">
                             {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: it })}
                           </p>
                         </button>

@@ -157,15 +157,35 @@
 }
 
 :root {
-    --arena-navy: #0b1220;
-    --arena-navy-2: #0f1a2e;
-    --arena-blue: #1e40af;
-    --arena-blue-700: #1d3a9e;
-    --arena-cyan: #06b6d4;
-    --arena-bg: #f8fafc;
-    --arena-ink: #0f172a;
-    --arena-muted: #64748b;
-    --arena-border: #e2e8f0;
+    --arena-navy: #0f0f11;
+    --arena-navy-2: #15171c;
+    --arena-blue: #6b7cff;
+    --arena-blue-700: #5f6ff0;
+    --arena-cyan: #6b7cff;
+    --arena-bg: #0f0f11;
+    --arena-sidebar-bg: #090909;
+    --arena-surface: #111216;
+    --arena-surface-elevated: #15171c;
+    --arena-surface-subtle: #0c0d10;
+    --arena-ink: #f7f8fa;
+    --arena-muted: #9aa3b2;
+    --arena-border: #1c1e21;
+    --arena-border-soft: rgba(255,255,255,0.06);
+    --arena-text-primary: #f7f8fa;
+    --arena-text-secondary: #9aa3b2;
+    --arena-text-muted: #656d7c;
+    --arena-accent: #27e58c;
+    --arena-accent-soft: rgba(39,229,140,0.12);
+    --arena-danger: #f04444;
+    --arena-danger-soft: rgba(240,68,68,0.12);
+    --arena-warning: #f59e0b;
+    --arena-warning-soft: rgba(245,158,11,0.12);
+    --arena-info: #6b7cff;
+    --arena-info-soft: rgba(107,124,255,0.12);
+    --arena-radius-sm: 6px;
+    --arena-radius-md: 8px;
+    --arena-radius-lg: 10px;
+    --arena-shadow-none: none;
     --background: oklch(1 0 0);
     --foreground: oklch(0.145 0 0);
     --card: oklch(1 0 0);

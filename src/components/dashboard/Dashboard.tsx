@@ -2,7 +2,6 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
 import {
@@ -16,19 +15,21 @@ import {
 import { useDashboard } from '@/hooks/useDashboard';
 import { useAuth } from '@/contexts/AuthContext';
 
-const ASSET_STATUS_COLORS = ['#10b981', '#f59e0b', '#ef4444'];
+const ASSET_STATUS_COLORS = ['#27e58c', '#c98a24', '#d84a4a'];
 
 const TOOLTIP_STYLE = {
-  borderRadius: '12px',
-  border: 'none',
-  boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
+  backgroundColor: '#15171c',
+  borderRadius: '8px',
+  border: '1px solid rgba(255,255,255,0.08)',
+  boxShadow: 'none',
+  color: '#f7f8fa',
   padding: '10px 14px',
   fontSize: '12px',
 };
 
 function ChartEmptyState({ label }: { label: string }) {
   return (
-    <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50/70 text-xs text-slate-400">
+    <div className="flex h-full items-center justify-center rounded-[var(--arena-radius-md)] border border-dashed border-[var(--arena-border-soft)] bg-[var(--arena-surface-subtle)]/60 text-xs text-[var(--arena-text-muted)]">
       Nessun dato — {label.toLowerCase()}
     </div>
   );
@@ -44,20 +45,20 @@ export function Dashboard() {
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[var(--arena-border)] border-t-[var(--arena-accent)]" />
       </div>
     );
   }
 
   if (error || !stats) {
     return (
-      <div className="flex h-64 flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-slate-200 bg-slate-50 text-center">
-        <AlertTriangle size={36} className="text-slate-300" />
+      <div className="flex h-64 flex-col items-center justify-center gap-4 rounded-[var(--arena-radius-lg)] border border-dashed border-[var(--arena-border-soft)] bg-[var(--arena-surface)] text-center">
+        <AlertTriangle size={36} className="text-[var(--arena-text-muted)]" />
         <div className="space-y-1">
-          <p className="font-semibold text-slate-600">Errore nel caricamento</p>
-          <p className="text-sm text-slate-400">{error ?? 'Dati non disponibili'}</p>
+          <p className="font-semibold text-[var(--arena-text-primary)]">Errore nel caricamento</p>
+          <p className="text-sm text-[var(--arena-text-secondary)]">{error ?? 'Dati non disponibili'}</p>
         </div>
-        <Button variant="outline" className="gap-2 rounded-xl" onClick={reload}>
+        <Button variant="outline" className="gap-2 rounded-[var(--arena-radius-md)] border-[var(--arena-border-soft)] bg-[var(--arena-surface-elevated)] text-[var(--arena-text-primary)] hover:bg-[var(--arena-surface-subtle)]" onClick={reload}>
           <RefreshCw size={14} /> Riprova
         </Button>
       </div>
@@ -65,11 +66,11 @@ export function Dashboard() {
   }
 
   const kpis = [
-    { label: 'Tot Asset', value: stats.totalAssets.toString(), icon: Package, color: 'bg-blue-500' },
-    { label: 'Conformità', value: `${stats.conformanceRate}%`, icon: CheckCircle2, color: 'bg-emerald-500' },
-    { label: 'Asset Scaduti', value: stats.expiredAssets.toString(), icon: AlertTriangle, color: 'bg-red-500' },
-    { label: 'WO In Corso', value: stats.woInProgress.toString(), icon: Clock, color: 'bg-orange-500' },
-    { label: 'Ticket Aperti', value: stats.openTickets.toString(), icon: Ticket, color: 'bg-violet-500' },
+    { label: 'Tot Asset', value: stats.totalAssets.toString(), icon: Package, color: 'bg-[var(--arena-info-soft)] text-[var(--arena-info)]' },
+    { label: 'Conformità', value: `${stats.conformanceRate}%`, icon: CheckCircle2, color: 'bg-[var(--arena-accent-soft)] text-[var(--arena-accent)]' },
+    { label: 'Asset Scaduti', value: stats.expiredAssets.toString(), icon: AlertTriangle, color: 'bg-[var(--arena-danger-soft)] text-[var(--arena-danger)]' },
+    { label: 'WO In Corso', value: stats.woInProgress.toString(), icon: Clock, color: 'bg-[var(--arena-warning-soft)] text-[var(--arena-warning)]' },
+    { label: 'Ticket Aperti', value: stats.openTickets.toString(), icon: Ticket, color: 'bg-[rgba(139,148,255,0.12)] text-[#8b94ff]' },
   ];
 
   return (
@@ -79,18 +80,18 @@ export function Dashboard() {
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        className="arena-card flex items-center justify-between px-5 py-2.5"
+        className="flex items-center justify-between rounded-[var(--arena-radius-lg)] border border-[var(--arena-border-soft)] bg-[var(--arena-surface)] px-5 py-2.5"
       >
         <div className="flex items-baseline gap-3">
-          <h2 className="arena-heading text-lg font-semibold text-slate-950">
+          <h2 className="arena-heading text-lg font-semibold text-[var(--arena-text-primary)]">
             Buongiorno {userName}
           </h2>
           {stats.expiredAssets > 0 && (
-            <span className="text-sm font-medium text-red-600">· {stats.expiredAssets} asset scaduti</span>
+            <span className="rounded-full bg-[var(--arena-danger-soft)] px-2 py-0.5 text-xs font-medium text-[var(--arena-danger)]">{stats.expiredAssets} asset scaduti</span>
           )}
         </div>
         <Button
-          className="h-8 gap-1.5 rounded-lg bg-blue-800 px-3 text-sm font-medium text-white hover:bg-blue-900"
+          className="h-8 gap-1.5 rounded-[var(--arena-radius-sm)] bg-[var(--arena-accent)]/90 px-3 text-sm font-medium text-[#07110c] hover:bg-[var(--arena-accent)]"
           onClick={() => navigate('/reports/cda')}
         >
           <FileOutput size={14} /> Report
@@ -106,14 +107,14 @@ export function Dashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.07 }}
           >
-            <Card className="arena-card overflow-hidden py-0 transition-all duration-300 hover:shadow-md">
+            <Card className="overflow-hidden rounded-[var(--arena-radius-lg)] border border-[var(--arena-border-soft)] bg-[var(--arena-surface)] py-0 shadow-none transition-colors duration-150 hover:bg-[var(--arena-surface-elevated)]">
               <CardContent className="flex items-center justify-between p-4">
                 <div className="space-y-0.5">
-                  <p className="arena-kicker">{kpi.label}</p>
-                  <p className="arena-heading text-2xl font-bold text-slate-950">{kpi.value}</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--arena-text-muted)]">{kpi.label}</p>
+                  <p className="arena-heading text-[26px] font-semibold leading-tight text-[var(--arena-text-primary)]">{kpi.value}</p>
                 </div>
-                <div className={cn('flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-white', kpi.color)}>
-                  <kpi.icon size={18} />
+                <div className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--arena-radius-sm)]', kpi.color)}>
+                  <kpi.icon size={16} />
                 </div>
               </CardContent>
             </Card>
@@ -125,11 +126,11 @@ export function Dashboard() {
       <div className="grid grid-cols-12 gap-3">
 
         {/* Area Chart — Trend Manutenzioni */}
-        <Card className="arena-card col-span-12 overflow-hidden p-4 lg:col-span-7">
+        <Card className="col-span-12 overflow-hidden rounded-[var(--arena-radius-lg)] border border-[var(--arena-border-soft)] bg-[var(--arena-surface)] p-4 shadow-none lg:col-span-7">
           <div className="mb-2 flex items-start justify-between">
             <div>
-              <CardTitle className="arena-heading text-sm font-semibold text-slate-950">Trend Manutenzioni</CardTitle>
-              <p className="text-[11px] text-slate-400">WO chiusi · ultimi 12 mesi</p>
+              <CardTitle className="arena-heading text-sm font-semibold text-[var(--arena-text-primary)]">Trend Manutenzioni</CardTitle>
+              <p className="text-[11px] text-[var(--arena-text-muted)]">WO chiusi · ultimi 12 mesi</p>
             </div>
           </div>
           <div className="h-36">
@@ -140,22 +141,22 @@ export function Dashboard() {
                 <AreaChart data={stats.monthlyTrend} margin={{ top: 4, right: 4, left: -22, bottom: 0 }}>
                   <defs>
                     <linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#1e40af" stopOpacity={0.18} />
-                      <stop offset="95%" stopColor="#1e40af" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#6b7cff" stopOpacity={0.16} />
+                      <stop offset="95%" stopColor="#6b7cff" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 10 }} dy={6} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 10 }} allowDecimals={false} width={24} />
-                  <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ stroke: '#e2e8f0', strokeWidth: 1 }} />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.06)" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#656d7c', fontSize: 10 }} dy={6} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#656d7c', fontSize: 10 }} allowDecimals={false} width={24} />
+                  <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ stroke: 'rgba(255,255,255,0.08)', strokeWidth: 1 }} />
                   <Area
                     type="monotone"
                     dataKey="value"
-                    stroke="#1e40af"
+                    stroke="#6b7cff"
                     strokeWidth={2}
                     fill="url(#trendGradient)"
                     dot={false}
-                    activeDot={{ r: 4, fill: '#1e40af', strokeWidth: 0 }}
+                    activeDot={{ r: 4, fill: '#6b7cff', strokeWidth: 0 }}
                   />
                 </AreaChart>
               </ResponsiveContainer>
@@ -164,13 +165,13 @@ export function Dashboard() {
         </Card>
 
         {/* Donut — Stato Asset */}
-        <Card className="arena-card col-span-12 overflow-hidden p-4 lg:col-span-5">
+        <Card className="col-span-12 overflow-hidden rounded-[var(--arena-radius-lg)] border border-[var(--arena-border-soft)] bg-[var(--arena-surface)] p-4 shadow-none lg:col-span-5">
           <div className="mb-2 flex items-start justify-between">
             <div>
-              <CardTitle className="arena-heading text-sm font-semibold text-slate-950">Stato Asset</CardTitle>
-              <p className="text-[11px] text-slate-400">Distribuzione operativa</p>
+              <CardTitle className="arena-heading text-sm font-semibold text-[var(--arena-text-primary)]">Stato Asset</CardTitle>
+              <p className="text-[11px] text-[var(--arena-text-muted)]">Distribuzione operativa</p>
             </div>
-            <Layers3 size={15} className="shrink-0 text-primary" />
+            <Layers3 size={15} className="shrink-0 text-[var(--arena-text-muted)]" />
           </div>
           <div className="flex items-center gap-3">
             <div className="h-36 w-36 shrink-0">
@@ -202,15 +203,15 @@ export function Dashboard() {
             </div>
             <div className="flex flex-1 flex-col gap-2">
               {stats.assetStatusBreakdown.map((item, index) => (
-                <div key={item.name} className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
+                <div key={item.name} className="flex items-center justify-between rounded-[var(--arena-radius-md)] bg-[var(--arena-surface-subtle)] px-3 py-2">
                   <div className="flex items-center gap-2">
                     <span
                       className="h-2.5 w-2.5 shrink-0 rounded-full"
                       style={{ backgroundColor: ASSET_STATUS_COLORS[index % ASSET_STATUS_COLORS.length] }}
                     />
-                    <span className="text-xs font-medium text-slate-600">{item.name}</span>
+                    <span className="text-xs font-medium text-[var(--arena-text-secondary)]">{item.name}</span>
                   </div>
-                  <span className="text-xs font-bold text-slate-800">{item.value}</span>
+                  <span className="text-xs font-semibold text-[var(--arena-text-primary)]">{item.value}</span>
                 </div>
               ))}
             </div>
@@ -222,13 +223,13 @@ export function Dashboard() {
       {/* Charts row 2: Ticket per Categoria · Ticket per Ubicazione */}
       <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
 
-        <Card className="arena-card overflow-hidden p-4">
+        <Card className="overflow-hidden rounded-[var(--arena-radius-lg)] border border-[var(--arena-border-soft)] bg-[var(--arena-surface)] p-4 shadow-none">
           <div className="mb-2 flex items-start justify-between">
             <div>
-              <CardTitle className="arena-heading text-sm font-semibold text-slate-950">Ticket per Categoria</CardTitle>
-              <p className="text-[11px] text-slate-400">Anomalie più frequenti</p>
+              <CardTitle className="arena-heading text-sm font-semibold text-[var(--arena-text-primary)]">Ticket per Categoria</CardTitle>
+              <p className="text-[11px] text-[var(--arena-text-muted)]">Anomalie più frequenti</p>
             </div>
-            <Ticket size={15} className="shrink-0 text-primary" />
+            <Ticket size={15} className="shrink-0 text-[var(--arena-text-muted)]" />
           </div>
           <div className="h-32">
             {stats.ticketsByCategory.length === 0 ? (
@@ -242,28 +243,28 @@ export function Dashboard() {
                 >
                   <defs>
                     <linearGradient id="catGradient" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%" stopColor="#1e40af" />
-                      <stop offset="100%" stopColor="#06b6d4" />
+                      <stop offset="0%" stopColor="#6b7cff" />
+                      <stop offset="100%" stopColor="#27e58c" />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
-                  <XAxis type="number" axisLine={false} tickLine={false} allowDecimals={false} tick={{ fill: '#94a3b8', fontSize: 10 }} />
-                  <YAxis type="category" dataKey="name" axisLine={false} tickLine={false} width={120} tick={{ fill: '#475569', fontSize: 10 }} />
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="rgba(255,255,255,0.06)" />
+                  <XAxis type="number" axisLine={false} tickLine={false} allowDecimals={false} tick={{ fill: '#656d7c', fontSize: 10 }} />
+                  <YAxis type="category" dataKey="name" axisLine={false} tickLine={false} width={120} tick={{ fill: '#9aa3b2', fontSize: 10 }} />
                   <Tooltip contentStyle={TOOLTIP_STYLE} />
-                  <Bar dataKey="value" fill="url(#catGradient)" radius={[0, 8, 8, 0]} barSize={13} />
+                  <Bar dataKey="value" fill="url(#catGradient)" radius={[0, 6, 6, 0]} barSize={12} />
                 </BarChart>
               </ResponsiveContainer>
             )}
           </div>
         </Card>
 
-        <Card className="arena-card overflow-hidden p-4">
+        <Card className="overflow-hidden rounded-[var(--arena-radius-lg)] border border-[var(--arena-border-soft)] bg-[var(--arena-surface)] p-4 shadow-none">
           <div className="mb-2 flex items-start justify-between">
             <div>
-              <CardTitle className="arena-heading text-sm font-semibold text-slate-950">Ticket per Ubicazione</CardTitle>
-              <p className="text-[11px] text-slate-400">Aree più colpite</p>
+              <CardTitle className="arena-heading text-sm font-semibold text-[var(--arena-text-primary)]">Ticket per Ubicazione</CardTitle>
+              <p className="text-[11px] text-[var(--arena-text-muted)]">Aree più colpite</p>
             </div>
-            <MapPin size={15} className="shrink-0 text-primary" />
+            <MapPin size={15} className="shrink-0 text-[var(--arena-text-muted)]" />
           </div>
           <div className="h-32">
             {stats.ticketsByLocation.length === 0 ? (
@@ -277,15 +278,15 @@ export function Dashboard() {
                 >
                   <defs>
                     <linearGradient id="locGradient" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%" stopColor="#0f766e" />
-                      <stop offset="100%" stopColor="#06b6d4" />
+                      <stop offset="0%" stopColor="#27e58c" />
+                      <stop offset="100%" stopColor="#6b7cff" />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
-                  <XAxis type="number" axisLine={false} tickLine={false} allowDecimals={false} tick={{ fill: '#94a3b8', fontSize: 10 }} />
-                  <YAxis type="category" dataKey="name" axisLine={false} tickLine={false} width={130} tick={{ fill: '#475569', fontSize: 10 }} />
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="rgba(255,255,255,0.06)" />
+                  <XAxis type="number" axisLine={false} tickLine={false} allowDecimals={false} tick={{ fill: '#656d7c', fontSize: 10 }} />
+                  <YAxis type="category" dataKey="name" axisLine={false} tickLine={false} width={130} tick={{ fill: '#9aa3b2', fontSize: 10 }} />
                   <Tooltip contentStyle={TOOLTIP_STYLE} />
-                  <Bar dataKey="value" fill="url(#locGradient)" radius={[0, 8, 8, 0]} barSize={13} />
+                  <Bar dataKey="value" fill="url(#locGradient)" radius={[0, 6, 6, 0]} barSize={12} />
                 </BarChart>
               </ResponsiveContainer>
             )}
