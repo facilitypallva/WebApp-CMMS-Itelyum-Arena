@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Printer, CalendarDays, Building2 } from 'lucide-react';
 import arenaOsLogo from '@/assets/arenaos-logo-horizontal.svg';
+import arenaOsLogoWhite from '@/assets/arenaos-logo-white.svg';
 import { useDashboard } from '@/hooks/useDashboard';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
@@ -131,7 +132,8 @@ export function CdaReport() {
           <div className="flex flex-col gap-8 border-b border-slate-100 px-8 py-8 md:flex-row md:items-center md:justify-between dark:border-slate-700">
             <div className="flex items-center gap-4">
               <div>
-                <img src={arenaOsLogo} alt="ArenaOS" className="h-12 w-auto max-w-[220px] object-contain dark:brightness-0 dark:invert" />
+                <img src={arenaOsLogo} alt="ArenaOS" className="h-12 w-auto max-w-[220px] object-contain dark:hidden" />
+                <img src={arenaOsLogoWhite} alt="ArenaOS" className="hidden h-12 w-auto max-w-[220px] object-contain dark:block" />
                 <h1 className="mt-2 text-4xl font-bold tracking-tight text-slate-950">Report manutenzione impianti</h1>
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
                   Documento sintetico con stato manutentivo, criticità aperte e trend operativi della piattaforma.
