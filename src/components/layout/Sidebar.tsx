@@ -101,14 +101,19 @@ export function Sidebar() {
                       to={item.href}
                       end={item.href === '/'}
                       className={({ isActive }) => cn(
-                        'group relative flex h-[var(--sidebar-item-height)] flex-1 items-center gap-2.5 rounded-[var(--sidebar-radius)] px-3 text-[13px] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#27e58c]/35',
+                        'group relative flex h-[var(--sidebar-item-height)] flex-1 items-center gap-2.5 rounded-[var(--sidebar-radius)] px-3 text-[13px] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2ECC71]/35',
                         isActive
-                          ? 'bg-[var(--sidebar-item-bg-active)] text-[var(--sidebar-text-active)] [box-shadow:inset_2px_0_0_#27e58c]'
+                          ? 'bg-[var(--sidebar-item-bg-active)] pl-6 text-[var(--sidebar-text-active)]'
                           : 'text-[var(--sidebar-text)] hover:bg-[var(--sidebar-item-bg-hover)] hover:text-slate-200'
                       )}
                     >
-                      <item.icon size={16} className="shrink-0" />
-                      <span className="font-medium">{item.label}</span>
+                      {({ isActive }) => (
+                        <>
+                          {isActive && <span className="absolute left-3 top-1/2 size-2 -translate-y-1/2 rounded-full bg-[#2ECC71]" />}
+                          <item.icon size={16} className="shrink-0" />
+                          <span className="font-medium">{item.label}</span>
+                        </>
+                      )}
                     </NavLink>
                     {hasChildren && (
                       <button
@@ -129,14 +134,19 @@ export function Sidebar() {
                           key={child.href}
                           to={child.href}
                           className={({ isActive }) => cn(
-                            'group flex h-[var(--sidebar-item-height)] items-center gap-2.5 rounded-[var(--sidebar-radius)] px-3 text-[13px] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#27e58c]/35',
+                            'group relative flex h-[var(--sidebar-item-height)] items-center gap-2.5 rounded-[var(--sidebar-radius)] px-3 text-[13px] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2ECC71]/35',
                             isActive
-                              ? 'bg-[var(--sidebar-item-bg-active)] font-medium text-[var(--sidebar-text-active)] [box-shadow:inset_2px_0_0_#27e58c]'
+                              ? 'bg-[var(--sidebar-item-bg-active)] pl-6 font-medium text-[var(--sidebar-text-active)]'
                               : 'text-[var(--sidebar-text)] hover:bg-[var(--sidebar-item-bg-hover)] hover:text-slate-200'
                           )}
                         >
-                          <child.icon size={16} className="shrink-0" />
-                          <span className="font-medium">{child.label}</span>
+                          {({ isActive }) => (
+                            <>
+                              {isActive && <span className="absolute left-3 top-1/2 size-2 -translate-y-1/2 rounded-full bg-[#2ECC71]" />}
+                              <child.icon size={16} className="shrink-0" />
+                              <span className="font-medium">{child.label}</span>
+                            </>
+                          )}
                         </NavLink>
                       ))}
                     </div>
