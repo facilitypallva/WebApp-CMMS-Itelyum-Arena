@@ -3,7 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Box, ClipboardList, Ticket, Users, ShieldCheck, CalendarDays, User, FolderOpen, ChevronDown, ChevronRight, ChevronUp, Car } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
-import arenaOsLogoWhite from '@/assets/arenaos-logo-white.svg';
+import { ArenaOsLogo } from '@/components/brand/ArenaOsLogo';
 import { APP_ROLE_LABELS } from '@/lib/constants';
 import { AppRole } from '@/types';
 import { ProfileSheet } from '@/components/profile/ProfileSheet';
@@ -81,7 +81,7 @@ export function Sidebar() {
   return (
     <aside className="sticky top-0 flex h-screen w-[248px] shrink-0 flex-col overflow-y-auto border-r border-white/5 bg-sidebar text-slate-400">
       <div className="flex h-[72px] items-center border-b border-white/6 px-6">
-        <img src={arenaOsLogoWhite} alt="ArenaOS" className="h-12 w-[196px] object-contain object-left" />
+        <ArenaOsLogo variant="light" className="h-12 w-[196px]" />
       </div>
 
       <nav className="flex-1 overflow-y-auto px-2 py-4">

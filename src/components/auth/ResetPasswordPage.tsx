@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import arenaOsLogo from '@/assets/arenaos-logo-horizontal.svg';
+import { ArenaOsLogo } from '@/components/brand/ArenaOsLogo';
 import { waitForSaveFeedback, waitForSaveSuccessFeedback } from '@/lib/saveFeedback';
 
 export function ResetPasswordPage() {
@@ -61,11 +61,7 @@ export function ResetPasswordPage() {
       <div aria-hidden="true" className="login-light-sweep pointer-events-none absolute inset-y-0 -left-1/3 z-0 w-1/2" />
       <div aria-hidden="true" className="login-ambient-glow pointer-events-none absolute left-[12%] top-[28%] z-0 h-72 w-72 rounded-full bg-white/45 blur-3xl sm:h-96 sm:w-96" />
 
-      <img
-        src={arenaOsLogo}
-        alt="ArenaOS"
-        className="absolute left-6 top-6 z-10 h-9 w-auto max-w-[170px] object-contain drop-shadow-[0_14px_28px_rgba(15,23,42,0.14)] sm:left-10 sm:top-8 sm:h-10 lg:left-14 lg:top-12"
-      />
+      <ArenaOsLogo className="absolute left-6 top-6 z-10 h-9 w-[170px] drop-shadow-[0_14px_28px_rgba(15,23,42,0.14)] sm:left-10 sm:top-8 sm:h-10 lg:left-14 lg:top-12" />
 
       <main className="grid min-h-screen px-6 py-8 sm:px-10 lg:grid-cols-[minmax(0,1fr)_minmax(420px,520px)] lg:px-14 lg:py-12">
         <section className="flex items-center justify-center lg:col-start-2">

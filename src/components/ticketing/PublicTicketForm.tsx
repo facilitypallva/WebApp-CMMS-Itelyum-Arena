@@ -12,7 +12,7 @@ import { supabase } from '@/lib/supabase';
 import { runResilientRequest, withRequestTimeout } from '@/lib/resilientRequest';
 import { useLocations } from '@/hooks/useLocations';
 import { TICKET_PROBLEM_CATEGORIES } from '@/lib/constants';
-import arenaOsLogo from '@/assets/arenaos-logo-horizontal.svg';
+import { ArenaOsLogo } from '@/components/brand/ArenaOsLogo';
 
 async function notifyTicketStakeholders(payload: {
   ticketId: string;
@@ -208,7 +208,7 @@ export function PublicTicketForm() {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[120px] -z-10" />
       <div className="w-full max-w-xl space-y-8">
         <div className="text-center space-y-2">
-          <img src={arenaOsLogo} alt="ArenaOS" className="mx-auto mb-6 h-16 w-auto max-w-[280px] object-contain" />
+          <ArenaOsLogo className="mx-auto mb-6 h-16 w-[280px]" />
           <h1 className="text-4xl font-extrabold tracking-tight text-slate-900">Segnala un Guasto</h1>
           <p className="text-slate-500 font-semibold text-lg">Itelyum Arena</p>
         </div>

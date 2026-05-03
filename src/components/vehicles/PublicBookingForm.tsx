@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/lib/supabase';
 import { runResilientRequest } from '@/lib/resilientRequest';
-import arenaOsLogo from '@/assets/arenaos-logo-horizontal.svg';
+import { ArenaOsLogo } from '@/components/brand/ArenaOsLogo';
 import pallacanestroLogo from '@/assets/pallacanestro-varese-logo.png';
 
 type BookingFormState = {
@@ -223,7 +223,7 @@ export default function PublicBookingForm() {
         <div className="space-y-3 text-center">
           <div className="flex items-center justify-center gap-4">
             <img src={pallacanestroLogo} alt="Pallacanestro Varese" className="h-16 w-16 rounded-2xl object-contain" />
-            <img src={arenaOsLogo} alt="ArenaOS" className="h-14 w-auto max-w-[260px] object-contain" />
+            <ArenaOsLogo className="h-14 w-[260px]" />
           </div>
           <h1 className="text-4xl font-extrabold tracking-tight text-slate-900">Prenotazione mezzo</h1>
           <p className="text-lg font-semibold text-slate-500">Itelyum Arena · Pallacanestro Varese</p>
