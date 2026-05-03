@@ -161,17 +161,17 @@ export function VehicleBookingsSidebar() {
   };
 
   return (
-    <div className="arena-card overflow-hidden p-4">
+    <div className="overflow-hidden rounded-[var(--arena-radius-lg)] border border-[var(--arena-border-soft)] bg-[var(--arena-surface)] p-4 shadow-none">
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
-          <h3 className="arena-heading text-sm font-semibold text-slate-950">Richieste sharing</h3>
-          <p className="text-[11px] text-slate-400">{pendingBookings.length} in attesa</p>
+          <h3 className="arena-heading text-sm font-semibold text-[var(--arena-text-primary)]">Richieste sharing</h3>
+          <p className="text-[11px] text-[var(--arena-text-muted)]">{pendingBookings.length} in attesa</p>
         </div>
-        <ClipboardList size={16} className="shrink-0 text-primary" />
+        <ClipboardList size={16} className="shrink-0 text-[var(--arena-text-muted)]" />
       </div>
 
       {pendingBookings.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50/70 px-4 py-6 text-center text-sm text-slate-400">
+        <div className="rounded-[var(--arena-radius-md)] border border-dashed border-[var(--arena-border-soft)] bg-[var(--arena-surface-subtle)] px-4 py-6 text-center text-sm text-[var(--arena-text-muted)]">
           <XCircle size={28} className="mx-auto mb-2 opacity-40" />
           Nessuna richiesta in attesa
         </div>
@@ -182,27 +182,27 @@ export function VehicleBookingsSidebar() {
             const selectedVehicleId = selectedVehicleByBooking[booking.id];
 
             return (
-              <div key={booking.id} className="rounded-lg border border-slate-100 bg-slate-50/70 p-3">
+              <div key={booking.id} className="rounded-[var(--arena-radius-md)] border border-[var(--arena-border-soft)] bg-[var(--arena-surface-subtle)] p-3">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-bold text-slate-900">
+                    <p className="truncate text-sm font-semibold text-[var(--arena-text-primary)]">
                       {booking.requester_name} {booking.requester_surname}
                     </p>
-                    <p className="mt-0.5 flex items-center gap-1.5 text-xs font-semibold text-slate-500">
+                    <p className="mt-0.5 flex items-center gap-1.5 text-xs font-semibold text-[var(--arena-text-secondary)]">
                       <CalendarDays size={12} />
                       {formatDate(booking.trip_date)} · {formatTime(booking.departure_time)}
                     </p>
                   </div>
-                  <Badge className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700">
+                  <Badge className="rounded-full bg-[var(--arena-warning-soft)] px-2 py-0.5 text-[10px] font-semibold text-[var(--arena-warning)]">
                     Pending
                   </Badge>
                 </div>
 
-                <p className="mt-2 flex items-center gap-1.5 text-xs font-medium text-slate-600">
+                <p className="mt-2 flex items-center gap-1.5 text-xs font-medium text-[var(--arena-text-secondary)]">
                   <Route size={12} />
                   {booking.departure} → {booking.destination}
                 </p>
-                <p className="mt-2 line-clamp-3 text-xs text-slate-500">{booking.reason}</p>
+                <p className="mt-2 line-clamp-3 text-xs text-[var(--arena-text-muted)]">{booking.reason}</p>
 
                 <div className="mt-3 flex flex-wrap gap-2">
                   <Popover>
@@ -212,8 +212,8 @@ export function VehicleBookingsSidebar() {
                     <PopoverContent align="start" className="w-72 p-3">
                       <div className="space-y-3">
                         <div>
-                          <p className="text-sm font-bold text-slate-900">Veicolo sharing</p>
-                          <p className="text-xs text-slate-500">Disponibili il {formatDate(booking.trip_date)}</p>
+                        <p className="text-sm font-semibold text-[var(--arena-text-primary)]">Veicolo sharing</p>
+                          <p className="text-xs text-[var(--arena-text-muted)]">Disponibili il {formatDate(booking.trip_date)}</p>
                         </div>
                         <Select
                           value={selectedVehicleId ?? ''}
@@ -232,7 +232,7 @@ export function VehicleBookingsSidebar() {
                           </SelectContent>
                         </Select>
                         <Button
-                          className="w-full rounded-lg bg-primary"
+                          className="w-full rounded-[var(--arena-radius-sm)] bg-[var(--arena-accent)] text-[#07110c] hover:bg-[var(--arena-accent)]"
                           disabled={!selectedVehicleId || busyBookingId === booking.id}
                           onClick={() => handleApprove(booking.id, selectedVehicleId)}
                         >
@@ -245,7 +245,7 @@ export function VehicleBookingsSidebar() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="rounded-lg border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+                    className="rounded-[var(--arena-radius-sm)] border-[var(--arena-danger)]/25 text-[var(--arena-danger)] hover:bg-[var(--arena-danger-soft)] hover:text-[var(--arena-danger)]"
                     disabled={busyBookingId === booking.id}
                     onClick={() => handleReject(booking.id)}
                   >
@@ -258,10 +258,10 @@ export function VehicleBookingsSidebar() {
         </div>
       )}
 
-      <div className="mt-5 border-t border-slate-100 pt-4">
-        <p className="arena-kicker mb-2">Link prenotazione</p>
+      <div className="mt-5 border-t border-[var(--arena-border-soft)] pt-4">
+        <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--arena-text-muted)]">Link prenotazione</p>
         {sharingVehicles.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-3 py-3 text-xs font-medium text-slate-500">
+          <div className="rounded-[var(--arena-radius-md)] border border-dashed border-[var(--arena-border-soft)] bg-[var(--arena-surface-subtle)] px-3 py-3 text-xs font-medium text-[var(--arena-text-secondary)]">
             Crea un mezzo con destinazione Sharing per generare il link pubblico.
           </div>
         ) : (
@@ -300,8 +300,8 @@ export function VehicleBookingsSidebar() {
                 </div>
               </>
             )}
-            <div className="rounded-lg bg-slate-50 px-3 py-2">
-              <p className="truncate text-xs font-medium text-slate-600">
+            <div className="rounded-[var(--arena-radius-md)] bg-[var(--arena-surface-subtle)] px-3 py-2">
+              <p className="truncate text-xs font-medium text-[var(--arena-text-secondary)]">
                 {publicLink ?? 'Configura lo slug e salva'}
               </p>
             </div>

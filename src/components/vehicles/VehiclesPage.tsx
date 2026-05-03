@@ -52,16 +52,16 @@ export function VehiclesPage() {
   );
 
   const kpis = [
-    { label: 'Veicoli disponibili oggi', value: availableToday, icon: Car, color: 'bg-emerald-500' },
-    { label: 'Prenotazioni attive oggi', value: activeBookingsToday, icon: CalendarCheck2, color: 'bg-blue-500' },
-    { label: 'Scadenze entro 30 giorni', value: deadlinesWithinThirtyDays, icon: AlertTriangle, color: 'bg-orange-500' },
-    { label: 'Richieste sharing in attesa', value: pendingCount, icon: Clock, color: 'bg-red-500', urgent: pendingCount > 0 },
+    { label: 'Veicoli disponibili oggi', value: availableToday, icon: Car, color: 'bg-[var(--arena-accent-soft)] text-[var(--arena-accent)]' },
+    { label: 'Prenotazioni attive oggi', value: activeBookingsToday, icon: CalendarCheck2, color: 'bg-[var(--arena-info-soft)] text-[var(--arena-info)]' },
+    { label: 'Scadenze entro 30 giorni', value: deadlinesWithinThirtyDays, icon: AlertTriangle, color: 'bg-[var(--arena-warning-soft)] text-[var(--arena-warning)]' },
+    { label: 'Richieste sharing in attesa', value: pendingCount, icon: Clock, color: 'bg-[var(--arena-danger-soft)] text-[var(--arena-danger)]', urgent: pendingCount > 0 },
   ];
 
   if (loading) {
     return (
       <div className="flex justify-center py-20">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[var(--arena-border)] border-t-[var(--arena-accent)]" />
       </div>
     );
   }
@@ -71,24 +71,24 @@ export function VehiclesPage() {
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        className="arena-card flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
+        className="flex flex-col gap-4 rounded-[var(--arena-radius-lg)] border border-[var(--arena-border-soft)] bg-[var(--arena-surface)] px-5 py-4 shadow-none sm:flex-row sm:items-center sm:justify-between"
       >
         <div className="flex flex-wrap items-center gap-3">
-          <h2 className="arena-heading text-xl font-semibold text-slate-950">
+          <h2 className="arena-heading text-xl font-semibold text-[var(--arena-text-primary)]">
             Gestione Mezzi
           </h2>
-          <Badge className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+          <Badge className="rounded-full border border-[var(--arena-border-soft)] bg-[var(--arena-info-soft)] px-3 py-1 text-xs font-semibold text-[var(--arena-info)]">
             {vehicles.length.toLocaleString('it-IT')} veicoli
           </Badge>
           {error && (
-            <span className="text-sm font-medium text-red-600">{error}</span>
+            <span className="text-sm font-medium text-[var(--arena-danger)]">{error}</span>
           )}
         </div>
 
         {canManageVehicles && (
           <Button
             type="button"
-            className="h-9 gap-2 rounded-lg bg-blue-800 px-4 text-sm font-semibold text-white hover:bg-blue-900"
+            className="h-9 gap-2 rounded-[var(--arena-radius-sm)] bg-[var(--arena-accent)]/90 px-4 text-sm font-semibold text-[#07110c] hover:bg-[var(--arena-accent)]"
             onClick={() => setCreateDialogOpen(true)}
           >
             <Plus size={16} /> Aggiungi Veicolo
@@ -104,23 +104,23 @@ export function VehiclesPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.07 }}
           >
-            <Card className="arena-card overflow-hidden py-0 transition-all duration-300 hover:shadow-md">
+            <Card className="overflow-hidden rounded-[var(--arena-radius-lg)] border border-[var(--arena-border-soft)] bg-[var(--arena-surface)] py-0 shadow-none transition-colors duration-150 hover:bg-[var(--arena-surface-elevated)]">
               <CardContent className="flex items-center justify-between p-4">
                 <div className="space-y-0.5">
-                  <p className="arena-kicker">{kpi.label}</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--arena-text-muted)]">{kpi.label}</p>
                   <div className="flex items-center gap-2">
-                    <p className="arena-heading text-2xl font-bold text-slate-950">
+                    <p className="arena-heading text-[26px] font-semibold leading-tight text-[var(--arena-text-primary)]">
                       {kpi.value.toLocaleString('it-IT')}
                     </p>
                     {kpi.urgent && (
-                      <Badge className="rounded-full bg-red-600 px-2 py-0.5 text-[10px] font-bold text-white hover:bg-red-600">
+                      <Badge className="rounded-full bg-[var(--arena-danger-soft)] px-2 py-0.5 text-[10px] font-semibold text-[var(--arena-danger)] hover:bg-[var(--arena-danger-soft)]">
                         Da gestire
                       </Badge>
                     )}
                   </div>
                 </div>
-                <div className={cn('flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-white', kpi.color)}>
-                  <kpi.icon size={18} />
+                <div className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--arena-radius-sm)]', kpi.color)}>
+                  <kpi.icon size={16} />
                 </div>
               </CardContent>
             </Card>

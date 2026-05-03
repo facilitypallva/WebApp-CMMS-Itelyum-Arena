@@ -16,10 +16,10 @@ type SlotState = {
 };
 
 const LEGEND = [
-  { label: 'In uso', className: 'bg-slate-900' },
-  { label: 'Manutenzione', className: 'bg-amber-400' },
-  { label: 'Sharing richiesto', className: 'bg-teal-500' },
-  { label: 'Disponibile', className: 'bg-slate-100' },
+  { label: 'In uso', className: 'bg-[var(--arena-info)]' },
+  { label: 'Manutenzione', className: 'bg-[var(--arena-warning)]' },
+  { label: 'Sharing richiesto', className: 'bg-[var(--arena-accent)]' },
+  { label: 'Disponibile', className: 'bg-[var(--arena-surface-elevated)]' },
 ];
 
 function getMonday(date: Date) {
@@ -61,7 +61,7 @@ function getVehicleSlotState(
     return {
       label: 'Manutenzione',
       tooltip: maintenance.maintenance_type,
-      className: 'border-amber-200 bg-amber-400 text-amber-950',
+      className: 'border-[var(--arena-warning)]/25 bg-[var(--arena-warning-soft)] text-[var(--arena-warning)]',
     };
   }
 
@@ -72,7 +72,7 @@ function getVehicleSlotState(
     return {
       label: 'In uso',
       tooltip: `${approvedBooking.requester_name} ${approvedBooking.requester_surname}`,
-      className: 'border-slate-900 bg-slate-900 text-white',
+      className: 'border-[var(--arena-info)]/25 bg-[var(--arena-info-soft)] text-[var(--arena-info)]',
     };
   }
 
@@ -83,14 +83,14 @@ function getVehicleSlotState(
     return {
       label: 'Sharing',
       tooltip: 'Richiesta sharing in attesa',
-      className: 'border-teal-200 bg-teal-500 text-white',
+      className: 'border-[var(--arena-accent)]/25 bg-[var(--arena-accent-soft)] text-[var(--arena-accent)]',
     };
   }
 
   return {
     label: 'Libero',
     tooltip: 'Disponibile',
-    className: 'border-slate-200 bg-slate-100 text-slate-500',
+    className: 'border-[var(--arena-border-soft)] bg-[var(--arena-surface-subtle)] text-[var(--arena-text-secondary)]',
   };
 }
 
@@ -105,11 +105,11 @@ export function VehicleWeekCalendar({ vehicles, bookings }: VehicleWeekCalendarP
   const visibleVehicles = useMemo(() => vehicles.slice(0, 15), [vehicles]);
 
   return (
-    <section className="arena-card overflow-hidden">
-      <div className="flex flex-col gap-3 border-b border-slate-100 p-4 sm:flex-row sm:items-center sm:justify-between">
+    <section className="overflow-hidden rounded-[var(--arena-radius-lg)] border border-[var(--arena-border-soft)] bg-[var(--arena-surface)] shadow-none">
+      <div className="flex flex-col gap-3 border-b border-[var(--arena-border-soft)] p-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h3 className="arena-heading text-base font-semibold text-slate-950">Calendario settimanale mezzi</h3>
-          <p className="text-xs font-medium text-slate-500">{formatWeekRange(weekDays)}</p>
+          <h3 className="arena-heading text-base font-semibold text-[var(--arena-text-primary)]">Calendario settimanale mezzi</h3>
+          <p className="text-xs font-medium text-[var(--arena-text-muted)]">{formatWeekRange(weekDays)}</p>
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -135,25 +135,25 @@ export function VehicleWeekCalendar({ vehicles, bookings }: VehicleWeekCalendarP
 
       <div className="overflow-x-auto">
         <div className="min-w-[760px]">
-          <div className="grid grid-cols-[180px_repeat(7,minmax(72px,1fr))] border-b border-slate-100 bg-slate-50">
-            <div className="px-4 py-3 text-[11px] font-bold uppercase tracking-[0.08em] text-slate-500">Veicolo</div>
+          <div className="grid grid-cols-[180px_repeat(7,minmax(72px,1fr))] border-b border-[var(--arena-border-soft)] bg-[var(--arena-surface-subtle)]">
+            <div className="px-4 py-3 text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--arena-text-muted)]">Veicolo</div>
             {weekDays.map((day) => (
               <div key={getDateKey(day)} className="px-2 py-3 text-center">
-                <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-slate-500">
+                <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--arena-text-muted)]">
                   {new Intl.DateTimeFormat('it-IT', { weekday: 'short' }).format(day)}
                 </p>
-                <p className="mt-1 text-sm font-bold text-slate-900">{day.getDate()}</p>
+                <p className="mt-1 text-sm font-semibold text-[var(--arena-text-primary)]">{day.getDate()}</p>
               </div>
             ))}
           </div>
 
           {visibleVehicles.length === 0 ? (
-            <div className="p-8 text-center text-sm font-medium text-slate-400">Nessun mezzo da mostrare</div>
+            <div className="p-8 text-center text-sm font-medium text-[var(--arena-text-muted)]">Nessun mezzo da mostrare</div>
           ) : visibleVehicles.map((vehicle) => (
-            <div key={vehicle.id} className="grid grid-cols-[180px_repeat(7,minmax(72px,1fr))] border-b border-slate-100 last:border-b-0">
+            <div key={vehicle.id} className="grid grid-cols-[180px_repeat(7,minmax(72px,1fr))] border-b border-[var(--arena-border-soft)] last:border-b-0">
               <div className="min-w-0 px-4 py-3">
-                <p className="truncate text-sm font-bold text-slate-900">{vehicle.brand} {vehicle.model}</p>
-                <p className="mt-0.5 font-mono text-[10px] font-bold tracking-[0.14em] text-primary">{vehicle.plate}</p>
+                <p className="truncate text-sm font-semibold text-[var(--arena-text-primary)]">{vehicle.brand} {vehicle.model}</p>
+                <p className="mt-0.5 font-mono text-[10px] font-semibold tracking-[0.14em] text-[var(--arena-accent)]">{vehicle.plate}</p>
               </div>
               {weekDays.map((day) => {
                 const dateKey = getDateKey(day);
@@ -164,13 +164,13 @@ export function VehicleWeekCalendar({ vehicles, bookings }: VehicleWeekCalendarP
                     <div className="group relative">
                       <div
                         className={cn(
-                          'flex h-10 w-full min-w-16 items-center justify-center rounded-lg border text-[10px] font-bold',
+                          'flex h-10 w-full min-w-16 items-center justify-center rounded-[var(--arena-radius-sm)] border text-[10px] font-semibold',
                           slot.className
                         )}
                       >
                         {slot.label}
                       </div>
-                      <div className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 hidden w-max max-w-48 -translate-x-1/2 rounded-lg bg-slate-900 px-3 py-2 text-xs font-medium text-white shadow-lg group-hover:block">
+                      <div className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 hidden w-max max-w-48 -translate-x-1/2 rounded-[var(--arena-radius-sm)] border border-[var(--arena-border-soft)] bg-[var(--arena-surface-elevated)] px-3 py-2 text-xs font-medium text-[var(--arena-text-primary)] shadow-2xl shadow-black/30 group-hover:block">
                         {slot.tooltip}
                       </div>
                     </div>
@@ -182,9 +182,9 @@ export function VehicleWeekCalendar({ vehicles, bookings }: VehicleWeekCalendarP
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-3 border-t border-slate-100 px-4 py-3">
+      <div className="flex flex-wrap gap-3 border-t border-[var(--arena-border-soft)] px-4 py-3">
         {LEGEND.map((item) => (
-          <div key={item.label} className="flex items-center gap-2 text-xs font-semibold text-slate-500">
+          <div key={item.label} className="flex items-center gap-2 text-xs font-semibold text-[var(--arena-text-secondary)]">
             <span className={cn('h-2.5 w-2.5 rounded-full', item.className)} />
             {item.label}
           </div>

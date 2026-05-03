@@ -28,9 +28,9 @@ function daysUntil(dateKey: string) {
 }
 
 function getUrgencyClass(days: number) {
-  if (days < 30) return 'border-red-200 bg-red-50 text-red-700';
-  if (days <= 60) return 'border-amber-200 bg-amber-50 text-amber-700';
-  return 'border-emerald-200 bg-emerald-50 text-emerald-700';
+  if (days < 30) return 'border-[var(--arena-danger)]/25 bg-[var(--arena-danger-soft)] text-[var(--arena-danger)]';
+  if (days <= 60) return 'border-[var(--arena-warning)]/25 bg-[var(--arena-warning-soft)] text-[var(--arena-warning)]';
+  return 'border-[var(--arena-accent)]/25 bg-[var(--arena-accent-soft)] text-[var(--arena-accent)]';
 }
 
 function getUrgencyLabel(days: number) {
@@ -68,17 +68,17 @@ export function VehicleDeadlinesSidebar() {
   );
 
   return (
-    <div className="arena-card overflow-hidden p-4">
+    <div className="overflow-hidden rounded-[var(--arena-radius-lg)] border border-[var(--arena-border-soft)] bg-[var(--arena-surface)] p-4 shadow-none">
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
-          <h3 className="arena-heading text-sm font-semibold text-slate-950">Prossime scadenze mezzi</h3>
-          <p className="text-[11px] text-slate-400">Documenti e tagliandi</p>
+          <h3 className="arena-heading text-sm font-semibold text-[var(--arena-text-primary)]">Prossime scadenze mezzi</h3>
+          <p className="text-[11px] text-[var(--arena-text-muted)]">Documenti e tagliandi</p>
         </div>
-        <CalendarClock size={16} className="shrink-0 text-primary" />
+        <CalendarClock size={16} className="shrink-0 text-[var(--arena-text-muted)]" />
       </div>
 
       {rows.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50/70 px-4 py-6 text-center text-sm text-slate-400">
+        <div className="rounded-[var(--arena-radius-md)] border border-dashed border-[var(--arena-border-soft)] bg-[var(--arena-surface-subtle)] px-4 py-6 text-center text-sm text-[var(--arena-text-muted)]">
           Nessuna scadenza registrata
         </div>
       ) : (
@@ -87,23 +87,23 @@ export function VehicleDeadlinesSidebar() {
             <button
               key={row.id}
               type="button"
-              className="w-full rounded-lg border border-slate-100 bg-slate-50/70 px-3 py-3 text-left transition-colors hover:border-primary/20 hover:bg-blue-50/40"
+              className="w-full rounded-[var(--arena-radius-md)] border border-[var(--arena-border-soft)] bg-[var(--arena-surface-subtle)] px-3 py-3 text-left transition-colors duration-150 hover:border-[var(--arena-accent)]/25 hover:bg-[var(--arena-surface-elevated)]"
               onClick={() => setSelectedVehicleId(row.vehicle.id)}
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-bold text-slate-900">
+                  <p className="truncate text-sm font-semibold text-[var(--arena-text-primary)]">
                     {row.vehicle.brand} {row.vehicle.model}
                   </p>
-                  <p className="mt-0.5 font-mono text-[10px] font-bold tracking-[0.14em] text-primary">
+                  <p className="mt-0.5 font-mono text-[10px] font-semibold tracking-[0.14em] text-[var(--arena-accent)]">
                     {row.vehicle.plate}
                   </p>
                 </div>
-                <Badge className={cn('rounded-full border px-2 py-0.5 text-[10px] font-bold', getUrgencyClass(row.days))}>
+                <Badge className={cn('rounded-full border px-2 py-0.5 text-[10px] font-semibold', getUrgencyClass(row.days))}>
                   {getUrgencyLabel(row.days)}
                 </Badge>
               </div>
-              <div className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-slate-500">
+              <div className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-[var(--arena-text-secondary)]">
                 <AlertTriangle size={12} />
                 {DEADLINE_LABELS[row.deadline.deadline_type]}
               </div>
