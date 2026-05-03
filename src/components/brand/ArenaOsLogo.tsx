@@ -11,6 +11,7 @@ export function ArenaOsLogo({ className, variant = 'dark' }: ArenaOsLogoProps) {
   return (
     <svg
       viewBox="22 0 478 141"
+      preserveAspectRatio="xMinYMid meet"
       role="img"
       aria-label="ArenaOS"
       className={cn('block', className)}
