@@ -1,9 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Filter, Plus, MoreHorizontal, Eye, Edit, Trash2, MapPin, QrCode, Search, Download } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Filter, Plus, MoreHorizontal, Eye, Edit, Trash2, MapPin, QrCode, Search, Download, BellRing, Flame, Cog, Zap, Camera, RotateCcw, Boxes, ChevronRight, Save, X, AlertCircle, AlertTriangle } from 'lucide-react';
+import { Badge, Button, Card, Input, EmptyState, ErrorState, SavingIndicator } from '@/components/ui-v2';
 import { AnimatedSaveButton } from '@/components/ui/animated-save-button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -19,6 +17,7 @@ import { getNextVerificationDate, parseAssetSerial } from '@/lib/assetUtils';
 import { waitForSaveFeedback, waitForSaveSuccessFeedback } from '@/lib/saveFeedback';
 import { differenceInDays, format } from 'date-fns';
 import { it } from 'date-fns/locale';
+import { assetStatusConfig, formatRelativeDate, formatDate } from '@/lib/ui-helpers';
 
 const CATEGORIES: AssetCategory[] = ['Rivelazione incendi', 'Antincendio', 'Meccanico', 'Elettrico', 'TVCC'];
 
@@ -54,6 +53,14 @@ const LOCATION_LABELS: Record<string, string> = {
   WC7: 'Bagno 7',
 };
 
+const CATEGORY_UI: Record<AssetCategory, { icon: React.ElementType; color: string; bgColor: string }> = {
+  'Rivelazione incendi': { icon: BellRing, color: '#A8531A', bgColor: '#FFF3E8' },
+  'Antincendio': { icon: Flame, color: '#A83228', bgColor: '#FFF0EE' },
+  'Meccanico': { icon: Cog, color: '#5F5E5A', bgColor: '#F1EFE8' },
+  'Elettrico': { icon: Zap, color: '#A8531A', bgColor: '#FFF3E8' },
+  'TVCC': { icon: Camera, color: '#5F5E5A', bgColor: '#F1EFE8' },
+};
+
 const LOCATION_CODES = [
   'CR2', 'CR3', 'CR4', 'CR5', 'GD1', 'IF1', 'IF2', 'PL1', 'SC1', 'SLV1',
   'SP1', 'SP2', 'SP3', 'SP4', 'SP5', 'SP6',
@@ -78,24 +85,16 @@ function formatLocationDisplayName(locationName: string | null | undefined) {
 }
 
 function StatusBadge({ status }: { status: AssetStatus }) {
-  const cls =
-    status === 'IN REGOLA' ? 'bg-emerald-100 text-emerald-700' :
-    status === 'IN SCADENZA' ? 'bg-amber-100 text-amber-700' :
-    status === 'IN LAVORAZIONE' ? 'bg-blue-100 text-blue-700' :
-    'bg-red-100 text-red-700';
+  const config = assetStatusConfig[status];
   return (
-    <Badge className={cn(cls, 'gap-1.5 border-none rounded-full px-3 py-1 font-bold text-[10px] uppercase tracking-[0.16em]')}>
-      <span className="h-1.5 w-1.5 rounded-full bg-current" />
-      {status}
+    <Badge 
+      variant={config.variant} 
+      dot={config.dot}
+      className="px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide"
+    >
+      {config.label}
     </Badge>
   );
-}
-
-function getStatusAccent(status: AssetStatus) {
-  if (status === 'SCADUTO') return 'border-l-red-500';
-  if (status === 'IN SCADENZA') return 'border-l-amber-500';
-  if (status === 'IN LAVORAZIONE') return 'border-l-blue-500';
-  return 'border-l-emerald-500';
 }
 
 function formatDueLabel(nextDate: Date | null) {
@@ -451,75 +450,82 @@ export function AssetsTable({
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+    <div className="space-y-7">
+      {/* Header Pagina */}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="arena-kicker">{assets.length.toLocaleString('it-IT')} asset · {CATEGORIES.length} categorie</p>
-          <h2 className="arena-heading mt-1 text-4xl">Asset</h2>
+          <nav className="mb-2 flex items-center gap-1.5 text-[13px] font-medium text-[#5F5E5A]">
+            <span>Anagrafiche</span>
+            <span className="text-[#888780]">/</span>
+            <span className="font-bold text-[#1C1B18]">Asset</span>
+          </nav>
+          <h2 className="text-2xl font-bold tracking-tight text-[#1C1B18]">Asset</h2>
+          <p className="mt-1 text-[14px] font-medium text-[#5F5E5A]">
+            {assets.length.toLocaleString('it-IT')} asset monitorati · {CATEGORIES.length} categorie · {assets.filter(a => a.status === 'SCADUTO').length} scaduti
+          </p>
         </div>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex items-center gap-2">
           <Button
-            type="button"
-            variant="outline"
-            className="h-11 rounded-lg border-slate-200 bg-white px-5 font-semibold text-slate-700 hover:bg-slate-50"
+            variant="secondary"
+            leadingIcon={<Download size={16} />}
             onClick={handleExportAssets}
           >
-            <Download size={17} />
             Esporta Excel
           </Button>
           <Button
-            type="button"
-            variant="outline"
-            className="h-11 rounded-lg border-primary/30 bg-white px-5 font-semibold text-primary hover:bg-primary/5"
+            variant="secondary"
+            leadingIcon={<QrCode size={16} />}
             onClick={() => toast.info('Scanner QR non configurato in locale')}
           >
-            <QrCode size={17} />
             Scansiona QR
           </Button>
-          <Button className="h-11 rounded-lg bg-primary px-6 font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 gap-2" onClick={openCreate}>
-            <Plus size={18} /> Nuovo asset
+          <Button 
+            variant="primary" 
+            leadingIcon={<Plus size={18} />} 
+            onClick={openCreate}
+          >
+            Nuovo asset
           </Button>
         </div>
       </div>
 
-      <div className="arena-card p-4">
-        <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
-          <div className="relative min-w-0 xl:flex-1">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-            <Input
-              value={localSearch}
-              onChange={(event) => setLocalSearch(event.target.value)}
-              placeholder="Cerca..."
-              className="h-11 rounded-lg border-slate-200 bg-slate-50 pl-10 shadow-none"
-            />
-          </div>
+      {/* Toolbar Filtri */}
+      <Card className="p-3">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+          <Input
+            value={localSearch}
+            onChange={(event) => setLocalSearch(event.target.value)}
+            placeholder="Cerca asset, marca, codice..."
+            className="max-w-md"
+            startContent={<Search size={16} className="text-[#888780]" />}
+          />
           <Select value={filterCategory} onValueChange={(value) => setFilterCategory(value as AssetCategory | 'ALL')}>
-            <SelectTrigger className="h-11 w-full rounded-lg border-slate-200 bg-white sm:w-48">
+            <SelectTrigger className="w-full lg:w-48">
               <span className="truncate text-left">{getCategoryFilterLabel(filterCategory)}</span>
             </SelectTrigger>
-            <SelectContent className="rounded-lg">
-              <SelectItem value="ALL">Categoria · Tutte</SelectItem>
+            <SelectContent>
+              <SelectItem value="ALL">Tutte le categorie</SelectItem>
               {CATEGORIES.map((category) => (
                 <SelectItem key={category} value={category}>{category}</SelectItem>
               ))}
             </SelectContent>
           </Select>
           <Select value={filterLocation} onValueChange={setFilterLocation}>
-            <SelectTrigger className="h-11 w-full rounded-lg border-slate-200 bg-white sm:w-56">
+            <SelectTrigger className="w-full lg:w-56">
               <span className="truncate text-left">{getLocationFilterLabel(filterLocation)}</span>
             </SelectTrigger>
-            <SelectContent className="max-h-72 rounded-lg">
-              <SelectItem value="ALL">Localizzazione · Tutte</SelectItem>
+            <SelectContent className="max-h-72">
+              <SelectItem value="ALL">Tutte le ubicazioni</SelectItem>
               {LOCATION_CODES.map((code) => (
                 <SelectItem key={code} value={code}>{formatLocationDisplayName(code)}</SelectItem>
               ))}
             </SelectContent>
           </Select>
           <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as AssetStatus | 'ALL')}>
-            <SelectTrigger className="h-11 w-full rounded-lg border-slate-200 bg-white sm:w-44">
+            <SelectTrigger className="w-full lg:w-44">
               <span className="truncate text-left">{getStatusFilterLabel(filterStatus)}</span>
             </SelectTrigger>
-            <SelectContent className="rounded-lg">
+            <SelectContent>
               <SelectItem value="ALL">Stato · Tutti</SelectItem>
               <SelectItem value="IN REGOLA">In Regola</SelectItem>
               <SelectItem value="IN SCADENZA">In Scadenza</SelectItem>
@@ -527,43 +533,40 @@ export function AssetsTable({
               <SelectItem value="IN LAVORAZIONE">In Lavorazione</SelectItem>
             </SelectContent>
           </Select>
-          <Select value={filterDue} onValueChange={(value) => setFilterDue(value as typeof filterDue)}>
-            <SelectTrigger className="h-11 w-full rounded-lg border-slate-200 bg-white sm:w-52">
-              <Filter size={15} className="mr-2 text-slate-400" />
-              <span className="truncate text-left">{getDueFilterLabel(filterDue)}</span>
-            </SelectTrigger>
-            <SelectContent className="rounded-lg">
-              <SelectItem value="ALL">Scadenza · Tutte</SelectItem>
-              <SelectItem value="30">Scadenza · 30gg</SelectItem>
-              <SelectItem value="90">Scadenza · 90gg</SelectItem>
-              <SelectItem value="OVERDUE">Scaduti</SelectItem>
-            </SelectContent>
-          </Select>
-          <div className="shrink-0 whitespace-nowrap text-sm font-medium text-slate-500 xl:ml-auto xl:text-right">
+          <div className="shrink-0 whitespace-nowrap text-[13px] font-bold text-[#888780] lg:ml-auto">
             1-{filtered.length.toLocaleString('it-IT')} di {assets.length.toLocaleString('it-IT')}
           </div>
         </div>
-      </div>
+      </Card>
 
       {loading ? (
-        <div className="flex justify-center py-20"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>
+        <div className="space-y-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="h-16 w-full animate-pulse rounded-lg border border-[#E5E4DF] bg-white" />
+          ))}
+        </div>
       ) : (
-        <div className="arena-card overflow-hidden">
+        <div className="rounded-xl border border-[#E5E4DF] bg-white shadow-none overflow-hidden">
           <Table className="table-fixed">
-            <TableHeader className="bg-slate-50">
-              <TableRow className="border-none hover:bg-transparent">
-                <TableHead className="w-[34%] font-bold text-slate-500 md:w-[30%]">Asset</TableHead>
-                <TableHead className="hidden w-[15%] font-bold text-slate-500 lg:table-cell">Categoria</TableHead>
-                <TableHead className="hidden w-[16%] font-bold text-slate-500 xl:table-cell">Localizzazione</TableHead>
-                <TableHead className="hidden w-[12%] font-bold text-slate-500 2xl:table-cell">Ultima verifica</TableHead>
-                <TableHead className="w-[20%] font-bold text-slate-500 md:w-[16%]">Prossima</TableHead>
-                <TableHead className="w-[20%] font-bold text-slate-500 md:w-[18%]">Stato</TableHead>
-                <TableHead className="w-[86px] pr-4 text-right font-bold text-slate-500">Azioni</TableHead>
+            <TableHeader className="bg-[#FAFAF9]">
+              <TableRow className="border-b border-[#E5E4DF] hover:bg-transparent">
+                <TableHead className="w-[34%] text-[11px] font-bold uppercase tracking-wider text-[#888780] md:w-[30%]">Asset</TableHead>
+                <TableHead className="hidden w-[15%] text-[11px] font-bold uppercase tracking-wider text-[#888780] lg:table-cell">Categoria</TableHead>
+                <TableHead className="hidden w-[16%] text-[11px] font-bold uppercase tracking-wider text-[#888780] xl:table-cell">Ubicazione</TableHead>
+                <TableHead className="hidden w-[12%] text-[11px] font-bold uppercase tracking-wider text-[#888780] 2xl:table-cell">Ultima verifica</TableHead>
+                <TableHead className="w-[20%] text-[11px] font-bold uppercase tracking-wider text-[#888780] md:w-[16%]">Prossima</TableHead>
+                <TableHead className="w-[20%] text-[11px] font-bold uppercase tracking-wider text-[#888780] md:w-[18%] text-center">Stato</TableHead>
+                <TableHead className="w-[86px] pr-4 text-right text-[11px] font-bold uppercase tracking-wider text-[#888780]">Azioni</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.length === 0 && (
-                <TableRow><TableCell colSpan={7} className="text-center py-16 text-slate-400 font-medium">Nessun asset trovato</TableCell></TableRow>
+                <TableRow><TableCell colSpan={7} className="py-20">
+                  <EmptyState 
+                    title="Nessun asset trovato" 
+                    description="I filtri applicati non hanno restituito risultati." 
+                  />
+                </TableCell></TableRow>
               )}
               {filtered.map((asset) => {
                 const nextDate = getNextVerificationDate(asset.last_verification, asset.verification_frequency_days);
@@ -575,65 +578,76 @@ export function AssetsTable({
                   null;
                 const locationLabel = formatLocationDisplayName(locationName);
                 const dueLabel = formatDueLabel(nextDate);
+                const categoryStyle = CATEGORY_UI[asset.category] || CATEGORY_UI['Meccanico'];
+                const CategoryIcon = categoryStyle.icon;
+
                 return (
-                  <TableRow key={asset.id} className={cn('group border-l-2 border-slate-100 transition-colors hover:bg-slate-50/70', getStatusAccent(asset.status))}>
-                    <TableCell className="min-w-0 py-4">
+                  <TableRow 
+                    key={asset.id} 
+                    className="h-[64px] border-b border-[#E5E4DF] bg-white transition-colors hover:bg-[#FAFAF9] group cursor-pointer"
+                    onClick={() => setDetailAsset(asset)}
+                  >
+                    <TableCell className="min-w-0">
                       <div className="flex min-w-0 items-center gap-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
-                          <AssetCategoryIcon category={asset.category} />
+                        <div 
+                          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
+                          style={{ backgroundColor: categoryStyle.bgColor, color: categoryStyle.color }}
+                        >
+                          <CategoryIcon size={16} />
                         </div>
                         <div className="min-w-0">
-                          <p className="truncate font-bold text-slate-900">{asset.name}</p>
-                          <p className="truncate text-xs font-medium text-slate-400">
+                          <p className="truncate text-[14px] font-bold text-[#1C1B18]">{asset.name}</p>
+                          <p className="truncate text-[12px] font-medium text-[#888780] tabular-nums">
                             {[asset.brand, asset.model, asset.serial_number].filter(Boolean).join(' · ')}
-                          </p>
-                          <p className="mt-1 truncate text-xs font-medium text-slate-500 lg:hidden">
-                            {asset.category}
                           </p>
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="hidden min-w-0 lg:table-cell">
-                      <p className="truncate text-sm font-medium text-slate-600">{asset.category}</p>
+                    <TableCell className="hidden lg:table-cell">
+                      <p className="truncate text-[13px] font-semibold text-[#1C1B18]">{asset.category}</p>
                     </TableCell>
-                    <TableCell className="hidden min-w-0 xl:table-cell">
-                      <div className="flex min-w-0 items-center gap-1.5 text-sm font-medium text-slate-600">
-                        <MapPin size={13} className="text-slate-400" />
+                    <TableCell className="hidden xl:table-cell">
+                      <div className="flex items-center gap-1.5 text-[13px] font-semibold text-[#5F5E5A]">
+                        <MapPin size={13} className="text-[#888780]" />
                         <span className="truncate">{locationLabel}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="hidden text-sm text-slate-500 2xl:table-cell">
-                      {asset.last_verification ? format(new Date(asset.last_verification), 'dd MMM yyyy', { locale: it }) : '—'}
+                    <TableCell className="hidden 2xl:table-cell">
+                      <span className="text-[13px] font-medium text-[#5F5E5A] tabular-nums">
+                        {asset.last_verification ? format(new Date(asset.last_verification), 'dd MMM yyyy', { locale: it }) : '—'}
+                      </span>
                     </TableCell>
-                    <TableCell className="min-w-0">
-                      <div className="space-y-1">
-                        <p className="truncate text-sm font-semibold text-slate-700">
+                    <TableCell>
+                      <div className="space-y-0.5">
+                        <p className="truncate text-[13px] font-bold text-[#1C1B18] tabular-nums">
                           {nextDate ? format(nextDate, 'dd MMM yyyy', { locale: it }) : '—'}
                         </p>
-                        <p className={cn('text-xs font-semibold', asset.status === 'SCADUTO' ? 'text-red-500' : asset.status === 'IN SCADENZA' ? 'text-amber-600' : 'text-slate-400')}>
+                        <p className={cn('text-[11px] font-bold uppercase', asset.status === 'SCADUTO' ? 'text-[#A83228]' : asset.status === 'IN SCADENZA' ? 'text-[#A8531A]' : 'text-[#888780]')}>
                           {dueLabel}
                         </p>
                       </div>
                     </TableCell>
-                    <TableCell className="min-w-0"><StatusBadge status={asset.status} /></TableCell>
+                    <TableCell className="text-center">
+                      <StatusBadge status={asset.status} />
+                    </TableCell>
                     <TableCell className="pr-3">
-                      <div className="flex justify-end gap-0.5 text-slate-400">
-                        <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/5" onClick={() => setDetailAsset(asset)}>
-                          <Eye size={16} />
+                      <div className="flex justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setDetailAsset(asset)}>
+                          <Eye size={15} />
                         </Button>
-                        <Button variant="ghost" size="icon" className="hidden h-9 w-9 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/5 md:inline-flex" onClick={() => openEdit(asset)}>
-                          <Edit size={16} />
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(asset)}>
+                          <Edit size={15} />
                         </Button>
                         <DropdownMenu>
                           <DropdownMenuTrigger className="inline-flex">
-                            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/5">
-                              <MoreHorizontal size={16} />
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <MoreHorizontal size={15} />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="rounded-xl p-2 border-slate-100 shadow-xl">
-                            <DropdownMenuItem className="rounded-lg gap-2 cursor-pointer font-medium" onClick={() => openEdit(asset)}><Edit size={16} /> Modifica</DropdownMenuItem>
+                          <DropdownMenuContent align="end" className="min-w-44 p-1.5">
+                            <DropdownMenuItem className="gap-2 font-semibold" onClick={() => openEdit(asset)}><Edit size={14} /> Modifica</DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="rounded-lg gap-2 cursor-pointer font-medium text-red-600 focus:text-red-700 focus:bg-red-50" onClick={() => handleDelete(asset.id, asset.name)}><Trash2 size={16} /> Elimina</DropdownMenuItem>
+                            <DropdownMenuItem className="gap-2 font-semibold text-[#A83228] focus:bg-[#FFF0EE] focus:text-[#A83228]" onClick={() => handleDelete(asset.id, asset.name)}><Trash2 size={14} /> Elimina</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
@@ -648,116 +662,150 @@ export function AssetsTable({
 
       {/* Create / Edit Modal */}
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent className="w-[min(94vw,34rem)] rounded-xl">
-          <DialogHeader>
-            <DialogTitle>{editing ? 'Modifica Asset' : 'Nuovo Asset'}</DialogTitle>
+        <DialogContent className="w-[min(92vw,920px)] max-w-none sm:max-w-none p-0 overflow-hidden">
+          <DialogHeader className="border-b border-[#E5E4DF] bg-white px-6 py-4">
+            <DialogTitle className="text-lg font-bold text-[#1C1B18]">
+              {editing ? 'Modifica Asset' : 'Nuovo Asset'}
+            </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="col-span-2 space-y-1">
-                <Label>Nome *</Label>
-                <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Es. Centrale Antincendio" className="rounded-xl" />
+          <div className="max-h-[68vh] overflow-y-auto px-6 py-5">
+            <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+              <div className="col-span-2 space-y-3">
+                <div className="flex items-center gap-3">
+                  <p className="text-[11px] font-bold uppercase tracking-widest text-[#888780]">Identità Asset</p>
+                  <div className="h-px flex-1 bg-[#F1EFE8]" />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[13px] font-bold text-[#1C1B18]">Nome *</Label>
+                  <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Es. Centrale Antincendio" className="bg-white" />
+                </div>
               </div>
-              <div className="space-y-1">
-                <Label>Categoria *</Label>
+
+              <div className="col-span-2 flex items-center gap-3 mt-2">
+                <p className="text-[11px] font-bold uppercase tracking-widest text-[#888780]">Classificazione</p>
+                <div className="h-px flex-1 bg-[#F1EFE8]" />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-[13px] font-bold text-[#1C1B18]">Categoria *</Label>
                 <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v as AssetCategory })}>
-                  <SelectTrigger className="rounded-xl"><SelectValue placeholder="Seleziona..." /></SelectTrigger>
-                  <SelectContent className="rounded-xl">{CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                  <SelectTrigger className="bg-white"><SelectValue placeholder="Seleziona..." /></SelectTrigger>
+                  <SelectContent>{CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
-              <div
-                key={modalOpen ? `${editing?.id ?? 'new'}-${locations.length}` : 'closed'}
-                className="space-y-1"
-              >
-                <Label>Ubicazione</Label>
-                <Select 
-                  // Se le location arrivano mentre il modal e aperto, il wrapper keyed
-                  // forza il remount del Select e l'etichetta selezionata si riallinea.
-                  value={form.location_id} 
-                  onValueChange={(v) => setForm({ ...form, location_id: v })}
-                >
-                  <SelectTrigger className="w-full min-w-0 rounded-xl">
-                    <span className="truncate text-left">
-                      {selectedLocationLabel || 'Seleziona...'}
-                    </span>
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl">
-                    {locationOptions.map((location) => (
-                      <SelectItem key={location.id} value={location.id}>
-                        {location.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
+
+              <div className="space-y-2">
+                <Label className="text-[13px] font-bold text-[#1C1B18]">Ubicazione *</Label>
+                <Select value={form.location_id} onValueChange={(v) => setForm({ ...form, location_id: v })}>
+                  <SelectTrigger className="bg-white"><SelectValue placeholder="Seleziona..." /></SelectTrigger>
+                  <SelectContent className="max-h-60">{locationOptions.map((l) => <SelectItem key={l.id} value={l.id}>{l.label}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
-              <div className="space-y-1">
-                <Label>Marca</Label>
-                <Input value={form.brand} onChange={(e) => setForm({ ...form, brand: e.target.value })} placeholder="Es. Siemens" className="rounded-xl" />
+
+              <div className="col-span-2 flex items-center gap-3 mt-2">
+                <p className="text-[11px] font-bold uppercase tracking-widest text-[#888780]">Dettagli Tecnici</p>
+                <div className="h-px flex-1 bg-[#F1EFE8]" />
               </div>
-              <div className="space-y-1">
-                <Label>Modello</Label>
-                <Input value={form.model} onChange={(e) => setForm({ ...form, model: e.target.value })} placeholder="Es. FC722" className="rounded-xl" />
+
+              <div className="space-y-2">
+                <Label className="text-[13px] font-bold text-[#1C1B18]">Marca</Label>
+                <Input value={form.brand} onChange={(e) => setForm({ ...form, brand: e.target.value })} placeholder="Es. Siemens" className="bg-white" />
               </div>
-              <div className="space-y-1">
-                <Label>Numero seriale</Label>
-                <Input value={form.serial_number} onChange={(e) => setForm({ ...form, serial_number: e.target.value.toUpperCase() })} placeholder="CAS-UF5-001" className="rounded-xl" />
+              <div className="space-y-2">
+                <Label className="text-[13px] font-bold text-[#1C1B18]">Modello</Label>
+                <Input value={form.model} onChange={(e) => setForm({ ...form, model: e.target.value })} placeholder="Es. FC722" className="bg-white" />
+              </div>
+              <div className="col-span-2 space-y-3">
+                <Label className="text-[13px] font-bold text-[#1C1B18]">Numero seriale</Label>
+                <Input value={form.serial_number} onChange={(e) => setForm({ ...form, serial_number: e.target.value.toUpperCase() })} placeholder="CAS-UF5-001" className="bg-white" />
                 {parsedSerial ? (
-                  <div className="rounded-xl bg-slate-50 px-3 py-2 text-xs text-slate-600">
-                    <p><span className="font-semibold text-slate-800">Sigla apparato:</span> {parsedSerial.equipmentCode}</p>
-                    <p><span className="font-semibold text-slate-800">Codice ubicazione:</span> {parsedSerial.locationCode}</p>
-                    <p><span className="font-semibold text-slate-800">Progressivo:</span> {parsedSerial.progressiveCode}</p>
-                    {selectedLocation && (
-                      <p className={cn('mt-1 font-medium', serialMatchesLocation ? 'text-emerald-600' : 'text-amber-600')}>
-                        {serialMatchesLocation
-                          ? 'Seriale e ubicazione sono coerenti.'
-                          : `Il seriale punta a ${parsedSerial.locationCode}, ma l'ubicazione selezionata e ${selectedLocation.name}.`}
-                      </p>
-                    )}
+                  <div className="rounded-lg border border-[#E5E4DF] bg-[#FAFAF9] p-3 text-[12px] text-[#5F5E5A]">
+                    <div className="flex gap-4">
+                      <p><span className="font-bold text-[#1C1B18]">Apparato:</span> {parsedSerial.equipmentCode}</p>
+                      <p><span className="font-bold text-[#1C1B18]">LOC:</span> {parsedSerial.locationCode}</p>
+                      <p><span className="font-bold text-[#1C1B18]">Prog:</span> {parsedSerial.progressiveCode}</p>
+                    </div>
+                    {selectedLocation && <p className={cn('mt-1.5 font-bold', serialMatchesLocation ? 'text-[#1A7A3C]' : 'text-[#A8531A]')}>
+                      {serialMatchesLocation ? '● Seriale e ubicazione coerenti.' : `● Il seriale punta a ${parsedSerial.locationCode}, ubicazione selezionata: ${selectedLocation.name}.`}
+                    </p>}
                   </div>
-                ) : form.serial_number ? (
-                  <p className="text-xs text-amber-600">Usa il formato `SIGLA-LOC-PROG`, ad esempio `CAS-UF5-001`.</p>
-                ) : null}
+                ) : form.serial_number && <p className="text-[12px] font-medium text-[#A8531A]">Formato consigliato: `SIGLA-LOC-000`</p>}
               </div>
-              <div className="space-y-1">
-                <Label>Frequenza verifica (giorni)</Label>
+
+              <div className="col-span-2 flex items-center gap-3 mt-2">
+                <p className="text-[11px] font-bold uppercase tracking-widest text-[#888780]">Date e Scadenze</p>
+                <div className="h-px flex-1 bg-[#F1EFE8]" />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-[13px] font-bold text-[#1C1B18]">Frequenza (giorni)</Label>
                 <Input
                   type="number"
                   min={1}
                   value={form.verification_frequency_days}
-                  onChange={(e) => {
-                    const days = Number(e.target.value);
-                    setForm({
-                      ...form,
-                      verification_frequency_days: days,
-                      verification_frequency_months: Math.max(1, Math.round(days / 30)),
-                    });
-                  }}
-                  className="rounded-xl"
+                  onChange={(e) => setForm({ ...form, verification_frequency_days: Number(e.target.value), verification_frequency_months: Math.max(1, Math.round(Number(e.target.value) / 30)) })}
+                  className="bg-white"
                 />
               </div>
-              <div className="space-y-1">
-                <Label>Data installazione</Label>
-                <Input type="date" value={form.installation_date} onChange={(e) => setForm({ ...form, installation_date: e.target.value })} className="rounded-xl" />
+              <div className="space-y-2">
+                <Label className="text-[13px] font-bold text-[#1C1B18]">Installazione</Label>
+                <Input type="date" value={form.installation_date} onChange={(e) => setForm({ ...form, installation_date: e.target.value })} className="bg-white" />
               </div>
-              <div className="space-y-1">
-                <Label>Ultima verifica</Label>
-                <Input type="date" value={form.last_verification} onChange={(e) => setForm({ ...form, last_verification: e.target.value })} className="rounded-xl" />
+              <div className="space-y-2">
+                <Label className="text-[13px] font-bold text-[#1C1B18]">Ultima verifica</Label>
+                <Input type="date" value={form.last_verification} onChange={(e) => setForm({ ...form, last_verification: e.target.value })} className="bg-white" />
               </div>
             </div>
           </div>
-          <DialogFooter className="gap-2">
-            <Button variant="outline" className="rounded-xl" onClick={() => setModalOpen(false)}>Annulla</Button>
-            <AnimatedSaveButton onClick={handleSave} isSaving={saving} idleLabel="Salva" />
+          <DialogFooter className="border-t border-[#E5E4DF] bg-[#FAFAF9] px-8 py-5 justify-end gap-3">
+            <Button variant="secondary" onClick={() => setModalOpen(false)}>Annulla</Button>
+            <AnimatedSaveButton onClick={handleSave} isSaving={saving} idleLabel={editing ? "Salva modifiche" : "Crea asset"} />
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Detail Modal */}
       <Dialog open={!!detailAsset} onOpenChange={() => setDetailAsset(null)}>
-        <DialogContent className="rounded-xl max-w-md">
-          <DialogHeader><DialogTitle>Dettaglio Asset</DialogTitle></DialogHeader>
+        <DialogContent className="w-[min(92vw,900px)] max-w-none sm:max-w-none p-0 overflow-hidden">
+          <DialogHeader className="border-b border-[#E5E4DF] bg-white px-6 py-4">
+            <div className="flex items-center gap-3">
+              <div 
+                className="flex h-8 w-8 items-center justify-center rounded-lg"
+                style={{ 
+                  backgroundColor: detailAsset ? (CATEGORY_UI[detailAsset.category]?.bgColor || '#F1EFE8') : '#F1EFE8', 
+                  color: detailAsset ? (CATEGORY_UI[detailAsset.category]?.color || '#5F5E5A') : '#5F5E5A' 
+                }}
+              >
+                {detailAsset && React.createElement(CATEGORY_UI[detailAsset.category]?.icon || Cog, { size: 16 })}
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.10em] text-[#888780]">Scheda Asset</p>
+                  {detailAsset && <StatusBadge status={detailAsset.status} />}
+                </div>
+                <DialogTitle className="text-lg font-bold text-[#1C1B18]">{detailAsset?.name}</DialogTitle>
+              </div>
+            </div>
+          </DialogHeader>
+          
           {detailAsset && (
-            <div className="space-y-3 text-sm">
+            <div className="px-6 py-6 space-y-6">
+              <div className="rounded-xl border border-[#E5E4DF] bg-[#FAFAF9] p-5">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div>
+                    <p className="text-[11px] font-bold uppercase tracking-widest text-[#888780]">Seriale</p>
+                    <p className="text-lg font-bold text-[#1C1B18]">{detailAsset.serial_number || '—'}</p>
+                  </div>
+                  <div className="md:text-right">
+                    <p className="text-[11px] font-bold uppercase tracking-widest text-[#888780]">Ubicazione</p>
+                    <p className="text-lg font-bold text-[#1C1B18]">
+                      {formatLocationDisplayName(locationsById.get(detailAsset.location_id)?.name ?? parseAssetSerial(detailAsset.serial_number)?.locationCode)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-1">
               {[
                 ['Nome', detailAsset.name],
                 ['Categoria', detailAsset.category],
@@ -773,19 +821,20 @@ export function AssetsTable({
                 ],
                 ['Stato', detailAsset.status],
                 ['Ultima verifica', detailAsset.last_verification ? format(new Date(detailAsset.last_verification), 'd MMM yyyy', { locale: it }) : '—'],
-                ['Frequenza', `${detailAsset.verification_frequency_days} giorni`],
+                ['Frequenza verifica', `${detailAsset.verification_frequency_days} giorni`],
                 ['Installazione', detailAsset.installation_date ? format(new Date(detailAsset.installation_date), 'd MMM yyyy', { locale: it }) : '—'],
               ].map(([label, value]) => (
-                <div key={label as string} className="flex justify-between border-b border-slate-50 pb-2">
-                  <span className="text-slate-500 font-medium">{label}</span>
-                  <span className="font-bold text-slate-800">{value}</span>
+                <div key={label as string} className="flex justify-between border-b border-[#F1EFE8] py-3">
+                  <span className="text-[13px] font-medium text-[#5F5E5A]">{label}</span>
+                  <span className="text-[13px] font-bold text-[#1C1B18]">{value}</span>
                 </div>
               ))}
+              </div>
             </div>
           )}
-          <DialogFooter>
-            <Button variant="outline" className="rounded-xl" onClick={() => setDetailAsset(null)}>Chiudi</Button>
-            <Button className="rounded-xl bg-primary" onClick={() => { if (detailAsset) { setDetailAsset(null); openEdit(detailAsset); } }}>Modifica</Button>
+          <DialogFooter className="border-t border-[#E5E4DF] bg-[#FAFAF9] px-8 py-5 justify-end gap-3">
+            <Button variant="secondary" onClick={() => setDetailAsset(null)}>Chiudi</Button>
+            <Button variant="primary" onClick={() => { if (detailAsset) { setDetailAsset(null); openEdit(detailAsset); } }}>Modifica</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
