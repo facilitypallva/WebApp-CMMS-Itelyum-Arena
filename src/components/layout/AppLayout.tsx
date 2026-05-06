@@ -48,16 +48,16 @@ export function AppLayout({ children, title }: LayoutProps) {
   }, [children, globalSearch]);
 
   return (
-    <div className="flex min-h-screen bg-[var(--arena-bg)] text-[var(--arena-text-primary)]">
+    <div className="flex min-h-screen bg-[#FAFAF9] font-sans text-[#1C1B18] selection:bg-[#2ECC71]/20 selection:text-[#0A3D1F]">
       <Sidebar />
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col bg-[#FAFAF9]">
         <Header
           title={title}
           globalSearch={globalSearch}
           onGlobalSearchChange={handleGlobalSearchChange}
           onGlobalSearchApply={handleGlobalSearchApply}
         />
-        <main className="flex-1 overflow-y-auto bg-[var(--arena-bg)] p-6 lg:p-7">
+        <main className="flex-1 overflow-y-auto bg-[#FAFAF9] px-4 py-5 md:px-6 md:py-6 lg:px-8 lg:py-8 [&>*]:mx-auto [&>*]:w-full [&>*]:max-w-[1680px]">
           {content}
         </main>
       </div>

@@ -79,17 +79,21 @@ export function Sidebar() {
     setExpanded((s) => { const n = new Set(s); n.has(href) ? n.delete(href) : n.add(href); return n; });
 
   return (
-    <aside className="sticky top-0 flex h-screen w-[var(--sidebar-width)] shrink-0 flex-col overflow-y-auto border-r border-[var(--sidebar-border)] bg-[var(--sidebar-bg)] text-[var(--sidebar-text)]">
-      <div className="flex h-11 items-center border-b border-[var(--sidebar-border)] px-4">
+    <aside className="sticky top-0 z-30 flex h-screen w-[248px] shrink-0 flex-col overflow-hidden border-r border-white/[0.07] bg-[#1C1B18] text-[#FAFAF9] shadow-[8px_0_24px_-18px_rgba(28,27,24,0.75)]">
+      <div className="flex h-[68px] items-center border-b border-white/[0.055] px-5">
         <ArenaOsLogo variant="light" className="h-[34px] w-[116px]" />
       </div>
 
-      <nav className="flex-1 overflow-y-auto px-2 py-3">
+      <nav className="flex-1 overflow-y-auto px-2.5 py-4">
         {sections.map((section) => (
-          <div key={section.label} className="mb-3 last:mb-0">
-            <div className="px-3 pb-1.5 pt-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--sidebar-text-muted)]">
-              {section.label}
+          <div key={section.label} className="mb-5 last:mb-0">
+            <div className="flex items-center gap-2 px-3.5 pb-2 pt-2">
+              <span className="text-[10.5px] font-bold uppercase tracking-[0.14em] text-[#A8A6A0]">
+                {section.label}
+              </span>
+              <span className="h-px flex-1 bg-white/[0.045]" />
             </div>
+            <div className="space-y-1">
             {section.items.map((item) => {
               const hasChildren = item.children && item.children.length > 0;
               const isOpen = expanded.has(item.href);
@@ -101,54 +105,55 @@ export function Sidebar() {
                 <div key={item.href}>
                   <div
                     className={cn(
-                      'relative flex h-[var(--sidebar-item-height)] items-center rounded-[var(--sidebar-radius)] text-[13px] transition-colors duration-150',
+                      'relative flex h-9 items-center rounded-[10px] text-[13.5px] transition-all duration-150',
                       isItemActive
-                        ? 'bg-[var(--sidebar-item-bg-active)] text-[var(--sidebar-text-active)]'
-                        : 'text-[var(--sidebar-text)] hover:bg-[var(--sidebar-item-bg-hover)] hover:text-slate-200'
+                        ? 'bg-[#123821] font-semibold text-[#FAFAF9] shadow-[inset_0_0_0_1px_rgba(46,204,113,0.16)]'
+                        : 'text-[#D6D3CC] hover:bg-white/[0.055] hover:text-[#FAFAF9] hover:shadow-[inset_0_0_0_1px_rgba(250,250,249,0.04)]'
                     )}
                   >
+                    {isItemActive && <span className="absolute left-0 top-1/2 h-[18px] w-[3px] -translate-y-1/2 rounded-r-sm bg-[#2ECC71]" />}
                     <NavLink
                       to={item.href}
                       end={item.href === '/'}
                       className={cn(
-                        'group flex h-full items-center gap-2.5 rounded-[var(--sidebar-radius)] pl-3 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2ECC71]/35',
-                        hasChildren ? 'pr-1' : 'flex-1 pr-6'
+                        'group flex h-full items-center gap-2.5 rounded-[10px] pl-4 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2ECC71] focus-visible:ring-offset-[-2px]',
+                        hasChildren ? 'pr-1' : 'flex-1 pr-4'
                       )}
                     >
-                      <item.icon size={16} className="shrink-0" />
-                      <span className="font-medium">{item.label}</span>
+                      <item.icon size={18} strokeWidth={isItemActive ? 2.35 : 2} className={cn('shrink-0 transition-colors', isItemActive ? 'text-[#2ECC71]' : 'text-[#A8A6A0] group-hover:text-[#FAFAF9]')} />
+                      <span className={cn('font-medium', isItemActive && 'font-semibold')}>{item.label}</span>
                     </NavLink>
                     {hasChildren && (
                       <button
                         onClick={() => toggle(item.href)}
-                        className="flex h-full w-5 shrink-0 items-center justify-center rounded-[var(--sidebar-radius)] text-[var(--sidebar-text-muted)] transition-colors duration-150 hover:text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2ECC71]/35"
+                        className="flex h-full w-8 shrink-0 items-center justify-center rounded-[10px] text-[#A8A6A0] transition-colors duration-150 hover:text-[#FAFAF9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2ECC71] focus-visible:ring-offset-[-2px]"
+                        aria-label={isOpen ? 'Chiudi sottomenu' : 'Apri sottomenu'}
                       >
                         {isOpen
                           ? <ChevronDown size={13} />
                           : <ChevronRight size={13} />}
                       </button>
                     )}
-                    {isItemActive && <span className="absolute right-3 top-1/2 size-2 -translate-y-1/2 rounded-full bg-[#2ECC71]" />}
                   </div>
 
                   {hasChildren && isOpen && (
-                    <div className="ml-3 mt-1 space-y-1 border-l border-[var(--sidebar-border)] pl-2">
+                    <div className="ml-5 mt-1.5 space-y-1 border-l border-white/[0.08] pl-3">
                       {item.children!.map((child) => (
                         <NavLink
                           key={child.href}
                           to={child.href}
                           className={({ isActive }) => cn(
-                            'group relative flex h-[var(--sidebar-item-height)] items-center gap-2.5 rounded-[var(--sidebar-radius)] px-3 text-[13px] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2ECC71]/35',
+                            'group relative flex h-8 items-center gap-2.5 rounded-[10px] px-3 text-[13px] transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2ECC71] focus-visible:ring-offset-[-2px]',
                             isActive
-                              ? 'bg-[var(--sidebar-item-bg-active)] pr-6 font-medium text-[var(--sidebar-text-active)]'
-                              : 'text-[var(--sidebar-text)] hover:bg-[var(--sidebar-item-bg-hover)] hover:text-slate-200'
+                              ? 'bg-[#123821] font-semibold text-[#FAFAF9] shadow-[inset_0_0_0_1px_rgba(46,204,113,0.16)]'
+                              : 'text-[#D6D3CC] hover:bg-white/[0.055] hover:text-[#FAFAF9]'
                           )}
                         >
                           {({ isActive }) => (
                             <>
-                              <child.icon size={16} className="shrink-0" />
+                              {isActive && <span className="absolute left-0 top-1/2 h-[18px] w-[3px] -translate-y-1/2 rounded-r-sm bg-[#2ECC71]" />}
+                              <child.icon size={16} strokeWidth={isActive ? 2.35 : 2} className={cn('shrink-0 transition-colors', isActive ? 'text-[#2ECC71]' : 'text-[#A8A6A0] group-hover:text-[#FAFAF9]')} />
                               <span className="font-medium">{child.label}</span>
-                              {isActive && <span className="absolute right-3 top-1/2 size-2 -translate-y-1/2 rounded-full bg-[#2ECC71]" />}
                             </>
                           )}
                         </NavLink>
@@ -158,16 +163,17 @@ export function Sidebar() {
                 </div>
               );
             })}
+            </div>
           </div>
         ))}
       </nav>
 
-      <div className="border-t border-[var(--sidebar-border)] p-2">
+      <div className="border-t border-white/[0.055] p-3">
         <button
           onClick={() => setProfileOpen(true)}
-          className="group flex h-12 w-full items-center gap-2 rounded-[var(--sidebar-radius)] px-2 text-left transition-colors duration-150 hover:bg-[var(--sidebar-item-bg-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#27e58c]/35"
+          className="group flex h-[56px] w-full items-center gap-2.5 rounded-xl border border-white/[0.065] bg-white/[0.035] px-3 text-left shadow-[inset_0_1px_0_rgba(250,250,249,0.04)] transition-all duration-150 hover:border-white/[0.11] hover:bg-white/[0.065] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2ECC71] focus-visible:ring-offset-[-2px]"
         >
-          <div className="relative flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#17181d] text-[10px] font-semibold text-white ring-1 ring-white/10">
+          <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#5F5E5A] text-[11px] font-bold text-[#FAFAF9] ring-1 ring-white/[0.12]">
             {profile?.avatar_url ? (
               <img src={profile.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
             ) : (
@@ -175,10 +181,10 @@ export function Sidebar() {
             )}
           </div>
           <div className="flex min-w-0 flex-1 flex-col items-start">
-            <p className="truncate text-[12px] font-medium leading-4 text-white">{displayName}</p>
-            <p className="text-[10px] leading-3 text-[var(--sidebar-text-muted)]">{APP_ROLE_LABELS[role]}</p>
+            <p className="truncate text-[13px] font-bold leading-4 text-[#FAFAF9]">{displayName}</p>
+            <p className="truncate text-[11px] font-medium leading-4 text-[#A8A6A0]">{APP_ROLE_LABELS[role]}</p>
           </div>
-          <ChevronUp size={13} className="shrink-0 text-[var(--sidebar-text-muted)] transition-colors duration-150 group-hover:text-slate-400" />
+          <ChevronUp size={13} className="shrink-0 text-[#A8A6A0] transition-colors duration-150 group-hover:text-[#FAFAF9]" />
         </button>
       </div>
 

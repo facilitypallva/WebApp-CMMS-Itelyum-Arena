@@ -253,42 +253,50 @@ export function Header({
   };
 
   return (
-    <header className="sticky top-0 z-40 flex h-[60px] items-center justify-between border-b border-[var(--arena-border)] bg-[var(--arena-bg)] px-6">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" className="md:hidden">
-          <Menu size={24} />
+    <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-[#E5E4DF] bg-white/95 px-4 md:px-6 lg:px-8">
+      <div className="flex min-w-0 items-center gap-3">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-10 w-10 rounded-xl border border-[#E5E4DF] bg-white text-[#5F5E5A] shadow-[0_1px_2px_rgba(28,27,24,0.04)] hover:bg-[#F1EFE8] hover:text-[#1C1B18] md:hidden"
+          aria-label="Apri navigazione"
+        >
+          <Menu size={20} />
         </Button>
-        <div className="hidden items-center gap-2 text-sm md:flex">
-          <span className="font-medium text-[var(--arena-text-muted)]">{sectionLabel}</span>
-          <span className="text-[var(--arena-text-muted)]/60">/</span>
-          <h1 className="arena-heading text-sm font-semibold text-[var(--arena-text-primary)]">{title}</h1>
+        <div className="hidden min-w-0 flex-col md:flex">
+          <div className="flex items-center gap-2 text-[12px] leading-4">
+            <span className="shrink-0 font-semibold text-[#5F5E5A]">{sectionLabel}</span>
+            <span className="shrink-0 text-[#888780]">/</span>
+            <span className="truncate font-semibold text-[#888780]">ArenaOS</span>
+          </div>
+          <h1 className="truncate text-[16px] font-bold leading-5 tracking-[-0.02em] text-[#1C1B18]">{title}</h1>
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         <div
-          className="relative hidden w-80 items-center lg:flex"
+          className="relative hidden w-[22rem] items-center lg:flex"
           onFocus={openSearchPanel}
           onBlur={closeSearchPanel}
         >
-          <Search className="absolute left-3 text-[var(--arena-text-muted)]" size={16} />
+          <Search className="absolute left-3.5 text-[#888780]" size={16} />
           <Input 
             placeholder="Cerca asset, ticket o WO..." 
-            className="h-9 rounded-[var(--arena-radius-md)] border-[var(--arena-border-soft)] bg-[var(--arena-surface-subtle)] pl-10 text-sm text-[var(--arena-text-primary)] placeholder:text-[var(--arena-text-muted)] focus-visible:border-[var(--arena-accent)] focus-visible:ring-[var(--arena-accent-soft)]"
+            className="h-10 rounded-xl border-[#E5E4DF] bg-white pl-10 pr-4 text-[14px] font-medium text-[#1C1B18] shadow-[0_1px_2px_rgba(28,27,24,0.04)] placeholder:text-[#888780] focus-visible:border-[#2ECC71] focus-visible:ring-[#2ECC71]/20"
             value={globalSearch}
             onChange={(event) => onGlobalSearchChange?.(event.target.value)}
           />
           {shouldShowSearchPanel && (
-            <div className="absolute left-0 top-[calc(100%+0.75rem)] z-30 flex max-h-[30rem] w-[30rem] flex-col overflow-hidden rounded-[var(--arena-radius-lg)] border border-[var(--arena-border-soft)] bg-[var(--arena-surface-elevated)] p-2 shadow-2xl shadow-black/30">
-              <div className="flex items-center justify-between px-3 py-2">
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--arena-text-muted)]">Ricerca Globale</p>
-                <Badge variant="outline" className="rounded-full border-[var(--arena-border-soft)] text-[10px] font-bold text-[var(--arena-text-secondary)]">
+            <div className="absolute left-0 top-[calc(100%+0.75rem)] z-50 flex max-h-[30rem] w-[31rem] flex-col overflow-hidden rounded-xl border border-[#E5E4DF] bg-white p-2 shadow-[0_18px_42px_-18px_rgba(28,27,24,0.26),0_6px_14px_-8px_rgba(28,27,24,0.12)]">
+              <div className="flex items-center justify-between rounded-lg bg-[#FAFAF9] px-3 py-2">
+                <p className="text-[11px] font-bold uppercase tracking-[0.10em] text-[#888780]">Ricerca Globale</p>
+                <Badge variant="outline" className="rounded-full border-[#E5E4DF] bg-[#FAFAF9] text-[10px] font-bold text-[#5F5E5A]">
                   {results.length} risultati
                 </Badge>
               </div>
 
               {!hasSearchResults ? (
-                <div className="px-3 py-6 text-center text-sm text-[var(--arena-text-muted)]">
+                <div className="px-3 py-6 text-center text-sm font-medium text-[#888780]">
                   Nessun risultato per "{globalSearch}"
                 </div>
               ) : (
@@ -303,7 +311,7 @@ export function Header({
 
                       return (
                         <div key={groupKey} className="space-y-1">
-                          <div className="flex items-center gap-2 px-2 py-1 text-xs font-bold uppercase tracking-[0.18em] text-[var(--arena-text-muted)]">
+                          <div className="flex items-center gap-2 px-2 py-1 text-[11px] font-bold uppercase tracking-[0.10em] text-[#888780]">
                             <Icon size={12} />
                             <span>{label}</span>
                           </div>
@@ -314,18 +322,18 @@ export function Header({
                               <button
                                 key={`${item.kind}-${item.id}`}
                                 type="button"
-                                className="flex w-full items-start gap-3 rounded-[var(--arena-radius-md)] px-3 py-2 text-left transition-colors hover:bg-[var(--arena-surface)]"
+                                className="flex w-full items-start gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-[#F1EFE8]"
                                 onMouseDown={(event) => event.preventDefault()}
                                 onClick={() => handleSelectResult(item)}
                               >
-                                <div className="mt-0.5 rounded-[var(--arena-radius-sm)] bg-[var(--arena-surface-subtle)] p-2 text-[var(--arena-text-secondary)]">
+                                <div className="mt-0.5 rounded-lg border border-[#E5E4DF] bg-white p-2 text-[#5F5E5A]">
                                   <ItemIcon size={14} />
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                  <p className="truncate text-sm font-semibold text-[var(--arena-text-primary)]">{item.title}</p>
-                                  <p className="line-clamp-2 text-xs text-[var(--arena-text-secondary)]">{item.subtitle}</p>
+                                  <p className="truncate text-sm font-semibold text-[#1C1B18]">{item.title}</p>
+                                  <p className="line-clamp-2 text-xs text-[#5F5E5A]">{item.subtitle}</p>
                                 </div>
-                                <div className="pt-1 text-[var(--arena-text-muted)]">
+                                <div className="pt-1 text-[#888780]">
                                   <MapPin size={14} />
                                 </div>
                               </button>
@@ -346,39 +354,40 @@ export function Header({
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 rounded-[var(--arena-radius-sm)] border border-[var(--arena-border-soft)] text-[var(--arena-text-secondary)] hover:bg-[var(--arena-surface)] hover:text-[var(--arena-text-primary)]"
+            className="h-10 w-10 rounded-xl border border-[#E5E4DF] bg-white text-[#5F5E5A] shadow-[0_1px_2px_rgba(28,27,24,0.04)] hover:bg-[#F1EFE8] hover:text-[#1C1B18]"
             onClick={handleThemeToggle}
             aria-label={isDarkMode ? 'Attiva modalita chiara' : 'Attiva modalita scura'}
             title={isDarkMode ? 'Modalita chiara' : 'Modalita scura'}
           >
-            {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+            {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
           </Button>
           <div className="relative">
             <Button
               variant="ghost"
               size="icon"
-              className="relative h-8 w-8 rounded-[var(--arena-radius-sm)] border border-[var(--arena-border-soft)] text-[var(--arena-text-secondary)] hover:bg-[var(--arena-surface)] hover:text-[var(--arena-text-primary)]"
+              className="relative h-10 w-10 rounded-xl border border-[#E5E4DF] bg-white text-[#5F5E5A] shadow-[0_1px_2px_rgba(28,27,24,0.04)] hover:bg-[#F1EFE8] hover:text-[#1C1B18]"
               onClick={() => setIsNotificationsOpen((current) => !current)}
+              aria-label={unreadCount > 0 ? `Notifiche, ${unreadCount} non lette` : 'Notifiche'}
             >
-              <Bell size={20} />
+              <Bell size={18} />
               {unreadCount > 0 && (
-                <span className="absolute right-1 top-1 flex min-h-4 min-w-4 items-center justify-center rounded-full border-2 border-[var(--arena-bg)] bg-[var(--arena-danger)] px-1 text-[9px] font-bold text-white">
+                <span className="absolute -right-1 -top-1 flex min-h-4 min-w-4 items-center justify-center rounded-full border-2 border-white bg-[#E24B4A] px-1 text-[9px] font-bold text-white">
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
             </Button>
 
             {isNotificationsOpen && (
-              <div className="absolute right-0 top-[calc(100%+0.75rem)] z-20 flex max-h-[30rem] w-[24rem] flex-col overflow-hidden rounded-[var(--arena-radius-lg)] border border-[var(--arena-border-soft)] bg-[var(--arena-surface-elevated)] p-2 shadow-2xl shadow-black/30">
-                <div className="flex items-center justify-between px-3 py-2">
-                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--arena-text-muted)]">Notifiche</p>
-                  <Badge variant="outline" className="rounded-full border-[var(--arena-border-soft)] text-[10px] font-bold text-[var(--arena-text-secondary)]">
+              <div className="absolute right-0 top-[calc(100%+0.75rem)] z-50 flex max-h-[30rem] w-[24rem] flex-col overflow-hidden rounded-xl border border-[#E5E4DF] bg-white p-2 shadow-[0_18px_42px_-18px_rgba(28,27,24,0.26),0_6px_14px_-8px_rgba(28,27,24,0.12)]">
+                <div className="flex items-center justify-between rounded-lg bg-[#FAFAF9] px-3 py-2">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.10em] text-[#888780]">Notifiche</p>
+                  <Badge variant="outline" className="rounded-full border-[#E5E4DF] bg-[#FAFAF9] text-[10px] font-bold text-[#5F5E5A]">
                     {unreadCount} non lette
                   </Badge>
                 </div>
 
                 {notifications.length === 0 ? (
-                  <div className="px-3 py-6 text-center text-sm text-[var(--arena-text-muted)]">
+                  <div className="px-3 py-6 text-center text-sm font-medium text-[#888780]">
                     Nessuna notifica disponibile
                   </div>
                 ) : (
@@ -389,17 +398,17 @@ export function Header({
                         <button
                           key={notification.id}
                           type="button"
-                          className="flex w-full flex-col items-start gap-1 rounded-[var(--arena-radius-md)] px-3 py-3 text-left transition-colors hover:bg-[var(--arena-surface)]"
+                          className="flex w-full flex-col items-start gap-1 rounded-lg px-3 py-3 text-left transition-colors hover:bg-[#F1EFE8]"
                           onClick={() => handleNotificationClick(notification.id, notification.entity_type, notification.entity_id)}
                         >
                           <div className="flex w-full items-start justify-between gap-3">
-                            <p className="text-sm font-semibold text-[var(--arena-text-primary)]">{notification.title}</p>
+                            <p className="text-sm font-semibold text-[#1C1B18]">{notification.title}</p>
                             {!notification.read_at && (
-                              <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-[var(--arena-danger)]" />
+                              <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-[#E24B4A]" />
                             )}
                           </div>
-                          <p className="text-xs text-[var(--arena-text-secondary)]">{notification.message}</p>
-                          <p className="text-[11px] font-medium text-[var(--arena-text-muted)]">
+                          <p className="text-xs text-[#5F5E5A]">{notification.message}</p>
+                          <p className="text-[11px] font-medium text-[#888780]">
                             {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: it })}
                           </p>
                         </button>
