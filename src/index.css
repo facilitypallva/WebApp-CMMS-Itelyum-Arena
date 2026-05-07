@@ -1,4 +1,12 @@
 @import "tailwindcss";
+
+@font-face {
+  font-family: 'Geomanist';
+  src: url('/fonts/GeomanistMedium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
 @import "@fontsource/inter/400.css";
 @import "@fontsource/inter/500.css";
 @import "@fontsource/inter/600.css";
