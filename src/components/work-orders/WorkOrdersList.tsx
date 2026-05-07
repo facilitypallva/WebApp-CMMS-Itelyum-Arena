@@ -229,7 +229,7 @@ export function WorkOrdersList({
   globalSearch?: string;
   onGlobalSearchChange?: (value: string) => void;
 }) {
-  const { workOrders, loading, createWorkOrder, updateWorkOrder, deleteWorkOrder } = useWorkOrders();
+  const { workOrders, loading, fetchWorkOrders, createWorkOrder, updateWorkOrder, deleteWorkOrder } = useWorkOrders();
   const { assets } = useAssets();
   const { technicians } = useTechnicians();
   const { suppliers } = useSuppliers();
@@ -530,6 +530,7 @@ export function WorkOrdersList({
       }
 
       toast.success(editing ? 'Ordine di lavoro aggiornato' : 'Ordine di lavoro creato');
+      void fetchWorkOrders(true);
       setTicketDraft(null);
       await waitForSaveFeedback(saveStartedAt);
       setSaving(false);
