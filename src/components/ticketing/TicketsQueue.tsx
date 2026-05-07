@@ -12,20 +12,23 @@ import { useNavigate } from 'react-router-dom';
 const STATUS_CONFIG = {
   OPEN: {
     label: 'Aperto',
-    cls: 'bg-[#FFF0EE] text-[#A83228]',
-    iconCls: 'bg-[#FFF0EE] text-[#A83228]',
+    stripBg: 'bg-[#FFF0EE]',
+    stripIcon: 'text-[#E24B4A]',
+    stripLabel: 'text-[#A83228]',
     dot: 'bg-[#E24B4A]',
   },
   IN_PROGRESS: {
     label: 'In Lavorazione',
-    cls: 'bg-[#1C1B18] text-[#FAFAF9]',
-    iconCls: 'bg-[#F1EFE8] text-[#5F5E5A]',
+    stripBg: 'bg-[#F1EFE8]',
+    stripIcon: 'text-[#5F5E5A]',
+    stripLabel: 'text-[#5F5E5A]',
     dot: 'bg-[#888780]',
   },
   CLOSED: {
     label: 'Chiuso',
-    cls: 'bg-[#EAFBF1] text-[#1A7A3C]',
-    iconCls: 'bg-[#EAFBF1] text-[#1A7A3C]',
+    stripBg: 'bg-[#EAFBF1]',
+    stripIcon: 'text-[#1A7A3C]',
+    stripLabel: 'text-[#1A7A3C]',
     dot: 'bg-[#2ECC71]',
   },
 };
@@ -183,44 +186,47 @@ export function TicketsQueue({
           {filtered.map((ticket) => (
             <div
               key={ticket.id}
-              className="overflow-hidden rounded-[10px] border border-[#E5E4DF] bg-white transition-colors hover:border-[#D3D1C7]"
+              className="group relative overflow-hidden rounded-xl border border-[#E5E4DF] bg-white transition-colors hover:border-[#D3D1C7]"
             >
-              <div className="flex items-start gap-4 p-5">
-                {/* Zone A — status icon */}
+              {/* Main flex: stub | body */}
+              <div className="flex">
+
+                {/* ── STUB ──────────────────────────────────────────────── */}
                 <div className={cn(
-                  'mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg',
-                  STATUS_CONFIG[ticket.status].iconCls
+                  'flex w-[160px] shrink-0 flex-col items-center justify-center gap-1.5 px-3 py-5',
+                  STATUS_CONFIG[ticket.status].stripBg
                 )}>
-                  <AlertCircle size={18} />
+                  <AlertCircle size={20} className={STATUS_CONFIG[ticket.status].stripIcon} />
+                  <span className={cn(
+                    'text-[9px] font-semibold uppercase tracking-[0.10em]',
+                    STATUS_CONFIG[ticket.status].stripLabel
+                  )}>
+                    {STATUS_CONFIG[ticket.status].label}
+                  </span>
+                  <span className="mt-0.5 text-[11px] font-bold tabular-nums text-[#1C1B18]">
+                    {ticket.code || 'TK-...'}
+                  </span>
                 </div>
 
-                {/* Zone B — main content */}
-                <div className="min-w-0 flex-1 space-y-2">
-                  {/* Code + reporter + badge */}
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs font-semibold tabular-nums tracking-[0.04em] text-[#888780]">
-                      {ticket.code || 'TK-...'}
-                    </span>
-                    <span className="h-3 w-px shrink-0 bg-[#E5E4DF]" />
-                    <span className="text-sm font-semibold text-[#1C1B18]">
-                      {ticket.reporter_name}
-                    </span>
-                    <span className={cn(
-                      'inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.04em]',
-                      STATUS_CONFIG[ticket.status].cls
-                    )}>
-                      {STATUS_CONFIG[ticket.status].label}
+                {/* ── BODY ──────────────────────────────────────────────── */}
+                <div className="flex min-w-0 flex-1 flex-col gap-2 px-5 py-3.5">
+
+                  {/* Reporter + date */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex min-w-0 items-baseline gap-1.5">
+                      <span className="shrink-0 text-sm font-semibold text-[#1C1B18]">{ticket.reporter_name}</span>
+                      <span className="truncate text-xs text-[#888780]">{ticket.reporter_email}</span>
+                    </div>
+                    <span className="shrink-0 whitespace-nowrap text-xs tabular-nums text-[#888780]">
+                      {format(new Date(ticket.created_at), 'd MMM yyyy · HH:mm', { locale: it })}
                     </span>
                   </div>
 
-                  {/* Email */}
-                  <p className="text-xs text-[#888780]">{ticket.reporter_email}</p>
-
                   {/* Description */}
-                  <p className="text-sm leading-relaxed text-[#5F5E5A]">{ticket.description}</p>
+                  <p className="line-clamp-2 text-sm leading-relaxed text-[#5F5E5A]">{ticket.description}</p>
 
-                  {/* Meta tags */}
-                  <div className="flex flex-wrap gap-3 text-xs text-[#888780]">
+                  {/* Meta */}
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#888780]">
                     {ticket.problem_category && (
                       <span className="flex items-center gap-1">
                         <AlertCircle size={11} />
@@ -251,25 +257,17 @@ export function TicketsQueue({
                     )}
                     {ticket.work_order?.code && (
                       <span className="flex items-center gap-1 font-semibold text-[#1A7A3C]">
-                        <CheckCircle2 size={11} /> WO collegato: {ticket.work_order.code}
+                        <CheckCircle2 size={11} /> WO: {ticket.work_order.code}
                       </span>
                     )}
                   </div>
-                </div>
 
-                {/* Zone C — date + actions (right column) */}
-                <div className="flex shrink-0 flex-col items-end gap-3">
-                  {/* Date */}
-                  <span className="whitespace-nowrap text-xs tabular-nums text-[#888780]">
-                    {format(new Date(ticket.created_at), 'd MMM yyyy · HH:mm', { locale: it })}
-                  </span>
-
-                  {/* Action buttons */}
-                  <div className="flex flex-wrap items-center justify-end gap-1.5">
+                  {/* Actions */}
+                  <div className="flex items-center justify-end gap-1.5">
                     {ticket.status !== 'IN_PROGRESS' && ticket.status !== 'CLOSED' && (
                       <Button
                         size="sm"
-                        className="h-9 rounded-lg bg-[#2ECC71] px-4 text-xs font-semibold text-[#0A3D1F] hover:bg-[#27B463]"
+                        className="h-8 rounded-lg bg-[#2ECC71] px-3 text-xs font-semibold text-[#0A3D1F] hover:bg-[#27B463]"
                         disabled={busyTicketId === ticket.id}
                         onClick={() => handleTakeOwnership(ticket)}
                       >
@@ -280,7 +278,7 @@ export function TicketsQueue({
                       <Button
                         size="sm"
                         variant="outline"
-                        className="h-9 rounded-lg border-[#E5E4DF] px-4 text-xs font-semibold text-[#1C1B18] hover:bg-[#F1EFE8]"
+                        className="h-8 rounded-lg border-[#E5E4DF] px-3 text-xs font-semibold text-[#5F5E5A] hover:bg-[#F1EFE8]"
                         disabled={busyTicketId === ticket.id}
                         onClick={() => handleStatusChange(ticket.id, 'CLOSED')}
                       >
@@ -291,7 +289,7 @@ export function TicketsQueue({
                       <Button
                         size="sm"
                         variant="outline"
-                        className="h-9 rounded-lg border-[#E5E4DF] px-4 text-xs font-semibold text-[#1C1B18] hover:bg-[#F1EFE8]"
+                        className="h-8 rounded-lg border-[#E5E4DF] px-3 text-xs font-semibold text-[#5F5E5A] hover:bg-[#F1EFE8]"
                         disabled={busyTicketId === ticket.id}
                         onClick={() => handleStatusChange(ticket.id, 'OPEN')}
                       >
@@ -301,16 +299,28 @@ export function TicketsQueue({
                     <Button
                       size="sm"
                       variant="outline"
-                      className="h-9 rounded-lg border-[#FFF0EE] px-3 text-xs font-semibold text-[#A83228] hover:bg-[#FFF0EE]"
+                      className="h-8 rounded-lg border-[#FFF0EE] px-2.5 text-xs font-semibold text-[#A83228] hover:bg-[#FFF0EE]"
                       disabled={busyTicketId === ticket.id}
                       onClick={() => handleDelete(ticket.id, ticket.code || 'questo ticket')}
                     >
-                      <Trash2 size={12} className="mr-1.5" />
+                      <Trash2 size={11} className="mr-1" />
                       Elimina
                     </Button>
                   </div>
+
                 </div>
               </div>
+
+              {/* ── Diagonal notch cuts at stub/body boundary ────────── */}
+              {/* Rotated squares half-outside card → clipped to V shapes by overflow-hidden */}
+              <div
+                className="pointer-events-none absolute z-10 h-5 w-5 rotate-45 bg-[#FAFAF9]"
+                style={{ top: '-10px', left: '150px' }}
+              />
+              <div
+                className="pointer-events-none absolute z-10 h-5 w-5 rotate-45 bg-[#FAFAF9]"
+                style={{ bottom: '-10px', left: '150px' }}
+              />
             </div>
           ))}
         </div>
