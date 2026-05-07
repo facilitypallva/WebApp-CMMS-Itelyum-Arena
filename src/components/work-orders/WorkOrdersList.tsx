@@ -879,7 +879,7 @@ export function WorkOrdersList({
         <DialogContent className="w-[min(92vw,1040px)] max-w-none sm:max-w-none p-0 overflow-hidden rounded-xl flex flex-col max-h-[90vh]">
 
           {/* Header */}
-          <div className="shrink-0 border-b border-[#E5E4DF] bg-white px-8 py-5">
+          <div className="shrink-0 border-b border-[#E5E4DF] bg-white px-6 py-5">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <DialogTitle className="text-[15px] font-bold tracking-tight text-[#1C1B18]">
@@ -893,7 +893,7 @@ export function WorkOrdersList({
           </div>
 
           {/* Body */}
-          <div className="max-h-[68vh] overflow-y-auto bg-[#FAFAF9] px-8 py-6 space-y-4">
+          <div className="max-h-[68vh] overflow-y-auto bg-[#FAFAF9] px-6 py-6 space-y-4">
 
             {/* Timeline intervento (solo modifica) */}
             {editing && (
@@ -912,6 +912,7 @@ export function WorkOrdersList({
                     <p className="mt-0.5 text-xs text-[#888780]">Gestisci l'avanzamento operativo — clicca uno step per aggiornare</p>
                   </div>
                   <div className="flex shrink-0 flex-col items-end gap-1.5">
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#888780]">Azioni rapide</span>
                     <div className="flex flex-wrap items-center gap-2">
                       <Button type="button" variant="outline"
                         className="inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-[#F4C7C3] bg-[#FFF0EE] px-3 text-xs font-bold text-[#A83228] transition-colors hover:bg-[#FFE7E4] disabled:opacity-40"
@@ -1151,14 +1152,16 @@ export function WorkOrdersList({
           </div>
 
           {/* Footer */}
-          <div className="flex shrink-0 items-center justify-between border-t border-[#E5E4DF] bg-white px-8 py-5">
-            <p className="text-xs text-[#888780]">I campi con * sono obbligatori</p>
+          <div className="flex shrink-0 items-center justify-between gap-4 border-t border-[#E5E4DF] bg-white px-6 py-4">
             <div className="flex items-center gap-3">
               {editing && isAdmin && (
                 <Button variant="outline" className="h-9 rounded-lg border-[#FFF0EE] text-[#A83228] hover:bg-[#FFF0EE]" onClick={() => void handleDelete(editing)}>
                   Elimina
                 </Button>
               )}
+              <p className="text-xs text-[#888780]">I campi con * sono obbligatori</p>
+            </div>
+            <div className="flex items-center gap-3">
               <Button variant="outline" className="h-9 rounded-lg border-[#E5E4DF] text-[#1C1B18] hover:bg-[#F1EFE8]" onClick={() => setModalOpen(false)}>Annulla</Button>
               <AnimatedSaveButton onClick={handleSave} isSaving={saving} idleLabel={editing ? 'Salva modifiche' : 'Crea WO'} />
             </div>
