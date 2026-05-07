@@ -680,37 +680,37 @@ export function WorkOrdersList({
   return (
     <div className="space-y-5">
       {/* Header + toolbar unificato */}
-      <div className="overflow-hidden rounded-xl border border-[#E5E4DF] bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-[#E5E4DF] bg-white">
         {/* Top: overview + KPI + azione */}
         <div className="flex flex-col gap-4 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
           {/* Sinistra: titolo + desc */}
           <div className="min-w-0 space-y-0.5">
-            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Overview operativa</p>
-            <p className="text-xl font-bold tracking-tight text-slate-950">
+            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#888780]">Overview operativa</p>
+            <p className="text-xl font-bold tracking-tight text-[#1C1B18]">
               {totalOrders} {totalOrders === 1 ? 'ordine di lavoro' : 'ordini di lavoro'}
             </p>
-            <p className="text-xs text-slate-400">Monitoraggio interventi e avanzamento operativo</p>
+            <p className="text-xs text-[#888780]">Monitoraggio interventi e avanzamento operativo</p>
           </div>
           {/* Centro: KPI pills */}
           <div className="flex flex-wrap gap-2 lg:justify-center">
             <div className="flex items-center gap-2 rounded-lg border border-[#E5E4DF] bg-[#FAFAF9] px-3 py-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
-              <span className="text-xs font-bold text-slate-700">{inProgressCount}</span>
-              <span className="text-xs text-slate-500">In corso</span>
+              <span className="h-1.5 w-1.5 rounded-full bg-[#2ECC71]" />
+              <span className="text-xs font-bold text-[#1C1B18]">{inProgressCount}</span>
+              <span className="text-xs text-[#888780]">In corso</span>
             </div>
             <div className="flex items-center gap-2 rounded-lg border border-[#E5E4DF] bg-[#FAFAF9] px-3 py-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
-              <span className="text-xs font-bold text-slate-700">{plannedCount}</span>
-              <span className="text-xs text-slate-500">Pianificati</span>
+              <span className="h-1.5 w-1.5 rounded-full bg-[#E8782A]" />
+              <span className="text-xs font-bold text-[#1C1B18]">{plannedCount}</span>
+              <span className="text-xs text-[#888780]">Pianificati</span>
             </div>
             <div className="flex items-center gap-2 rounded-lg border border-[#E5E4DF] bg-[#FAFAF9] px-3 py-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              <span className="text-xs font-bold text-slate-700">{closedCount}</span>
-              <span className="text-xs text-slate-500">Chiusi</span>
+              <span className="h-1.5 w-1.5 rounded-full bg-[#1A7A3C]" />
+              <span className="text-xs font-bold text-[#1C1B18]">{closedCount}</span>
+              <span className="text-xs text-[#888780]">Chiusi</span>
             </div>
           </div>
           {/* Destra: azione */}
-          <Button className="h-10 shrink-0 rounded-lg bg-[#2ECC71] px-6 font-bold shadow-lg shadow-primary/20 gap-2 hover:bg-[#27B463]" onClick={openCreate}>
+          <Button className="h-10 shrink-0 rounded-lg bg-[#2ECC71] px-6 font-bold gap-2 hover:bg-[#27B463] text-[#0A3D1F]" onClick={openCreate}>
             <Plus size={18} /> Nuovo Ordine di Lavoro
           </Button>
         </div>
@@ -722,7 +722,7 @@ export function WorkOrdersList({
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#888780]" size={16} />
             <Input
               placeholder="Cerca intervento..."
-              className="h-10 rounded-lg border border-[#E5E4DF] bg-[#FAFAF9] pl-9 text-sm shadow-none dark:bg-slate-900/80"
+              className="h-10 rounded-lg border border-[#E5E4DF] bg-[#FAFAF9] pl-9 text-sm shadow-none"
               value={searchValue}
               onChange={(e) => {
                 const nextValue = e.target.value;
@@ -732,7 +732,7 @@ export function WorkOrdersList({
             />
           </div>
           <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as WorkOrderStatus | 'ALL')}>
-            <SelectTrigger className="h-10 w-44 rounded-lg border border-[#E5E4DF] bg-[#FAFAF9] text-sm shadow-none dark:bg-slate-900/80">
+            <SelectTrigger className="h-10 w-44 rounded-lg border border-[#E5E4DF] bg-[#FAFAF9] text-sm shadow-none">
               <SelectValue placeholder="Tutti gli stati" />
             </SelectTrigger>
             <SelectContent className="rounded-lg">
@@ -744,11 +744,11 @@ export function WorkOrdersList({
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-20"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>
+        <div className="flex justify-center py-20"><div className="w-8 h-8 border-4 border-[#2ECC71] border-t-transparent rounded-full animate-spin" /></div>
       ) : (
         <div className="grid grid-cols-1 gap-5 xl:grid-cols-2 2xl:grid-cols-3">
           {filtered.length === 0 && (
-            <div className="arena-card col-span-full text-center py-16 text-slate-400">Nessun ordine di lavoro trovato</div>
+            <div className="col-span-full rounded-xl border border-[#E5E4DF] bg-white py-16 text-center text-sm text-[#888780]">Nessun ordine di lavoro trovato</div>
           )}
           {filtered.map((wo) => {
             const technicianName = wo.technician?.name ?? 'Non assegnato';
