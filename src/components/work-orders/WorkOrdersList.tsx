@@ -160,52 +160,57 @@ function WorkOrderTimeline({
     : STATUS_FLOW.indexOf(status);
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-2 overflow-x-auto pb-1">
+    <div className="space-y-3">
+      <div className="flex w-full items-center overflow-x-auto pb-1">
         {STATUS_FLOW.map((step, index) => {
           const isCompleted = index < currentIndex;
           const isCurrent = step === status || (status === 'SUSPENDED' && step === 'IN_PROGRESS');
 
           return (
             <React.Fragment key={step}>
-              <div className="flex min-w-fit items-center gap-2">
+              <div className="flex shrink-0 items-center gap-1.5">
                 <button
                   type="button"
                   disabled={!interactive || !onStepClick}
                   onClick={() => onStepClick?.(step)}
                   className={cn(
-                    'flex h-7 min-w-7 items-center justify-center rounded-full border px-2 text-[10px] font-bold transition-colors',
+                    'flex h-7 min-w-7 items-center justify-center rounded-full border text-[10px] font-bold transition-all',
                     interactive && onStepClick ? 'cursor-pointer hover:scale-105' : 'cursor-default',
                     isCurrent
                       ? status === 'SUSPENDED'
-                        ? 'border-red-200 bg-red-100 text-red-700 dark:border-red-500/35 dark:bg-red-500/20 dark:text-red-200'
-                        : 'border-primary/20 bg-primary text-white dark:border-blue-400/40 dark:bg-blue-600 dark:text-white'
+                        ? 'border-[#FFF0EE] bg-[#FFF0EE] text-[#A83228] ring-2 ring-[#FFF0EE] ring-offset-1'
+                        : 'border-[#2ECC71] bg-[#2ECC71] text-white ring-2 ring-[#2ECC71]/25 ring-offset-1'
                       : isCompleted
-                        ? 'border-emerald-200 bg-emerald-100 text-emerald-700 dark:border-emerald-400/35 dark:bg-emerald-500/20 dark:text-emerald-200'
-                        : 'border-slate-200 bg-white text-slate-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-500'
+                        ? 'border-[#EAFBF1] bg-[#EAFBF1] text-[#1A7A3C]'
+                        : 'border-[#E5E4DF] bg-white text-[#888780]'
                   )}
                 >
                   {index + 1}
                 </button>
-                <span className={cn('text-[11px] font-semibold whitespace-nowrap', isCurrent ? 'text-slate-800' : 'text-slate-400')}>
+                <span className={cn(
+                  'text-[11px] whitespace-nowrap',
+                  isCurrent
+                    ? status === 'SUSPENDED' ? 'font-bold text-[#A83228]' : 'font-bold text-[#1C1B18]'
+                    : isCompleted ? 'font-semibold text-[#1A7A3C]' : 'font-medium text-[#888780]'
+                )}>
                   {STATUS_LABELS[step]}
                 </span>
               </div>
               {index < STATUS_FLOW.length - 1 && (
-                <div className={cn('h-px w-7 shrink-0', index < currentIndex ? 'bg-emerald-300' : 'bg-slate-200')} />
+                <div className={cn('h-px min-w-8 flex-1', index < currentIndex ? 'bg-[#2ECC71]' : 'bg-[#E5E4DF]')} />
               )}
             </React.Fragment>
           );
         })}
       </div>
       {status === 'SUSPENDED' && (
-        <p className="text-xs font-medium text-red-600">Intervento sospeso: puoi riprenderlo riportandolo In corso.</p>
+        <p className="text-[11px] font-medium text-[#A83228]">Intervento sospeso — puoi riprenderlo riportandolo In corso.</p>
       )}
       {status === 'ABANDONED' && (
-        <p className="text-xs font-medium text-slate-600">Intervento abbandonato: stato finale, non modificabile.</p>
+        <p className="text-[11px] font-medium text-[#5F5E5A]">Intervento abbandonato: stato finale, non modificabile.</p>
       )}
       {status === 'VALIDATED' && (
-        <p className="text-xs font-medium text-emerald-700">Intervento validato: stato finale, non modificabile.</p>
+        <p className="text-[11px] font-medium text-[#1A7A3C]">Intervento validato: stato finale, non modificabile.</p>
       )}
     </div>
   );
@@ -871,248 +876,294 @@ export function WorkOrdersList({
       )}
 
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent className="rounded-xl w-[min(96vw,1100px)] max-w-[1100px] sm:max-w-[1100px] max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{editing ? 'Modifica Ordine di Lavoro' : 'Nuovo Ordine di Lavoro'}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-6 py-2">
-            {/* Timeline */}
+        <DialogContent className="w-[min(92vw,1040px)] max-w-none sm:max-w-none p-0 overflow-hidden rounded-xl flex flex-col max-h-[90vh]">
+
+          {/* Header */}
+          <div className="shrink-0 border-b border-[#E5E4DF] bg-white px-8 py-5">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <DialogTitle className="text-[15px] font-bold tracking-tight text-[#1C1B18]">
+                  {editing ? 'Modifica Ordine di Lavoro' : 'Nuovo Ordine di Lavoro'}
+                </DialogTitle>
+                <p className="mt-0.5 text-xs text-[#888780]">
+                  {editing ? "Aggiorna i dati dell'ordine di lavoro" : "Compila i campi per pianificare l'intervento"}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Body */}
+          <div className="max-h-[68vh] overflow-y-auto bg-[#FAFAF9] px-8 py-6 space-y-4">
+
+            {/* Timeline intervento (solo modifica) */}
             {editing && (
-              <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4">
-                <div className="mb-3 flex items-center justify-between gap-3">
+              <div className="overflow-hidden rounded-xl border border-[#E5E4DF] bg-white">
+                {/* Header */}
+                <div className="flex flex-col gap-3 border-b border-[#E5E4DF] bg-[#FAFAF9] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <p className="text-sm font-bold text-slate-800">Timeline Intervento</p>
-                    <p className="text-xs text-slate-500">Clicca uno stato per aggiornare rapidamente il WO.</p>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm font-bold text-[#1C1B18]">Timeline intervento</h3>
+                      {editing.code && (
+                        <span className="tabular-nums rounded bg-[#F1EFE8] px-1.5 py-0.5 text-[11px] font-semibold text-[#5F5E5A]">
+                          {editing.code}
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-0.5 text-xs text-[#888780]">Gestisci l'avanzamento operativo — clicca uno step per aggiornare</p>
                   </div>
-                  <div className="flex gap-2">
-                    <Button type="button" variant="outline" className="h-9 rounded-lg border-red-200 bg-white font-semibold text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300 dark:hover:bg-red-500/20"
-                      disabled={form.status === 'SUSPENDED' || form.status === 'CLOSED' || form.status === 'VALIDATED' || form.status === 'ABANDONED'}
-                      onClick={() => handleTimelineStatusChange('SUSPENDED')}>
-                      Sospendi
-                    </Button>
-                    <Button type="button" variant="outline" className="h-9 rounded-lg border-slate-300 bg-white font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-                      disabled={form.status === 'VALIDATED' || form.status === 'ABANDONED'}
-                      onClick={() => handleTimelineStatusChange('ABANDONED')}>
-                      Abbandona
-                    </Button>
-                    <Button type="button" variant="outline" className="h-9 rounded-lg border-slate-200 bg-white font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-                      disabled={!NEXT_STATUS_MAP[form.status] || form.status === 'VALIDATED' || form.status === 'ABANDONED'}
-                      onClick={() => handleTimelineStatusChange(NEXT_STATUS_MAP[form.status] as WorkOrderStatus)}>
-                      {NEXT_STATUS_MAP[form.status] ? `Avanza a ${STATUS_LABELS[NEXT_STATUS_MAP[form.status] as WorkOrderStatus]}` : 'Flusso completato'}
-                    </Button>
+                  <div className="flex shrink-0 flex-col items-end gap-1.5">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Button type="button" variant="outline"
+                        className="inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-[#F4C7C3] bg-[#FFF0EE] px-3 text-xs font-bold text-[#A83228] transition-colors hover:bg-[#FFE7E4] disabled:opacity-40"
+                        disabled={form.status === 'SUSPENDED' || form.status === 'CLOSED' || form.status === 'VALIDATED' || form.status === 'ABANDONED'}
+                        onClick={() => handleTimelineStatusChange('SUSPENDED')}>
+                        Sospendi
+                      </Button>
+                      <Button type="button" variant="outline"
+                        className="inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-[#D3D1C7] bg-white px-3 text-xs font-bold text-[#5F5E5A] transition-colors hover:bg-[#FAFAF9] disabled:opacity-40"
+                        disabled={form.status === 'VALIDATED' || form.status === 'ABANDONED'}
+                        onClick={() => handleTimelineStatusChange('ABANDONED')}>
+                        Abbandona
+                      </Button>
+                      <Button type="button" variant="outline"
+                        className="inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-[#1C1B18] bg-[#1C1B18] px-3 text-xs font-bold text-[#FAFAF9] transition-colors hover:bg-[#2A2925] disabled:opacity-40"
+                        disabled={!NEXT_STATUS_MAP[form.status] || form.status === 'VALIDATED' || form.status === 'ABANDONED'}
+                        onClick={() => handleTimelineStatusChange(NEXT_STATUS_MAP[form.status] as WorkOrderStatus)}>
+                        {NEXT_STATUS_MAP[form.status] ? `Avanza → ${STATUS_LABELS[NEXT_STATUS_MAP[form.status] as WorkOrderStatus]}` : 'Flusso completato'}
+                      </Button>
+                    </div>
                   </div>
                 </div>
-                <WorkOrderTimeline status={form.status} interactive={!isTerminalStatus} onStepClick={handleTimelineStatusChange} />
+                {/* Body */}
+                <div className="px-5 py-5">
+                  <WorkOrderTimeline status={form.status} interactive={!isTerminalStatus} onStepClick={handleTimelineStatusChange} />
+                </div>
               </div>
             )}
 
-            {/* SEZ 1 — Intervento */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <p className="text-xs font-black uppercase tracking-widest text-slate-400">Intervento</p>
-                <div className="flex-1 h-px bg-slate-100" />
-              </div>
-              <div className="space-y-1">
-                <Label>Asset *</Label>
-                <Popover open={assetPopoverOpen} onOpenChange={setAssetPopoverOpen}>
-                  <PopoverTrigger className="w-full">
-                    <button type="button" className="flex h-12 w-full items-center justify-between rounded-lg border border-input bg-background px-4 text-left text-sm ring-offset-background transition-colors hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
-                      <div className="min-w-0">
-                        {selectedAsset ? (
-                          <div className="min-w-0">
-                            <p className="truncate font-semibold text-slate-900">{selectedAsset.name}</p>
-                            <p className="truncate text-xs text-slate-500">{[selectedAsset.serial_number, selectedAsset.location?.name].filter(Boolean).join(' • ')}</p>
+            {/* Grid asimmetrico: sinistra più larga */}
+            <div className="grid grid-cols-1 xl:grid-cols-[1.15fr_0.85fr] gap-5 items-start">
+
+              {/* Colonna sinistra: Intervento + Rapportino */}
+              <div className="space-y-4">
+
+                {/* Intervento */}
+                <div className="rounded-xl border border-[#E5E4DF] bg-white p-5 space-y-4">
+                  <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#888780]">Intervento</p>
+
+                  {/* Asset selector premium */}
+                  <div className="space-y-1.5">
+                    <Label className="text-[13px] font-semibold text-[#1C1B18]">Asset *</Label>
+                    <Popover open={assetPopoverOpen} onOpenChange={setAssetPopoverOpen}>
+                      <PopoverTrigger className="w-full">
+                        <button type="button" className={cn(
+                          'flex w-full items-center justify-between rounded-xl border bg-white px-4 text-left transition-colors hover:border-[#D3D1C7] hover:bg-[#FAFAF9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2ECC71] focus-visible:ring-offset-2',
+                          selectedAsset ? 'h-14 border-[#E5E4DF]' : 'h-10 border-[#E5E4DF]'
+                        )}>
+                          <div className="min-w-0 flex-1">
+                            {selectedAsset ? (
+                              <>
+                                <p className="truncate text-sm font-semibold text-[#1C1B18]">{selectedAsset.name}</p>
+                                <p className="truncate text-xs text-[#888780]">{[selectedAsset.serial_number, selectedAsset.location?.name].filter(Boolean).join(' • ')}</p>
+                              </>
+                            ) : (
+                              <span className="text-sm text-[#888780]">Cerca e seleziona un asset...</span>
+                            )}
                           </div>
-                        ) : (
-                          <span className="text-slate-500">Cerca e seleziona un asset...</span>
-                        )}
-                      </div>
-                      <Search size={16} className="shrink-0 text-slate-400" />
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent align="start" className="w-[var(--radix-popover-trigger-width)] rounded-xl p-3">
-                    <div className="space-y-3">
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                        <Input value={assetSearchQuery} onChange={(e) => setAssetSearchQuery(e.target.value)} placeholder="Cerca per nome, seriale, marca, modello o ubicazione..." className="h-11 rounded-xl pl-9" />
-                      </div>
-                      <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
-                        {filteredAssets.length === 0 ? (
-                          <p className="py-4 text-center text-sm text-slate-500">Nessun asset trovato</p>
-                        ) : (
-                          filteredAssets.map((asset) => (
-                            <button key={asset.id} type="button"
-                              onClick={() => { setForm({ ...form, asset_id: asset.id }); setAssetPopoverOpen(false); setAssetSearchQuery(''); }}
-                              className={cn('w-full rounded-xl border px-3 py-2 text-left transition-colors', form.asset_id === asset.id ? 'border-primary bg-primary/5' : 'border-slate-200 hover:border-primary/40 hover:bg-slate-50')}>
-                              <p className="truncate text-sm font-semibold text-slate-900">{asset.name}</p>
-                              <p className="truncate text-xs text-slate-500">{[asset.serial_number, asset.brand, asset.model, asset.location?.name].filter(Boolean).join(' • ')}</p>
-                            </button>
-                          ))
-                        )}
-                      </div>
+                          <Search size={15} className="ml-3 shrink-0 text-[#888780]" />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent align="start" className="w-[var(--radix-popover-trigger-width)] rounded-xl border border-[#E5E4DF] p-3 shadow-sm">
+                        <div className="space-y-2.5">
+                          <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#888780]" size={15} />
+                            <Input value={assetSearchQuery} onChange={(e) => setAssetSearchQuery(e.target.value)} placeholder="Cerca per nome, seriale, marca, modello o ubicazione..." className="h-9 rounded-lg border-[#E5E4DF] pl-9 text-sm" />
+                          </div>
+                          <div className="max-h-60 space-y-1 overflow-y-auto pr-1">
+                            {filteredAssets.length === 0 ? (
+                              <p className="py-4 text-center text-sm text-[#888780]">Nessun asset trovato</p>
+                            ) : (
+                              filteredAssets.map((asset) => (
+                                <button key={asset.id} type="button"
+                                  onClick={() => { setForm({ ...form, asset_id: asset.id }); setAssetPopoverOpen(false); setAssetSearchQuery(''); }}
+                                  className={cn('w-full rounded-lg border px-3 py-2 text-left transition-colors', form.asset_id === asset.id ? 'border-[#2ECC71] bg-[#EAFBF1]' : 'border-[#E5E4DF] hover:border-[#D3D1C7] hover:bg-[#FAFAF9]')}>
+                                  <p className="truncate text-sm font-semibold text-[#1C1B18]">{asset.name}</p>
+                                  <p className="truncate text-xs text-[#888780]">{[asset.serial_number, asset.brand, asset.model, asset.location?.name].filter(Boolean).join(' • ')}</p>
+                                </button>
+                              ))
+                            )}
+                          </div>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  {/* Descrizione */}
+                  <div className="space-y-1.5">
+                    <Label className="text-[13px] font-semibold text-[#1C1B18]">Descrizione *</Label>
+                    <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="min-h-[96px] rounded-lg border-[#E5E4DF] text-sm" rows={4} placeholder="Descrivi l'intervento da svolgere..." />
+                  </div>
+
+                  {/* Tipo + Priorità + Stato */}
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-[13px] font-semibold text-[#1C1B18]">Tipo</Label>
+                      <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v as WorkOrderType })}>
+                        <SelectTrigger className="h-10 w-full rounded-lg border-[#E5E4DF] text-sm"><span className="truncate">{TYPE_LABELS[form.type]}</span></SelectTrigger>
+                        <SelectContent className="rounded-lg">{TYPES.map((t) => <SelectItem key={t} value={t}>{TYPE_LABELS[t]}</SelectItem>)}</SelectContent>
+                      </Select>
                     </div>
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                <div className="space-y-1">
-                  <Label>Tipo</Label>
-                  <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v as WorkOrderType })}>
-                    <SelectTrigger className="w-full rounded-xl"><span className="truncate">{TYPE_LABELS[form.type]}</span></SelectTrigger>
-                    <SelectContent className="rounded-xl">{TYPES.map((t) => <SelectItem key={t} value={t}>{TYPE_LABELS[t]}</SelectItem>)}</SelectContent>
-                  </Select>
+                    <div className="space-y-1.5">
+                      <Label className="text-[13px] font-semibold text-[#1C1B18]">Priorità</Label>
+                      <Select value={form.priority} onValueChange={(v) => setForm({ ...form, priority: v as Priority })}>
+                        <SelectTrigger className="h-10 w-full rounded-lg border-[#E5E4DF] text-sm"><span className="truncate">{PRIORITY_TRANSLATIONS[form.priority]}</span></SelectTrigger>
+                        <SelectContent className="rounded-lg">{PRIORITIES.map((p) => <SelectItem key={p} value={p}>{PRIORITY_TRANSLATIONS[p]}</SelectItem>)}</SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-[13px] font-semibold text-[#1C1B18]">Stato</Label>
+                      <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as WorkOrderStatus })}>
+                        <SelectTrigger className="h-10 w-full rounded-lg border-[#E5E4DF] text-sm" disabled={isTerminalStatus}><span className="truncate">{STATUS_LABELS[form.status]}</span></SelectTrigger>
+                        <SelectContent className="rounded-lg">{STATUSES.map((s) => <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>)}</SelectContent>
+                      </Select>
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <Label>Priorità</Label>
-                  <Select value={form.priority} onValueChange={(v) => setForm({ ...form, priority: v as Priority })}>
-                    <SelectTrigger className="w-full rounded-xl"><span className="truncate">{PRIORITY_TRANSLATIONS[form.priority]}</span></SelectTrigger>
-                    <SelectContent className="rounded-xl">{PRIORITIES.map((p) => <SelectItem key={p} value={p}>{PRIORITY_TRANSLATIONS[p]}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1">
-                  <Label>Stato</Label>
-                  <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as WorkOrderStatus })}>
-                    <SelectTrigger className="w-full rounded-xl" disabled={isTerminalStatus}><span className="truncate">{STATUS_LABELS[form.status]}</span></SelectTrigger>
-                    <SelectContent className="rounded-xl">{STATUSES.map((s) => <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="space-y-1">
-                <Label>Descrizione *</Label>
-                <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="rounded-xl min-h-20" rows={3} />
-              </div>
-            </div>
 
-            {/* SEZ 2 — Date */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <p className="text-xs font-black uppercase tracking-widest text-slate-400">Date</p>
-                <div className="flex-1 h-px bg-slate-100" />
-              </div>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div className="space-y-1">
-                  <Label>Data concordata con il fornitore</Label>
-                  <Input type="date" value={form.planned_date} onChange={(e) => setForm({ ...form, planned_date: e.target.value })} className="rounded-xl" />
-                  <p className="text-xs text-slate-400">La data in cui hai fissato l'intervento</p>
-                </div>
-                <div className="space-y-1">
-                  <Label>Data esecuzione effettiva</Label>
-                  <Input type="date" value={form.executed_at} onChange={(e) => setForm({ ...form, executed_at: e.target.value })} className="rounded-xl" />
-                  <p className="text-xs text-slate-400">Obbligatoria per chiudere il WO · la prossima scadenza sarà calcolata da questa data</p>
-                </div>
-              </div>
-            </div>
-
-            {/* SEZ 3 — Tecnico, Fornitore, Costi */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <p className="text-xs font-black uppercase tracking-widest text-slate-400">Tecnico, Fornitore e Costi</p>
-                <div className="flex-1 h-px bg-slate-100" />
-              </div>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div className="space-y-1">
-                  <Label>Tecnico</Label>
-                  <Select value={form.technician_id} onValueChange={(v) => setForm({ ...form, technician_id: v })}>
-                    <SelectTrigger className="w-full rounded-xl">
-                      <span className="truncate text-left">
-                        {selectedTechnician ? `${selectedTechnician.name}${selectedTechnician.supplier?.name ? ` • ${selectedTechnician.supplier.name}` : ''}` : 'Nessuno'}
-                      </span>
-                    </SelectTrigger>
-                    <SelectContent className="rounded-xl">
-                      <SelectItem value="">Nessuno</SelectItem>
-                      {technicians.map((t) => (
-                        <SelectItem key={t.id} value={t.id}>{t.name} • {TECHNICIAN_EMPLOYMENT_LABELS[t.employment_type]}{t.supplier?.name ? ` • ${t.supplier.name}` : ''}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1">
-                  <Label>Fornitore</Label>
-                  <Select value={form.supplier_id} onValueChange={(v) => setForm({ ...form, supplier_id: v })} disabled={technicianIsExternal}>
-                    <SelectTrigger className="w-full rounded-xl">
-                      <span className="truncate text-left">{selectedSupplier?.name ?? 'Nessuno'}</span>
-                    </SelectTrigger>
-                    <SelectContent className="rounded-xl">
-                      <SelectItem value="">Nessuno</SelectItem>
-                      {suppliers.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                  {selectedTechnician && (
-                    <p className="text-xs text-slate-500">
-                      {selectedTechnician.employment_type === 'EXTERNAL'
-                        ? `Fornitore collegato automaticamente: ${selectedTechnician.supplier?.name ?? 'non impostato'}`
-                        : 'Tecnico interno di Pallacanestro Varese'}
-                    </p>
-                  )}
-                </div>
-                <div className="space-y-1">
-                  <Label>Costo (€)</Label>
-                  <Input type="number" min={0} step="0.01" value={form.cost} onChange={(e) => setForm({ ...form, cost: e.target.value })} className="rounded-xl" placeholder="0.00" />
-                </div>
-                <div className="col-span-2 space-y-3 rounded-xl border border-slate-200 bg-slate-50/60 px-4 py-4">
+                {/* Rapportino */}
+                <div className="rounded-xl border border-[#E5E4DF] bg-white p-5 space-y-3">
+                  <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#888780]">Rapportino</p>
                   <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2.5">
                       <Checkbox
                         id="report_delivered"
                         checked={form.report_delivered}
                         onCheckedChange={(v) => setForm((f) => ({ ...f, report_delivered: !!v }))}
                       />
-                      <label htmlFor="report_delivered" className="text-sm font-semibold text-slate-700 cursor-pointer flex items-center gap-2">
-                        <FileCheck size={14} className="text-slate-500" />
-                        Rapportino di intervento consegnato
+                      <label htmlFor="report_delivered" className="flex cursor-pointer items-center gap-1.5 text-sm font-semibold text-[#1C1B18]">
+                        <FileCheck size={13} className="text-[#888780]" />
+                        Consegnato
                       </label>
                     </div>
                     {editing ? (
-                      <label className={cn('flex items-center gap-2 cursor-pointer rounded-xl px-3 py-1.5 text-xs font-semibold border transition-colors', uploading ? 'opacity-50 pointer-events-none' : 'border-primary/30 text-primary hover:bg-primary/5')}>
-                        {uploading ? <Loader2 size={13} className="animate-spin" /> : <Paperclip size={13} />}
+                      <label className={cn('flex cursor-pointer items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition-colors', uploading ? 'pointer-events-none opacity-50' : 'border-[#E5E4DF] text-[#5F5E5A] hover:bg-[#F1EFE8]')}>
+                        {uploading ? <Loader2 size={12} className="animate-spin" /> : <Paperclip size={12} />}
                         {uploading ? 'Caricamento...' : 'Allega file'}
                         <input type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png,.webp" onChange={handleFileUpload} disabled={uploading} />
                       </label>
                     ) : (
-                      <p className="text-xs text-slate-400">Salva il WO per allegare file</p>
+                      <p className="text-xs text-[#888780]">Salva prima di allegare</p>
                     )}
                   </div>
                   {reportFiles.length > 0 && (
-                    <div className="space-y-1.5 pt-1 border-t border-slate-200">
+                    <div className="space-y-1 border-t border-[#E5E4DF] pt-2">
                       {reportFiles.map((path) => (
-                        <div key={path} className="flex items-center gap-2 rounded-lg bg-white border border-slate-100 px-3 py-2">
-                          <Paperclip size={12} className="text-slate-400 shrink-0" />
-                          <span className="text-xs font-medium text-slate-700 flex-1 truncate">{fileNameFromPath(path)}</span>
-                          <button onClick={() => handleFileDownload(path)} className="p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-primary transition-colors" title="Scarica">
-                            <Download size={13} />
+                        <div key={path} className="flex items-center gap-2 rounded-lg border border-[#E5E4DF] bg-[#FAFAF9] px-2.5 py-1.5">
+                          <Paperclip size={11} className="shrink-0 text-[#888780]" />
+                          <span className="flex-1 truncate text-xs font-medium text-[#1C1B18]">{fileNameFromPath(path)}</span>
+                          <button onClick={() => handleFileDownload(path)} className="rounded p-1 text-[#888780] transition-colors hover:bg-[#F1EFE8] hover:text-[#1C1B18]" title="Scarica">
+                            <Download size={12} />
                           </button>
-                          <button onClick={() => handleFileDelete(path)} className="p-1 rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors" title="Rimuovi">
-                            <Trash2 size={13} />
+                          <button onClick={() => handleFileDelete(path)} className="rounded p-1 text-[#888780] transition-colors hover:bg-[#FFF0EE] hover:text-[#A83228]" title="Rimuovi">
+                            <Trash2 size={12} />
                           </button>
                         </div>
                       ))}
                     </div>
                   )}
                   {reportFiles.length === 0 && editing && (
-                    <p className="text-xs text-slate-400 pt-1 border-t border-slate-200">Nessun file allegato · formati accettati: PDF, JPG, PNG</p>
+                    <p className="border-t border-[#E5E4DF] pt-2 text-xs text-[#888780]">Nessun allegato · PDF, JPG, PNG</p>
                   )}
                 </div>
+
+              </div>
+
+              {/* Colonna destra: Pianificazione + Assegnazione e costi */}
+              <div className="space-y-4">
+
+                {/* Pianificazione */}
+                <div className="rounded-xl border border-[#E5E4DF] bg-white p-5 space-y-3">
+                  <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#888780]">Pianificazione</p>
+                  <div className="space-y-1.5">
+                    <Label className="text-[13px] font-semibold text-[#1C1B18]">Data concordata</Label>
+                    <Input type="date" value={form.planned_date} onChange={(e) => setForm({ ...form, planned_date: e.target.value })} className="h-10 rounded-lg border-[#E5E4DF] text-sm" />
+                    <p className="text-[11px] text-[#888780]">La data in cui hai fissato l'intervento</p>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-[13px] font-semibold text-[#1C1B18]">Data esecuzione</Label>
+                    <Input type="date" value={form.executed_at} onChange={(e) => setForm({ ...form, executed_at: e.target.value })} className="h-10 rounded-lg border-[#E5E4DF] text-sm" />
+                    <p className="text-[11px] text-[#888780]">Obbligatoria per chiudere il WO</p>
+                  </div>
+                </div>
+
+                {/* Assegnazione e costi */}
+                <div className="rounded-xl border border-[#E5E4DF] bg-white p-5 space-y-3">
+                  <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#888780]">Assegnazione e costi</p>
+                  <div className="space-y-1.5">
+                    <Label className="text-[13px] font-semibold text-[#1C1B18]">Tecnico</Label>
+                    <Select value={form.technician_id} onValueChange={(v) => setForm({ ...form, technician_id: v })}>
+                      <SelectTrigger className="h-10 w-full rounded-lg border-[#E5E4DF] text-sm">
+                        <span className="truncate text-left">
+                          {selectedTechnician ? `${selectedTechnician.name}${selectedTechnician.supplier?.name ? ` • ${selectedTechnician.supplier.name}` : ''}` : 'Nessuno'}
+                        </span>
+                      </SelectTrigger>
+                      <SelectContent className="rounded-lg">
+                        <SelectItem value="">Nessuno</SelectItem>
+                        {technicians.map((t) => (
+                          <SelectItem key={t.id} value={t.id}>{t.name} • {TECHNICIAN_EMPLOYMENT_LABELS[t.employment_type]}{t.supplier?.name ? ` • ${t.supplier.name}` : ''}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-[13px] font-semibold text-[#1C1B18]">Fornitore</Label>
+                    <Select value={form.supplier_id} onValueChange={(v) => setForm({ ...form, supplier_id: v })} disabled={technicianIsExternal}>
+                      <SelectTrigger className="h-10 w-full rounded-lg border-[#E5E4DF] text-sm">
+                        <span className="truncate text-left">{selectedSupplier?.name ?? 'Nessuno'}</span>
+                      </SelectTrigger>
+                      <SelectContent className="rounded-lg">
+                        <SelectItem value="">Nessuno</SelectItem>
+                        {suppliers.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                    {selectedTechnician && (
+                      <p className="text-[11px] text-[#888780]">
+                        {selectedTechnician.employment_type === 'EXTERNAL'
+                          ? `Fornitore collegato automaticamente: ${selectedTechnician.supplier?.name ?? 'non impostato'}`
+                          : 'Tecnico interno di Pallacanestro Varese'}
+                      </p>
+                    )}
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-[13px] font-semibold text-[#1C1B18]">Costo (€)</Label>
+                    <Input type="number" min={0} step="0.01" value={form.cost} onChange={(e) => setForm({ ...form, cost: e.target.value })} className="h-10 rounded-lg border-[#E5E4DF] text-sm" placeholder="0.00" />
+                  </div>
+                </div>
+
               </div>
             </div>
 
-            {/* SEZ 4 — Note */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <p className="text-xs font-black uppercase tracking-widest text-slate-400">Note</p>
-                <div className="flex-1 h-px bg-slate-100" />
-              </div>
-              <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} className="rounded-xl min-h-20" rows={3} placeholder="Annotazioni aggiuntive sull'intervento..." />
+            {/* Note operative — full-width */}
+            <div className="rounded-xl border border-[#E5E4DF] bg-white p-5 space-y-2">
+              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#888780]">Note operative</p>
+              <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} className="min-h-[110px] w-full rounded-lg border-[#E5E4DF] text-sm" rows={4} placeholder="Annotazioni aggiuntive..." />
             </div>
           </div>
-          <DialogFooter className="gap-2">
-            {editing && isAdmin && (
-              <Button variant="outline" className="rounded-xl border-red-200 text-red-600 hover:bg-red-50" onClick={() => void handleDelete(editing)}>
-                Elimina
-              </Button>
-            )}
-            <Button variant="outline" className="rounded-xl" onClick={() => setModalOpen(false)}>Annulla</Button>
-            <AnimatedSaveButton onClick={handleSave} isSaving={saving} idleLabel="Salva" />
-          </DialogFooter>
+
+          {/* Footer */}
+          <div className="flex shrink-0 items-center justify-between border-t border-[#E5E4DF] bg-white px-8 py-5">
+            <p className="text-xs text-[#888780]">I campi con * sono obbligatori</p>
+            <div className="flex items-center gap-3">
+              {editing && isAdmin && (
+                <Button variant="outline" className="h-9 rounded-lg border-[#FFF0EE] text-[#A83228] hover:bg-[#FFF0EE]" onClick={() => void handleDelete(editing)}>
+                  Elimina
+                </Button>
+              )}
+              <Button variant="outline" className="h-9 rounded-lg border-[#E5E4DF] text-[#1C1B18] hover:bg-[#F1EFE8]" onClick={() => setModalOpen(false)}>Annulla</Button>
+              <AnimatedSaveButton onClick={handleSave} isSaving={saving} idleLabel={editing ? 'Salva modifiche' : 'Crea WO'} />
+            </div>
+          </div>
+
         </DialogContent>
       </Dialog>
     </div>
