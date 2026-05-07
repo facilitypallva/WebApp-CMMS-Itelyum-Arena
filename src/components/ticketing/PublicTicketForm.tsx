@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
@@ -172,180 +171,270 @@ export function PublicTicketForm() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
-        <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className="max-w-md w-full bg-white rounded-[3rem] p-12 text-center shadow-xl border border-slate-100"
-        >
-          <div className="w-24 h-24 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
-            <CheckCircle2 size={48} />
-          </div>
-          <h2 className="text-3xl font-bold text-slate-800 mb-3">Segnalazione inviata!</h2>
-          {ticketCode && (
-            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary font-black px-5 py-2.5 rounded-2xl text-lg mb-6 tracking-wider">
-              {ticketCode}
-            </div>
-          )}
-          <p className="text-slate-500 font-medium mb-8">
-            La tua segnalazione è stata ricevuta. Il team tecnico interverrà il prima possibile.
-            {form.email && ' Riceverai una mail di conferma.'}
-          </p>
-          <Button
-            variant="outline"
-            onClick={() => { setSubmitted(false); setForm({ name: '', email: '', location_id: '', problem_category: '', description: '' }); }}
-            className="rounded-2xl h-12 px-8 font-bold border-slate-200"
-          >
-            Invia un'altra segnalazione
-          </Button>
-        </motion.div>
+      <div className="relative min-h-screen bg-[#f8fafc]">
+        <img
+          src="/login-seats-bg.jpg"
+          alt=""
+          aria-hidden="true"
+          className="fixed inset-0 -z-30 h-full w-full object-cover opacity-60 saturate-50"
+        />
+        <div className="fixed inset-0 -z-20 bg-white/55" />
+
+        <div className="relative z-10 flex min-h-screen flex-col">
+          <header className="shrink-0 px-6 py-3 sm:px-10 lg:px-14">
+            <ArenaOsLogo className="h-9 w-[170px] drop-shadow-sm" />
+          </header>
+
+          <main className="flex-1 px-6 pb-8 sm:px-10 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(460px,500px)] lg:items-center lg:px-14 lg:pb-0">
+            <div className="hidden lg:block" />
+            <section className="flex items-center justify-center py-8 lg:py-0">
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
+                className="w-full max-w-[480px] rounded-2xl border border-white/80 bg-white/95 p-8 text-center shadow-xl shadow-slate-900/8 backdrop-blur-sm"
+              >
+                <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-[#EAFBF1] text-[#1A7A3C]">
+                  <CheckCircle2 size={32} strokeWidth={1.75} />
+                </div>
+                <h2 className="mb-2 text-2xl font-bold tracking-[-0.02em] text-[#1C1B18]">Segnalazione inviata!</h2>
+                {ticketCode && (
+                  <div className="mx-auto mb-4 inline-flex items-center gap-2 rounded-lg bg-[#EAFBF1] px-4 py-2 text-base font-bold tabular-nums tracking-[0.06em] text-[#1A7A3C]">
+                    {ticketCode}
+                  </div>
+                )}
+                <p className="mb-6 text-sm leading-relaxed text-[#5F5E5A]">
+                  La tua segnalazione è stata ricevuta. Il team tecnico interverrà il prima possibile.
+                  {form.email && ' Riceverai una mail di conferma.'}
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={() => { setSubmitted(false); setForm({ name: '', email: '', location_id: '', problem_category: '', description: '' }); }}
+                  className="h-9 rounded-lg border-[#E5E4DF] px-6 font-semibold text-[#1C1B18] hover:bg-[#F1EFE8]"
+                >
+                  Invia un'altra segnalazione
+                </Button>
+              </motion.div>
+            </section>
+          </main>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 relative overflow-hidden">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[120px] -z-10" />
-      <div className="w-full max-w-xl space-y-8">
-        <div className="text-center space-y-2">
-          <ArenaOsLogo className="mx-auto mb-6 h-16 w-[280px]" />
-          <h1 className="text-4xl font-extrabold tracking-tight text-slate-900">Segnala un Guasto</h1>
-          <p className="text-slate-500 font-semibold text-lg">Itelyum Arena</p>
-        </div>
+    <div className="relative min-h-screen bg-[#f8fafc]">
+      <img
+        src="/login-seats-bg.jpg"
+        alt=""
+        aria-hidden="true"
+        className="fixed inset-0 -z-30 h-full w-full object-cover opacity-60 saturate-50"
+      />
+      <div className="fixed inset-0 -z-20 bg-white/55" />
 
-        <Card className="border-none shadow-2xl rounded-[3rem] p-4 bg-white">
-          <CardHeader className="p-8 pb-4">
-            <CardTitle className="text-2xl">Dettagli del Problema</CardTitle>
-            <CardDescription className="text-base font-medium">
-              Fornisci più informazioni possibili per aiutarci ad intervenire velocemente.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-8 pt-4">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Chi segnala */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name" className="text-sm font-bold text-slate-700 ml-1">Chi segnala *</Label>
-                  <Input
-                    id="name"
-                    placeholder="Es. Marco Rossi"
-                    required
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    className="h-12 rounded-2xl border-slate-100 bg-slate-50/50 px-4"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-sm font-bold text-slate-700 ml-1">Email di contatto *</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="m.rossi@example.com"
-                    required
-                    value={form.email}
-                    onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    className="h-12 rounded-2xl border-slate-100 bg-slate-50/50 px-4"
-                  />
-                </div>
-              </div>
+      <div className="relative z-10 flex min-h-screen flex-col">
+        {/* Logo header */}
+        <header className="shrink-0 px-6 py-3 sm:px-10 lg:px-14">
+          <ArenaOsLogo className="h-9 w-[170px] drop-shadow-sm" />
+        </header>
 
-              {/* Dove */}
-              <div className="space-y-2">
-                <Label className="text-sm font-bold text-slate-700 ml-1">Dove si trova il problema *</Label>
-                <Select
-                  required
-                  value={form.location_id}
-                  onValueChange={(v) => setForm({ ...form, location_id: v })}
-                  disabled={locationsLoading || locations.length === 0}
-                >
-                  <SelectTrigger className="h-12 rounded-2xl border-slate-100 bg-slate-50/50 px-4">
-                    <SelectValue placeholder={locationsLoading ? 'Caricamento ubicazioni...' : 'Seleziona il locale o l\'area...'} />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-2xl">
-                    {locations.map((l) => (
-                      <SelectItem key={l.id} value={l.id}>
-                        {l.name.replace(/^00_/, '')}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {!locationsLoading && locations.length === 0 && (
-                  <p className="text-xs font-medium text-amber-600">
-                    Nessuna ubicazione disponibile. Verifica la policy pubblica di lettura su `locations` in Supabase.
-                  </p>
-                )}
-              </div>
+        {/* Two-column grid — fills remaining height, items centered */}
+        <main className="flex-1 px-6 pb-8 sm:px-10 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(460px,500px)] lg:items-center lg:px-14 lg:pb-0">
 
-              {/* Tipo di problema */}
-              <div className="space-y-2">
-                <Label className="text-sm font-bold text-slate-700 ml-1">Tipo di problema *</Label>
-                <Select required value={form.problem_category} onValueChange={(v) => setForm({ ...form, problem_category: v })}>
-                  <SelectTrigger className="h-12 rounded-2xl border-slate-100 bg-slate-50/50 px-4">
-                    <SelectValue placeholder="Seleziona la categoria..." />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-2xl">
-                    {TICKET_PROBLEM_CATEGORIES.map((c) => (
-                      <SelectItem key={c} value={c}>{c}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+          {/* Left — hero tagline, desktop only */}
+          <div className="hidden lg:flex lg:items-center">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#888780]">
+                Itelyum Arena
+              </p>
+              <h2 className="mt-3 text-[48px] font-bold leading-[1.05] tracking-[-0.03em] text-[#1C1B18]">
+                Segnala un<br />problema
+              </h2>
+              <p className="mt-4 max-w-[320px] text-[15px] leading-relaxed text-[#5F5E5A]">
+                La tua segnalazione arriva direttamente al team tecnico di manutenzione.
+                Interveniamo il prima possibile.
+              </p>
+            </div>
+          </div>
 
-              {/* Descrizione */}
-              <div className="space-y-2">
-                <Label htmlFor="desc" className="text-sm font-bold text-slate-700 ml-1">Descrivi cosa non funziona *</Label>
-                <Textarea
-                  id="desc"
-                  placeholder="Sii specifico: cosa non funziona, da quando, se c'è stato un evento scatenante..."
-                  rows={4}
-                  required
-                  value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  className="rounded-[1.5rem] border-slate-100 bg-slate-50/50 p-4"
-                />
-              </div>
+          {/* Right — compact form card */}
+          <section className="flex items-start justify-center py-6 lg:items-center lg:py-0">
+            <div className="w-full max-w-[480px] rounded-2xl border border-white/80 bg-white/95 shadow-xl shadow-slate-900/8 backdrop-blur-sm">
 
-              {/* Foto */}
-              <div className="space-y-2">
-                <Label className="text-sm font-bold text-slate-700 ml-1 flex items-center gap-2">
-                  <ImageIcon size={16} /> Allega una foto (opzionale)
-                </Label>
-                {photoPreview ? (
-                  <div className="relative rounded-2xl overflow-hidden border border-slate-100">
-                    <img src={photoPreview} alt="Anteprima" className="w-full max-h-48 object-cover" />
-                    <button
-                      type="button"
-                      onClick={removePhoto}
-                      className="absolute top-2 right-2 w-7 h-7 bg-white rounded-full shadow-md flex items-center justify-center text-slate-600 hover:text-red-500 transition-colors"
-                    >
-                      <X size={14} />
-                    </button>
-                  </div>
-                ) : (
-                  <label className="flex flex-col items-center justify-center gap-2 h-28 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/50 cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-colors">
-                    <ImageIcon size={24} className="text-slate-300" />
-                    <span className="text-sm text-slate-400 font-medium">Clicca per caricare una foto</span>
-                    <span className="text-xs text-slate-300">JPG, PNG, WebP · max 10MB</span>
-                    <input type="file" className="hidden" accept="image/*" onChange={handlePhotoChange} />
-                  </label>
-                )}
-              </div>
-
-              <div className="pt-4">
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full h-14 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold text-lg shadow-xl shadow-primary/20 flex gap-3"
-                >
-                  {loading ? 'Invio in corso...' : <><span>Invia Segnalazione</span><Send size={20} /></>}
-                </Button>
-                <p className="text-center text-[10px] text-slate-400 mt-4 font-bold uppercase tracking-widest">
-                  Gestito dal Team Pallacanestro Varese
+              {/* Card header */}
+              <div className="border-b border-[#E5E4DF]/60 px-6 pb-4 pt-5">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#888780]">
+                  Itelyum Arena
+                </p>
+                <h1 className="mt-1.5 text-xl font-bold tracking-[-0.02em] text-[#1C1B18]">
+                  Segnala un guasto
+                </h1>
+                <p className="mt-1 text-sm text-[#5F5E5A]">
+                  Compila i dettagli, il team tecnico riceverà subito la richiesta.
                 </p>
               </div>
-            </form>
-          </CardContent>
-        </Card>
+
+              {/* Form body */}
+              <div className="px-6 py-4">
+                <form onSubmit={handleSubmit} className="space-y-4">
+
+                  {/* Chi sei — name + email */}
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#888780]">Chi sei</p>
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <div className="space-y-1">
+                        <Label htmlFor="name" className="text-[12px] font-semibold text-[#1C1B18]">
+                          Chi segnala <span className="text-[#E24B4A]">*</span>
+                        </Label>
+                        <Input
+                          id="name"
+                          placeholder="Es. Marco Rossi"
+                          required
+                          value={form.name}
+                          onChange={(e) => setForm({ ...form, name: e.target.value })}
+                          className="h-9 rounded-lg border-[#E5E4DF] bg-white px-3 text-sm text-[#1C1B18] placeholder:text-[#888780] shadow-none"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="email" className="text-[12px] font-semibold text-[#1C1B18]">
+                          Email <span className="text-[#E24B4A]">*</span>
+                        </Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          placeholder="m.rossi@example.com"
+                          required
+                          value={form.email}
+                          onChange={(e) => setForm({ ...form, email: e.target.value })}
+                          className="h-9 rounded-lg border-[#E5E4DF] bg-white px-3 text-sm text-[#1C1B18] placeholder:text-[#888780] shadow-none"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Dove / Problema — location + category */}
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#888780]">Dove / Problema</p>
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <div className="space-y-1">
+                        <Label className="text-[12px] font-semibold text-[#1C1B18]">
+                          Ubicazione <span className="text-[#E24B4A]">*</span>
+                        </Label>
+                        <Select
+                          required
+                          value={form.location_id}
+                          onValueChange={(v) => setForm({ ...form, location_id: v })}
+                          disabled={locationsLoading || locations.length === 0}
+                        >
+                          <SelectTrigger className="h-9 rounded-lg border-[#E5E4DF] bg-white text-sm text-[#1C1B18] shadow-none">
+                            <SelectValue placeholder={locationsLoading ? 'Caricamento...' : 'Seleziona...'} />
+                          </SelectTrigger>
+                          <SelectContent className="rounded-lg border border-[#E5E4DF]">
+                            {locations.map((l) => (
+                              <SelectItem key={l.id} value={l.id}>
+                                {l.name.replace(/^00_/, '')}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[12px] font-semibold text-[#1C1B18]">
+                          Tipo problema <span className="text-[#E24B4A]">*</span>
+                        </Label>
+                        <Select
+                          required
+                          value={form.problem_category}
+                          onValueChange={(v) => setForm({ ...form, problem_category: v })}
+                        >
+                          <SelectTrigger className="h-9 rounded-lg border-[#E5E4DF] bg-white text-sm text-[#1C1B18] shadow-none">
+                            <SelectValue placeholder="Categoria..." />
+                          </SelectTrigger>
+                          <SelectContent className="rounded-lg border border-[#E5E4DF]">
+                            {TICKET_PROBLEM_CATEGORIES.map((c) => (
+                              <SelectItem key={c} value={c}>{c}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    {!locationsLoading && locations.length === 0 && (
+                      <p className="text-xs font-medium text-[#A8531A]">
+                        Nessuna ubicazione disponibile. Verifica la policy pubblica di lettura su `locations` in Supabase.
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Descrizione */}
+                  <div className="space-y-1">
+                    <Label htmlFor="desc" className="text-[12px] font-semibold text-[#1C1B18]">
+                      Descrizione <span className="text-[#E24B4A]">*</span>
+                    </Label>
+                    <Textarea
+                      id="desc"
+                      placeholder="Sii specifico: cosa non funziona, da quando, se c'è stato un evento scatenante..."
+                      rows={2}
+                      required
+                      value={form.description}
+                      onChange={(e) => setForm({ ...form, description: e.target.value })}
+                      className="rounded-lg border-[#E5E4DF] bg-white px-3 py-2 text-sm text-[#1C1B18] placeholder:text-[#888780] shadow-none resize-none"
+                    />
+                  </div>
+
+                  {/* Foto — compact strip */}
+                  <div>
+                    {photoPreview ? (
+                      <div className="relative overflow-hidden rounded-lg border border-[#E5E4DF]">
+                        <img src={photoPreview} alt="Anteprima" className="w-full max-h-28 object-cover" />
+                        <button
+                          type="button"
+                          onClick={removePhoto}
+                          className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full border border-[#E5E4DF] bg-white text-[#5F5E5A] shadow-sm transition-colors hover:text-[#A83228]"
+                        >
+                          <X size={13} />
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="flex h-11 cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[#E5E4DF] bg-[#FAFAF9]/80 transition-colors hover:border-[#2ECC71] hover:bg-[#EAFBF1]">
+                        <ImageIcon size={15} className="text-[#888780]" />
+                        <span className="text-xs font-medium text-[#5F5E5A]">
+                          Foto allegata <span className="text-[#888780]">(opzionale)</span> · max 10MB
+                        </span>
+                        <input type="file" className="hidden" accept="image/*" onChange={handlePhotoChange} />
+                      </label>
+                    )}
+                  </div>
+
+                  {/* Submit */}
+                  <div>
+                    <Button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full h-10 rounded-lg bg-[#2ECC71] text-[14px] font-semibold text-[#0A3D1F] hover:bg-[#27B463] disabled:opacity-60"
+                    >
+                      {loading ? (
+                        <span className="flex items-center justify-center gap-2">
+                          <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#0A3D1F] border-t-transparent" />
+                          Invio in corso...
+                        </span>
+                      ) : (
+                        <span className="flex items-center justify-center gap-2">
+                          Invia segnalazione
+                          <Send size={16} />
+                        </span>
+                      )}
+                    </Button>
+                    <p className="mt-2 text-center text-[10px] font-semibold uppercase tracking-[0.08em] text-[#888780]">
+                      Gestito dal Team Pallacanestro Varese
+                    </p>
+                  </div>
+
+                </form>
+              </div>
+            </div>
+          </section>
+
+        </main>
       </div>
     </div>
   );
