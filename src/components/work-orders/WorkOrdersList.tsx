@@ -78,15 +78,16 @@ const NEXT_STATUS_MAP: Partial<Record<WorkOrderStatus, WorkOrderStatus>> = {
 
 function StatusBadge({ status }: { status: WorkOrderStatus }) {
   const cls =
-    status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-700' :
-    status === 'CLOSED' || status === 'VALIDATED' ? 'bg-emerald-100 text-emerald-700' :
-    status === 'ABANDONED' ? 'bg-slate-900 text-white' :
-    status === 'SUSPENDED' ? 'bg-red-100 text-red-700' :
-    status === 'ASSIGNED' ? 'bg-blue-100 text-blue-700' :
-    status === 'PLANNED' ? 'bg-slate-100 text-slate-700' :
-    'bg-sky-50 text-sky-700';
+    status === 'IN_PROGRESS' ? 'bg-[#1C1B18] text-[#FAFAF9]' :
+    status === 'VALIDATED'   ? 'bg-[#1A7A3C] text-white' :
+    status === 'CLOSED'      ? 'bg-[#EAFBF1] text-[#1A7A3C]' :
+    status === 'ASSIGNED'    ? 'bg-[#EAFBF1] text-[#1A7A3C]' :
+    status === 'SUSPENDED'   ? 'bg-[#FFF0EE] text-[#A83228]' :
+    status === 'ABANDONED'   ? 'bg-[#F1EFE8] text-[#5F5E5A]' :
+    status === 'PLANNED'     ? 'bg-[#FFF3E8] text-[#A8531A]' :
+    'bg-[#F1EFE8] text-[#5F5E5A]';
   return (
-    <Badge className={cn(cls, 'gap-1.5 border-none rounded-full px-3 py-1 font-bold text-[10px] uppercase tracking-[0.16em]')}>
+    <Badge className={cn(cls, 'gap-1 border-none rounded-md px-2 py-[3px] font-semibold text-[11px] uppercase tracking-[0.04em]')}>
       <span className="h-1.5 w-1.5 rounded-full bg-current" />
       {STATUS_LABELS[status]}
     </Badge>
@@ -95,16 +96,24 @@ function StatusBadge({ status }: { status: WorkOrderStatus }) {
 
 function PriorityBadge({ priority }: { priority: Priority }) {
   const cls =
-    priority === 'CRITICAL' || priority === 'HIGH' ? 'bg-red-100 text-red-700' :
-    priority === 'MEDIUM' ? 'bg-amber-100 text-amber-700' :
-    'bg-blue-100 text-blue-700';
+    priority === 'CRITICAL' ? 'bg-[#A83228] text-white' :
+    priority === 'HIGH'     ? 'bg-[#FFF0EE] text-[#A83228]' :
+    priority === 'MEDIUM'   ? 'bg-[#FFF3E8] text-[#A8531A]' :
+    'bg-[#F1EFE8] text-[#5F5E5A]';
 
   return (
-    <Badge className={cn(cls, 'gap-1.5 border-none rounded-md px-2.5 py-1 font-bold text-[11px] uppercase tracking-[0.12em]')}>
+    <Badge className={cn(cls, 'gap-1 border-none rounded-md px-2 py-[3px] font-semibold text-[11px] uppercase tracking-[0.04em]')}>
       <span className="h-1.5 w-1.5 rounded-full bg-current" />
       {PRIORITY_TRANSLATIONS[priority]}
     </Badge>
   );
+}
+
+function getPriorityBorderColor(priority: Priority): string {
+  if (priority === 'CRITICAL') return '#A83228';
+  if (priority === 'HIGH') return '#E24B4A';
+  if (priority === 'MEDIUM') return '#E8782A';
+  return '#D3D1C7';
 }
 
 function getInitials(name: string | null | undefined) {
@@ -745,70 +754,76 @@ export function WorkOrdersList({
             return (
               <Card
                 key={wo.id}
-                className="arena-card group cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-md"
+                className="group cursor-pointer overflow-hidden rounded-[10px] border border-[#E5E4DF] bg-white transition-colors hover:border-[#D3D1C7] hover:shadow-sm"
+                style={{ borderLeft: `3px solid ${getPriorityBorderColor(wo.priority)}` }}
                 onClick={() => openEdit(wo)}
               >
-                <CardContent className="flex h-full min-h-72 flex-col p-6">
-                  <div className="mb-5 flex items-center justify-between gap-3">
-                    <span className="font-mono text-sm font-semibold tracking-[0.14em] text-slate-500">
+                <CardContent className="p-0">
+                  {/* Header: codice + priorità */}
+                  <div className="flex items-center justify-between border-b border-[#F1EFE8] px-5 py-3">
+                    <span className="tabular-nums text-xs font-semibold tracking-wide text-[#5F5E5A]">
                       {wo.code ?? wo.id.slice(0, 8).toUpperCase()}
                     </span>
                     <PriorityBadge priority={wo.priority} />
                   </div>
 
-                  <div className="min-h-24">
-                    <h3 className="line-clamp-2 text-xl font-bold leading-tight text-slate-950">
-                      {getWorkOrderTitle(wo)}
-                    </h3>
-                    <p className="mt-2 line-clamp-2 text-sm font-medium text-slate-500">
-                      {getAssetSubtitle(wo)}
-                    </p>
-                  </div>
-
-                  <div className="mt-auto flex items-center justify-between gap-4">
-                    <div className="flex min-w-0 items-center gap-3">
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-700 to-cyan-500 text-xs font-bold text-white shadow-sm">
-                        {getInitials(technicianName)}
-                      </span>
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-slate-700">{technicianName}</p>
-                        <p className="text-xs text-slate-500">
-                          Creato {format(new Date(wo.created_at), 'd MMM · HH:mm', { locale: it })}
-                        </p>
-                      </div>
+                  {/* Body: titolo + asset + assegnatario + stato */}
+                  <div className="space-y-3 px-5 py-4">
+                    <div>
+                      <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-[#1C1B18]">
+                        {getWorkOrderTitle(wo)}
+                      </h3>
+                      <p className="mt-1 line-clamp-1 text-xs text-[#888780]">
+                        {getAssetSubtitle(wo)}
+                      </p>
                     </div>
-                    <StatusBadge status={wo.status} />
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#1C1B18] text-[10px] font-bold text-[#FAFAF9]">
+                          {getInitials(technicianName)}
+                        </span>
+                        <div className="min-w-0">
+                          <p className="truncate text-xs font-semibold text-[#1C1B18]">{technicianName}</p>
+                          <p className="tabular-nums text-[11px] text-[#888780]">
+                            {format(new Date(wo.created_at), 'd MMM · HH:mm', { locale: it })}
+                          </p>
+                        </div>
+                      </div>
+                      <StatusBadge status={wo.status} />
+                    </div>
                   </div>
 
-                  <div className="mt-5 flex items-center justify-between border-t border-slate-200 pt-4">
-                    <div className="flex min-w-0 items-center gap-2 text-xs font-semibold text-slate-500">
+                  {/* Date row */}
+                  <div className="flex items-center justify-between border-t border-[#E5E4DF] px-5 py-3">
+                    <div className="flex min-w-0 items-center gap-1.5 text-xs text-[#5F5E5A]">
                       {wo.planned_date ? (
                         <>
-                          <Clock size={14} />
-                          <span className="truncate">{format(new Date(wo.planned_date), 'd MMM yyyy', { locale: it })}</span>
+                          <Clock size={13} className="shrink-0 text-[#888780]" />
+                          <span className="tabular-nums truncate">{format(new Date(wo.planned_date), 'd MMM yyyy', { locale: it })}</span>
                         </>
                       ) : (
-                        <span className="truncate">{TYPE_LABELS[wo.type]}</span>
+                        <span className="text-[#888780]">{TYPE_LABELS[wo.type]}</span>
                       )}
                     </div>
                     <Button
                       type="button"
                       variant="ghost"
-                      className="h-8 rounded-lg px-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+                      className="h-7 gap-0.5 rounded-md px-2 text-xs font-semibold text-[#5F5E5A] hover:bg-[#F1EFE8] hover:text-[#1C1B18]"
                       onClick={(event) => {
                         event.stopPropagation();
                         openEdit(wo);
                       }}
                     >
                       Apri scheda
-                      <ChevronRight size={15} />
+                      <ChevronRight size={13} />
                     </Button>
                   </div>
 
-                  <div className="mt-4 flex flex-wrap gap-2">
+                  {/* Footer azioni */}
+                  <div className="flex flex-wrap items-center gap-2 border-t border-[#E5E4DF] bg-[#FAFAF9] px-5 py-3">
                     <Button
                       type="button"
-                      className="h-10 rounded-lg bg-primary px-5 font-bold shadow-lg shadow-primary/15 hover:bg-primary/90"
+                      className="h-8 rounded-md bg-[#2ECC71] px-4 text-xs font-semibold text-[#0A3D1F] shadow-none hover:bg-[#27B463]"
                       disabled={!canAdvance}
                       onClick={(event) => {
                         event.stopPropagation();
@@ -821,7 +836,7 @@ export function WorkOrdersList({
                       <Button
                         type="button"
                         variant="ghost"
-                        className="h-10 rounded-lg px-5 font-bold text-slate-700 hover:bg-slate-100"
+                        className="h-8 rounded-md px-4 text-xs font-semibold text-[#5F5E5A] hover:bg-[#E5E4DF] hover:text-[#1C1B18]"
                         onClick={(event) => {
                           event.stopPropagation();
                           void updateWorkOrder(wo.id, {
@@ -838,7 +853,7 @@ export function WorkOrdersList({
                       <Button
                         type="button"
                         variant="ghost"
-                        className="h-10 rounded-lg px-4 font-bold text-red-600 hover:bg-red-50 hover:text-red-700"
+                        className="h-8 rounded-md px-3 text-xs font-semibold text-[#A83228] hover:bg-[#FFF0EE] hover:text-[#A83228]"
                         onClick={(event) => {
                           event.stopPropagation();
                           void handleSuspendStatus(wo);
