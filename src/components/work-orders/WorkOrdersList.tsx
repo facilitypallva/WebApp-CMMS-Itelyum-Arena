@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Clock, Plus, ChevronRight, Search, FileCheck, Paperclip, Download, Trash2, Loader2 } from 'lucide-react';
+import { Clock, Plus, ChevronRight, Search, FileCheck, Paperclip, Download, Trash2, Loader2, LayoutGrid, List } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { AnimatedSaveButton } from '@/components/ui/animated-save-button';
@@ -248,6 +248,7 @@ export function WorkOrdersList({
   const [reportFiles, setReportFiles] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [ticketDraft, setTicketDraft] = useState<TicketDraftState | null>(null);
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
   const searchValue = onGlobalSearchChange ? globalSearch : search;
   const selectedTechnician = technicians.find((technician) => technician.id === form.technician_id) ?? null;
   const technicianIsExternal = selectedTechnician?.employment_type === 'EXTERNAL';
@@ -731,21 +732,41 @@ export function WorkOrdersList({
               }}
             />
           </div>
-          <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as WorkOrderStatus | 'ALL')}>
-            <SelectTrigger className="h-10 w-44 rounded-lg border border-[#E5E4DF] bg-[#FAFAF9] text-sm shadow-none">
-              <SelectValue placeholder="Tutti gli stati" />
-            </SelectTrigger>
-            <SelectContent className="rounded-lg">
-              <SelectItem value="ALL">Tutti gli stati</SelectItem>
-              {STATUSES.map((s) => <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>)}
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-2">
+            <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as WorkOrderStatus | 'ALL')}>
+              <SelectTrigger className="h-10 w-44 rounded-lg border border-[#E5E4DF] bg-[#FAFAF9] text-sm shadow-none">
+                <SelectValue placeholder="Tutti gli stati" />
+              </SelectTrigger>
+              <SelectContent className="rounded-lg">
+                <SelectItem value="ALL">Tutti gli stati</SelectItem>
+                {STATUSES.map((s) => <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <div className="flex overflow-hidden rounded-lg border border-[#E5E4DF]">
+              <button
+                type="button"
+                title="Vista card"
+                onClick={() => setViewMode('cards')}
+                className={cn('flex h-10 w-10 items-center justify-center transition-colors', viewMode === 'cards' ? 'bg-white text-[#1C1B18]' : 'bg-[#FAFAF9] text-[#888780] hover:text-[#5F5E5A]')}
+              >
+                <LayoutGrid size={15} />
+              </button>
+              <button
+                type="button"
+                title="Vista tabella"
+                onClick={() => setViewMode('table')}
+                className={cn('flex h-10 w-10 items-center justify-center border-l border-[#E5E4DF] transition-colors', viewMode === 'table' ? 'bg-white text-[#1C1B18]' : 'bg-[#FAFAF9] text-[#888780] hover:text-[#5F5E5A]')}
+              >
+                <List size={15} />
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
       {loading ? (
         <div className="flex justify-center py-20"><div className="w-8 h-8 border-4 border-[#2ECC71] border-t-transparent rounded-full animate-spin" /></div>
-      ) : (
+      ) : viewMode === 'cards' ? (
         <div className="grid grid-cols-1 gap-5 xl:grid-cols-2 2xl:grid-cols-3">
           {filtered.length === 0 && (
             <div className="col-span-full rounded-xl border border-[#E5E4DF] bg-white py-16 text-center text-sm text-[#888780]">Nessun ordine di lavoro trovato</div>
@@ -872,6 +893,92 @@ export function WorkOrdersList({
               </Card>
             );
           })}
+        </div>
+      ) : (
+        <div className="overflow-hidden rounded-[10px] border border-[#E5E4DF] bg-white">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="border-b border-[#E5E4DF] bg-[#FAFAF9]">
+                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.06em] text-[#888780]">Codice</th>
+                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.06em] text-[#888780]">Intervento</th>
+                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.06em] text-[#888780]">Priorità</th>
+                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.06em] text-[#888780]">Stato</th>
+                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.06em] text-[#888780]">Assegnato</th>
+                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.06em] text-[#888780]">Data</th>
+                <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-[0.06em] text-[#888780]">Azioni</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="py-16 text-center text-sm text-[#888780]">Nessun ordine di lavoro trovato</td>
+                </tr>
+              )}
+              {filtered.map((wo, index) => {
+                const techName = wo.technician?.name ?? 'Non assegnato';
+                const canAdvanceTable = Boolean(NEXT_STATUS_MAP[wo.status]) && wo.status !== 'VALIDATED' && wo.status !== 'ABANDONED';
+                return (
+                  <tr
+                    key={wo.id}
+                    className={cn('cursor-pointer transition-colors hover:bg-[#FAFAF9]', index < filtered.length - 1 && 'border-b border-[#E5E4DF]')}
+                    onClick={() => openEdit(wo)}
+                  >
+                    <td className="px-4 py-3">
+                      <span className="tabular-nums text-xs font-semibold text-[#5F5E5A]">
+                        {wo.code ?? wo.id.slice(0, 8).toUpperCase()}
+                      </span>
+                    </td>
+                    <td className="max-w-[260px] px-4 py-3">
+                      <p className="truncate text-sm font-medium text-[#1C1B18]">{getWorkOrderTitle(wo)}</p>
+                      <p className="mt-0.5 truncate text-xs text-[#888780]">{wo.asset?.name ?? '—'}</p>
+                    </td>
+                    <td className="px-4 py-3">
+                      <PriorityBadge priority={wo.priority} />
+                    </td>
+                    <td className="px-4 py-3">
+                      <StatusBadge status={wo.status} />
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#1C1B18] text-[9px] font-bold text-[#FAFAF9]">
+                          {getInitials(techName)}
+                        </span>
+                        <span className="truncate text-xs text-[#1C1B18]">{techName}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="tabular-nums text-xs text-[#5F5E5A]">
+                        {wo.planned_date
+                          ? format(new Date(wo.planned_date), 'd MMM yyyy', { locale: it })
+                          : format(new Date(wo.created_at), 'd MMM yyyy', { locale: it })}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
+                        {canAdvanceTable && (
+                          <Button
+                            type="button"
+                            className="h-7 rounded-md bg-[#2ECC71] px-3 text-[11px] font-semibold text-[#0A3D1F] shadow-none hover:bg-[#27B463]"
+                            onClick={() => void handleAdvanceStatus(wo)}
+                          >
+                            {getPrimaryActionLabel(wo.status)}
+                          </Button>
+                        )}
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          className="h-7 rounded-md px-2 text-[11px] font-semibold text-[#5F5E5A] hover:bg-[#F1EFE8] hover:text-[#1C1B18]"
+                          onClick={() => openEdit(wo)}
+                        >
+                          Apri
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       )}
 
