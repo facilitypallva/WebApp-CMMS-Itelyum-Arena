@@ -658,23 +658,57 @@ export function WorkOrdersList({
     setForm(nextForm);
   };
 
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-        <div>
-          <p className="arena-kicker">Card manutenzione & work order</p>
-          <h2 className="arena-heading mt-1 text-2xl">Interventi operativi</h2>
-          <p className="mt-1 text-sm text-slate-500">
-            {filtered.length} {filtered.length === 1 ? 'ordine visibile' : 'ordini visibili'} su {workOrders.length}
-          </p>
-        </div>
+  const totalOrders = workOrders.length;
+  const inProgressCount = workOrders.filter(wo => wo.status === 'IN_PROGRESS').length;
+  const plannedCount = workOrders.filter(wo => wo.status === 'PLANNED').length;
+  const closedCount = workOrders.filter(wo => wo.status === 'CLOSED').length;
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <div className="relative flex-1 sm:w-72">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+  return (
+    <div className="space-y-5">
+      {/* Header + toolbar unificato */}
+      <div className="overflow-hidden rounded-xl border border-[#E5E4DF] bg-white shadow-sm">
+        {/* Top: overview + KPI + azione */}
+        <div className="flex flex-col gap-4 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+          {/* Sinistra: titolo + desc */}
+          <div className="min-w-0 space-y-0.5">
+            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Overview operativa</p>
+            <p className="text-xl font-bold tracking-tight text-slate-950">
+              {totalOrders} {totalOrders === 1 ? 'ordine di lavoro' : 'ordini di lavoro'}
+            </p>
+            <p className="text-xs text-slate-400">Monitoraggio interventi e avanzamento operativo</p>
+          </div>
+          {/* Centro: KPI pills */}
+          <div className="flex flex-wrap gap-2 lg:justify-center">
+            <div className="flex items-center gap-2 rounded-lg border border-[#E5E4DF] bg-[#FAFAF9] px-3 py-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+              <span className="text-xs font-bold text-slate-700">{inProgressCount}</span>
+              <span className="text-xs text-slate-500">In corso</span>
+            </div>
+            <div className="flex items-center gap-2 rounded-lg border border-[#E5E4DF] bg-[#FAFAF9] px-3 py-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
+              <span className="text-xs font-bold text-slate-700">{plannedCount}</span>
+              <span className="text-xs text-slate-500">Pianificati</span>
+            </div>
+            <div className="flex items-center gap-2 rounded-lg border border-[#E5E4DF] bg-[#FAFAF9] px-3 py-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              <span className="text-xs font-bold text-slate-700">{closedCount}</span>
+              <span className="text-xs text-slate-500">Chiusi</span>
+            </div>
+          </div>
+          {/* Destra: azione */}
+          <Button className="h-10 shrink-0 rounded-lg bg-[#2ECC71] px-6 font-bold shadow-lg shadow-primary/20 gap-2 hover:bg-[#27B463]" onClick={openCreate}>
+            <Plus size={18} /> Nuovo Ordine di Lavoro
+          </Button>
+        </div>
+        {/* Divider */}
+        <div className="border-t border-[#E5E4DF]" />
+        {/* Bottom: toolbar */}
+        <div className="flex flex-col gap-3 px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="relative sm:w-80">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#888780]" size={16} />
             <Input
               placeholder="Cerca intervento..."
-              className="pl-10 h-11 bg-white border border-slate-200 shadow-sm rounded-lg dark:bg-slate-900/80"
+              className="h-10 rounded-lg border border-[#E5E4DF] bg-[#FAFAF9] pl-9 text-sm shadow-none dark:bg-slate-900/80"
               value={searchValue}
               onChange={(e) => {
                 const nextValue = e.target.value;
@@ -684,15 +718,14 @@ export function WorkOrdersList({
             />
           </div>
           <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as WorkOrderStatus | 'ALL')}>
-            <SelectTrigger className="h-11 rounded-lg border border-slate-200 shadow-sm bg-white w-44 dark:bg-slate-900/80"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="h-10 w-44 rounded-lg border border-[#E5E4DF] bg-[#FAFAF9] text-sm shadow-none dark:bg-slate-900/80">
+              <SelectValue placeholder="Tutti gli stati" />
+            </SelectTrigger>
             <SelectContent className="rounded-lg">
               <SelectItem value="ALL">Tutti gli stati</SelectItem>
               {STATUSES.map((s) => <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>)}
             </SelectContent>
           </Select>
-          <Button className="h-11 rounded-lg shadow-lg shadow-primary/20 bg-primary font-bold px-6 gap-2" onClick={openCreate}>
-            <Plus size={18} /> Nuovo Ordine di Lavoro
-          </Button>
         </div>
       </div>
 
