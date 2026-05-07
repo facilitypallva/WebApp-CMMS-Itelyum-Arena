@@ -178,21 +178,21 @@ export function PublicTicketForm() {
           aria-hidden="true"
           className="fixed inset-0 -z-30 h-full w-full object-cover opacity-60 saturate-50"
         />
-        <div className="fixed inset-0 -z-20 bg-white/55" />
+        <div className="fixed inset-0 -z-20 bg-white/50" />
 
         <div className="relative z-10 flex min-h-screen flex-col">
           <header className="shrink-0 px-6 py-3 sm:px-10 lg:px-14">
-            <ArenaOsLogo className="h-9 w-[170px] drop-shadow-sm" />
+            <ArenaOsLogo className="h-9 w-[170px]" />
           </header>
 
-          <main className="flex-1 px-6 pb-8 sm:px-10 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(460px,500px)] lg:items-center lg:px-14 lg:pb-0">
+          <main className="flex-1 px-6 pb-8 sm:px-10 lg:grid lg:grid-cols-[minmax(0,1fr)_480px] lg:items-center lg:px-14 lg:pb-0">
             <div className="hidden lg:block" />
             <section className="flex items-center justify-center py-8 lg:py-0">
               <motion.div
                 initial={{ scale: 0.95, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.2, ease: 'easeOut' }}
-                className="w-full max-w-[480px] rounded-2xl border border-white/80 bg-white/95 p-8 text-center shadow-xl shadow-slate-900/8 backdrop-blur-sm"
+                className="w-full max-w-[480px] rounded-xl border border-[#E5E4DF] bg-white p-8 text-center shadow-[0_4px_12px_-2px_rgba(28,27,24,0.08),0_2px_4px_-2px_rgba(28,27,24,0.04)]"
               >
                 <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-[#EAFBF1] text-[#1A7A3C]">
                   <CheckCircle2 size={32} strokeWidth={1.75} />
@@ -230,16 +230,16 @@ export function PublicTicketForm() {
         aria-hidden="true"
         className="fixed inset-0 -z-30 h-full w-full object-cover opacity-60 saturate-50"
       />
-      <div className="fixed inset-0 -z-20 bg-white/55" />
+      <div className="fixed inset-0 -z-20 bg-white/50" />
 
       <div className="relative z-10 flex min-h-screen flex-col">
         {/* Logo header */}
         <header className="shrink-0 px-6 py-3 sm:px-10 lg:px-14">
-          <ArenaOsLogo className="h-9 w-[170px] drop-shadow-sm" />
+          <ArenaOsLogo className="h-9 w-[170px]" />
         </header>
 
         {/* Two-column grid — fills remaining height, items centered */}
-        <main className="flex-1 px-6 pb-8 sm:px-10 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(460px,500px)] lg:items-center lg:px-14 lg:pb-0">
+        <main className="flex-1 px-6 pb-8 sm:px-10 lg:grid lg:grid-cols-[minmax(0,1fr)_480px] lg:items-center lg:px-14 lg:pb-0">
 
           {/* Left — hero tagline, desktop only */}
           <div className="hidden lg:flex lg:items-center">
@@ -247,10 +247,10 @@ export function PublicTicketForm() {
               <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#888780]">
                 Itelyum Arena
               </p>
-              <h2 className="mt-3 text-[48px] font-bold leading-[1.05] tracking-[-0.03em] text-[#1C1B18]">
+              <h2 className="mt-3 text-[62px] font-bold leading-[1.0] tracking-[-0.03em] text-[#1C1B18]">
                 Segnala un<br />problema
               </h2>
-              <p className="mt-4 max-w-[320px] text-[15px] leading-relaxed text-[#5F5E5A]">
+              <p className="mt-5 max-w-[400px] text-base leading-relaxed text-[#5F5E5A]">
                 La tua segnalazione arriva direttamente al team tecnico di manutenzione.
                 Interveniamo il prima possibile.
               </p>
@@ -259,11 +259,11 @@ export function PublicTicketForm() {
 
           {/* Right — compact form card */}
           <section className="flex items-start justify-center py-6 lg:items-center lg:py-0">
-            <div className="w-full max-w-[480px] rounded-2xl border border-white/80 bg-white/95 shadow-xl shadow-slate-900/8 backdrop-blur-sm">
+            <div className="w-full max-w-[480px] rounded-xl border border-[#E5E4DF] bg-white shadow-[0_4px_12px_-2px_rgba(28,27,24,0.08),0_2px_4px_-2px_rgba(28,27,24,0.04)]">
 
               {/* Card header */}
               <div className="border-b border-[#E5E4DF]/60 px-6 pb-4 pt-5">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#888780]">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#888780]">
                   Itelyum Arena
                 </p>
                 <h1 className="mt-1.5 text-xl font-bold tracking-[-0.02em] text-[#1C1B18]">
@@ -280,7 +280,7 @@ export function PublicTicketForm() {
 
                   {/* Chi sei — name + email */}
                   <div className="space-y-2">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#888780]">Chi sei</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#888780]">Chi sei</p>
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       <div className="space-y-1">
                         <Label htmlFor="name" className="text-[12px] font-semibold text-[#1C1B18]">
@@ -314,7 +314,7 @@ export function PublicTicketForm() {
 
                   {/* Dove / Problema — location + category */}
                   <div className="space-y-2">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#888780]">Dove / Problema</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#888780]">Dove / Problema</p>
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       <div className="space-y-1">
                         <Label className="text-[12px] font-semibold text-[#1C1B18]">
@@ -424,7 +424,7 @@ export function PublicTicketForm() {
                         </span>
                       )}
                     </Button>
-                    <p className="mt-2 text-center text-[10px] font-semibold uppercase tracking-[0.08em] text-[#888780]">
+                    <p className="mt-2 text-center text-[11px] font-semibold uppercase tracking-[0.08em] text-[#888780]">
                       Gestito dal Team Pallacanestro Varese
                     </p>
                   </div>
